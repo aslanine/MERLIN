@@ -60,7 +60,8 @@ void TrackingOutputAV::Record(const ComponentFrame* frame, const Bunch* bunch){
 							<< pb->dp()  << " "
 							<< std::fixed
 							<< int(pb->type()) <<  " "
-							<< int(pb->id())  << endl;
+							//~ << int(pb->id())  << endl;
+							<< endl;
 		}
 	}
 
