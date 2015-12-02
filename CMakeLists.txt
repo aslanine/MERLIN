@@ -17,6 +17,7 @@ PROJECT(MERLIN)
 
 OPTION(ENABLE_EXAMPLES "Build the example gslprograms. Default OFF" OFF)
 OPTION(ENABLE_USER_RUNS "Build any user defined programs in the UserSim folder" OFF)
+OPTION(ENABLE_THESIS_RUNS "Build any user defined programs in the Thesis folder" OFF)
 OPTION(ENABLE_TESTS "Build the library test programs. Default OFF" OFF)
 OPTION(ENABLE_OPENMP "Use OpenMP where possible. Default OFF" OFF)
 OPTION(BUILD_DYNAMIC "Build Merlin as a dynamic library. Default ON" ON)
@@ -157,6 +158,12 @@ endif()
 if(ENABLE_USER_RUNS)
 	set(MERLIN_DIR ${CMAKE_BINARY_DIR} CACHE PATH "Current build directory")
 	add_subdirectory(UserSim)
+endif()
+
+#Enable building of user created code in UserSim folder
+if(ENABLE_THESIS_RUNS)
+	set(MERLIN_DIR ${CMAKE_BINARY_DIR} CACHE PATH "Current build directory")
+	add_subdirectory(Thesis)
 endif()
 
 #Enable to build the MerlinTests folder
