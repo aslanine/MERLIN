@@ -43,12 +43,12 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed 		= (int)time(NULL);    	// seed for random number generators
-    int npart 		= 1E2;                	// number of particles to track
-    int nturns 		= 4;                 	// number of turns to track
+    int npart 		= 1E5;                	// number of particles to track
+    int nturns 		= 1;                 	// number of turns to track
 	
 	bool DoTwiss 	= 1;					// run twiss and align to beam envelope etc?
 	bool beam1 		= 1;					// beam 1 or 2
-	bool hard_edge 	= 1;					// if true, scattering is off in collimation
+	bool hard_edge 	= 0;					// if true, scattering is off in collimation
 	bool output_fluka_database = 1;			// FLUKA database of collimators
 	bool symplectic	= 1;					// SYMPLECTIC or TRANSPORT tracking
 	
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	
 	//~ string output_dir = "/test2/UserSim/outputs/HL/";
 	string output_dir = "/Build/Thesis/outputs/SymplecticLossMap/";
-	string batch_directory="Test/";
+	string batch_directory="AlessiaTest/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -223,7 +223,12 @@ int main(int argc, char* argv[])
 //ApertureSurvey
 
 	//~ if(seed == 1)
-	ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 5);
+	// 5 points per element
+	//~ ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 5);
+	// every 10cm
+	//~ ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1);
+	// exact s every 10cm
+	ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, true, 0.1);
 
 
 ///////////////////
@@ -294,8 +299,8 @@ int main(int argc, char* argv[])
 
 	AcceleratorModel::RingIterator beamline = myAccModel->GetRing(start_element_number);
     ParticleTracker* myParticleTracker = new ParticleTracker(beamline, myBunch);
-    if(symplectic){ myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());}
-    else{ myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());}
+    //~ if(symplectic){ myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());}
+    //~ else{ myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());}
 
 // TRACK OUTPUT	
 	ostringstream alessias_sstream;
@@ -305,8 +310,8 @@ int main(int argc, char* argv[])
 	TrackingOutputAV* myTrackingOutputAV = new TrackingOutputAV(alessias_file);
 	myTrackingOutputAV->SetSRange(19000, 27000);
 	//~ myTrackingOutputAV->SetTurn(1);
-	myTrackingOutputAV->SetTurnRange(1,2);	
-	myTrackingOutputAV->SuppressUnscattered(0);	
+	myTrackingOutputAV->SetTurnRange(1,1);	
+	myTrackingOutputAV->SuppressUnscattered(1);	
 	myParticleTracker->SetOutput(myTrackingOutputAV);
 
 /////////////////////////

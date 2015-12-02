@@ -72,9 +72,12 @@ int main(int argc, char* argv[])
 	
 	bool batch = 1;
 	if(batch){
-		case_dir = "Test/";
+		case_dir = "02Dec15/";
+		full_output_dir = (directory + output_dir + case_dir);
+		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
-	
+
+
 	
 	bool collimation_on 			= 0;
 		bool sixtrack 				= 0; 		//use sixtrack like scattering?
@@ -82,10 +85,6 @@ int main(int argc, char* argv[])
 		if (collimation_on && dust){
 			loss_dir = (full_output_dir+"Loss/");
 			mkdir(loss_dir.c_str(), S_IRWXU);
-			if(batch){
-				loss_dir = (full_output_dir+"Loss/"+case_dir);
-				mkdir(loss_dir.c_str(), S_IRWXU);
-			}
 		}
 		
 	bool cut_distn				= 1;		//cut out stable part of distn
@@ -94,11 +93,6 @@ int main(int argc, char* argv[])
 		if (output_initial_bunch || output_final_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/");
 			mkdir(bunch_dir.c_str(), S_IRWXU);
-			if(batch){
-				bunch_dir = (full_output_dir+"Bunch_Distn/"+case_dir);
-				mkdir(bunch_dir.c_str(), S_IRWXU);
-			}
-
 		}
 		
 	bool track 					= 1;
@@ -134,10 +128,6 @@ int main(int argc, char* argv[])
 			track = 1; 
 			pn_dir = (full_output_dir+"ParticleNo/");
 			mkdir(pn_dir.c_str(), S_IRWXU);
-			if(batch){pn_dir = (
-				full_output_dir+"ParticleNo/"+case_dir);
-				mkdir(pn_dir.c_str(), S_IRWXU);
-			}
 		}	
 	
 	bool calc_tune				= 0;
@@ -146,10 +136,6 @@ int main(int argc, char* argv[])
 			single_particle = 0;
 			tune_dir = (full_output_dir+"Tune/");
 			mkdir(tune_dir.c_str(), S_IRWXU);
-			if(batch){
-				tune_dir = (full_output_dir+"Tune/"+case_dir);
-				mkdir(tune_dir.c_str(), S_IRWXU);
-			}
 		}
 		
 	bool input_distn 			= 0;	//use SixTrack input distn
@@ -500,16 +486,16 @@ int main(int argc, char* argv[])
 	if(hel_on){
 		
 		// HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double length_e);
-		//~ HollowELensProcess* myHELProcess;
-		SymplecticHollowELensProcess* myHELProcess;
+		HollowELensProcess* myHELProcess;
+		//~ SymplecticHollowELensProcess* myHELProcess;
 			
 		if(LHC_HEL){	// LHC: 3m, 10KeV, 5A
-			myHELProcess = new SymplecticHollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);
-			//~ myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);
+			//~ myHELProcess = new SymplecticHollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);
+			myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);
 		}
 		else{			//Tevatron: 2m, 5KeV, 1.2A
-			myHELProcess = new SymplecticHollowELensProcess(2, 1, 1.2, 0.138874007, 2.334948339E4, 2.0);
-			//~ myHELProcess = new HollowELensProcess(2, 1, 1.2, 0.138874007, 2.334948339E4, 2.0);
+			//~ myHELProcess = new SymplecticHollowELensProcess(2, 1, 1.2, 0.138874007, 2.334948339E4, 2.0);
+			myHELProcess = new HollowELensProcess(2, 1, 1.2, 0.138874007, 2.334948339E4, 2.0);
 		}
 				
 		myHELProcess->SetRadialProfile();
