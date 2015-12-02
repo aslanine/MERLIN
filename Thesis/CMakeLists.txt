@@ -35,6 +35,7 @@ thesis_run(HELIntegration HELIntegration HELIntegration.cpp)
 thesis_run(AV AV AV.cpp)
 thesis_run(ClosedOrbit ClosedOrbit ClosedOrbit.cpp)
 thesis_run(SymplecticHEL SymplecticHEL SymplecticHEL.cpp)
+thesis_run(SymplecticLossMap SymplecticLossMap SymplecticLossMap.cpp)
 
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
 INCLUDE(Dart)

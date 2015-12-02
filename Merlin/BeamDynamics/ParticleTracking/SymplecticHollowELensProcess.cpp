@@ -168,7 +168,7 @@ void SymplecticHollowELensProcess::DoProcess (double ds)
 					//~ double d1  = 1.0 + (*p).dp();
 					//~ double k   = sqrt(d1*d1 - (*p).xp()*(*p).xp() - (*p).yp()*(*p).yp());
 					double k   = sqrt((1.0 + (*p).dp())*(1.0 + (*p).dp()) - (*p).xp()*(*p).xp() - (*p).yp()*(*p).yp());
-					
+					//~ cout << "k = " << k << endl;
 					// Long winded kick
 					//~ double old_xp = asin((*p).xp()/k); 
 					//~ double old_yp = asin((*p).yp()/k); 					
