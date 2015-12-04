@@ -42,15 +42,16 @@ using namespace PhysicalUnits;
 
 int main(int argc, char* argv[])
 {
-    int seed 		= (int)time(NULL);    	// seed for random number generators
-    int npart 		= 1E5;                	// number of particles to track
-    int nturns 		= 1;                 	// number of turns to track
+    int seed 			= (int)time(NULL);    	// seed for random number generators
+    int npart 			= 1E4;                	// number of particles to track
+    int nturns 			= 200;                 	// number of turns to track
 	
-	bool DoTwiss 	= 1;					// run twiss and align to beam envelope etc?
-	bool beam1 		= 1;					// beam 1 or 2
-	bool hard_edge 	= 0;					// if true, scattering is off in collimation
-	bool output_fluka_database = 1;			// FLUKA database of collimators
-	bool symplectic	= 1;					// SYMPLECTIC or TRANSPORT tracking
+	bool DoTwiss 		= 1;					// run twiss and align to beam envelope etc?
+	bool beam1 			= 1;					// beam 1 or 2
+	bool hard_edge 		= 0;					// if true, scattering is off in collimation
+	bool output_fluka_database = 1;				// FLUKA database of collimators
+	bool symplectic		= 0;					// SYMPLECTIC or TRANSPORT tracking
+	bool collimation	= 1;
 	
 	 
     if (argc >=2){npart = atoi(argv[1]);}
@@ -85,7 +86,7 @@ int main(int argc, char* argv[])
 	
 	//~ string output_dir = "/test2/UserSim/outputs/HL/";
 	string output_dir = "/Build/Thesis/outputs/SymplecticLossMap/";
-	string batch_directory="AlessiaTest/";
+	string batch_directory="NoCollTest/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -286,7 +287,8 @@ int main(int argc, char* argv[])
 
     // horizontalHaloDistribution1 is a halo in xx' plane, zero in yy'
     // horizontalHaloDistribution2 is a halo in xx' plane, gaussian in yy'
-    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution2);
+    //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution2);
+    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, SymplecticHorizontalHaloDistribution2);
 
     myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
     delete myBunchCtor;
@@ -299,19 +301,19 @@ int main(int argc, char* argv[])
 
 	AcceleratorModel::RingIterator beamline = myAccModel->GetRing(start_element_number);
     ParticleTracker* myParticleTracker = new ParticleTracker(beamline, myBunch);
-    //~ if(symplectic){ myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());}
-    //~ else{ myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());}
+    if(symplectic){ myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());}
+    else{ myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());}
 
 // TRACK OUTPUT	
 	ostringstream alessias_sstream;
-	alessias_sstream << full_output_dir<<"Tracking_output_file"<< npart << "_" << seed << ".txt";	
+	alessias_sstream << full_output_dir << "Tracking_output_file" << npart << "_" << seed << ".txt";	
 	string alessias_file = alessias_sstream.str().c_str();	
 
 	TrackingOutputAV* myTrackingOutputAV = new TrackingOutputAV(alessias_file);
 	myTrackingOutputAV->SetSRange(19000, 27000);
 	//~ myTrackingOutputAV->SetTurn(1);
 	myTrackingOutputAV->SetTurnRange(1,1);	
-	myTrackingOutputAV->SuppressUnscattered(1);	
+	myTrackingOutputAV->SuppressUnscattered(0);	
 	myParticleTracker->SetOutput(myTrackingOutputAV);
 
 /////////////////////////
@@ -366,8 +368,8 @@ int main(int argc, char* argv[])
 	myCollimateProcess->SetLossThreshold(200.0);
 
 	myCollimateProcess->SetOutputBinSize(0.1);
-
-	myParticleTracker->AddProcess(myCollimateProcess);
+	
+	if(collimation){myParticleTracker->AddProcess(myCollimateProcess);}
 
 //////////////////
 // TRACKING RUN //
