@@ -252,7 +252,7 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 	                   i++;
 	               }
 	           }
-	break;
+	break;        
 	case horizontalHaloDistribution3:
 	           rx = sqrt(beamdat.emit_x);
 	           ry = sqrt(beamdat.emit_y);
@@ -526,6 +526,38 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 					p.sd() = 0.0;
 					p.id() = i;
 					if(itsFilter==0 || itsFilter->Apply(p)) {
+	                   pbunch.push_back(p);
+	                   i++;
+	               }
+	           }
+	break;
+	case SymplecticHorizontalHaloDistribution2:
+	           rx = sqrt(beamdat.emit_x);
+	           ry = sqrt(beamdat.emit_y);
+	           double k = 1;
+	           double xp = 0;
+	           for(i=1; i<np;) {
+				   u = RandomNG::uniform(-pi,pi);
+	               p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
+	               p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
+	               p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
+	               p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);	 
+	               
+	               u = RandomNG::uniform(-pi,pi);
+	               
+	               k  = sqrt( (1.0 + (p).dp())*(1.0 + (p).dp()) - (p).yp()*(p).yp() );
+	               xp =  rx * sin(u);
+	               p.x() = rx * cos(u);
+	               p.xp() = k * sin (xp);
+	               cout << "\nDifferenceSymplectic = " << p.xp() - xp  << " xp = " << p.xp() << endl;    
+	               
+		       M.Apply(p);
+	               p+=pbunch.front(); // add centroid
+	               p.type() = -1.0;
+	               p.location() = -1.0;
+	               p.sd() = 0.0;
+	               p.id() = i;
+	               if(itsFilter==0 || itsFilter->Apply(p)) {
 	                   pbunch.push_back(p);
 	                   i++;
 	               }
