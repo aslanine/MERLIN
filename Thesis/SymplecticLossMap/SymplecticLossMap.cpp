@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 	
 	//~ string output_dir = "/test2/UserSim/outputs/HL/";
 	string output_dir = "/Build/Thesis/outputs/SymplecticLossMap/";
-	string batch_directory="NoCollTest/";
+	string batch_directory="LossMapDustbinTest/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -287,8 +287,8 @@ int main(int argc, char* argv[])
 
     // horizontalHaloDistribution1 is a halo in xx' plane, zero in yy'
     // horizontalHaloDistribution2 is a halo in xx' plane, gaussian in yy'
-    //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution2);
-    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, SymplecticHorizontalHaloDistribution2);
+    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution2);
+    //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, SymplecticHorizontalHaloDistribution2);
 
     myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
     delete myBunchCtor;
