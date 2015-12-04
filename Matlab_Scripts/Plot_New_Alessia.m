@@ -49,7 +49,9 @@ subplot(2,1,1)
 %% Plot apertures
 % plot positive and negative apertures (assuming symmetric)
 plot(ap_s, ap_px, 'Color', 'black'), hold on
+%plot(ap_s, ap_mx, 'Color', 'black'), hold on
 plot(ap_s, -ap_mx,'Color', 'black' ), hold on
+%plot(ap_s, -ap_px,'Color', 'black' ), hold on
 
 %{
 %% sort and plot transport tracking data
