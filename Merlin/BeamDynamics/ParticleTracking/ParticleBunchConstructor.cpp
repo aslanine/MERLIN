@@ -532,36 +532,109 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 	           }
 	break;
 	case SymplecticHorizontalHaloDistribution2:
-	           rx = sqrt(beamdat.emit_x);
-	           ry = sqrt(beamdat.emit_y);
-	           double k = 1;
-	           double xp = 0;
-	           for(i=1; i<np;) {
-				   u = RandomNG::uniform(-pi,pi);
-	               p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
-	               p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
-	               p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
-	               p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);	 
-	               
-	               u = RandomNG::uniform(-pi,pi);
-	               
-	               k  = sqrt( (1.0 + (p).dp())*(1.0 + (p).dp()) - (p).yp()*(p).yp() );
-	               xp =  rx * sin(u);
-	               p.x() = rx * cos(u);
-	               p.xp() = k * sin (xp);
-	               cout << "\nDifferenceSymplectic = " << p.xp() - xp  << " xp = " << p.xp() << endl;    
-	               
-		       M.Apply(p);
-	               p+=pbunch.front(); // add centroid
-	               p.type() = -1.0;
-	               p.location() = -1.0;
-	               p.sd() = 0.0;
-	               p.id() = i;
-	               if(itsFilter==0 || itsFilter->Apply(p)) {
-	                   pbunch.push_back(p);
-	                   i++;
-	               }
-	           }
+	{
+		rx = sqrt(beamdat.emit_x);
+		ry = sqrt(beamdat.emit_y);
+		double u;
+		double k = 1;
+		double xp = 0;
+		for(i=1; i<np;) {
+			u = RandomNG::uniform(-pi,pi);
+			p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
+			p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
+			p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
+			p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);	 
+
+			u = RandomNG::uniform(-pi,pi);
+
+			k  = sqrt( (1.0 + (p).dp())*(1.0 + (p).dp()) - (p).yp()*(p).yp() );
+			xp =  rx * sin(u);
+			p.x() = rx * cos(u);
+			p.xp() = k * sin (xp);
+			cout << "\nDifferenceSymplectic = " << p.xp() - xp  << " xp = " << p.xp() << endl;    
+
+			M.Apply(p);
+			p+=pbunch.front(); // add centroid
+			p.type() = -1.0;
+			p.location() = -1.0;
+			p.sd() = 0.0;
+			p.id() = i;
+			if(itsFilter==0 || itsFilter->Apply(p)) {
+				pbunch.push_back(p);
+				i++;
+			}
+		}
+	}
+	break;
+	case HELHaloDistribution:
+	{	
+		rx = sqrt(beamdat.emit_x);
+		ry = sqrt(beamdat.emit_y);
+		
+		//~ double minx = 4 * sqrt(beamdat.emit_x * beamdat.beta_x);
+		//~ double maxx = 6 * sqrt(beamdat.emit_x * beamdat.beta_x);
+		//~ double miny = 4 * sqrt(beamdat.emit_y * beamdat.beta_y);
+		//~ double maxy = 6 * sqrt(beamdat.emit_y * beamdat.beta_y);
+		double minx = 1 * sqrt(beamdat.emit_x );
+		double maxx = 4 * sqrt(beamdat.emit_x );
+		double miny = 1 * sqrt(beamdat.emit_y );
+		double maxy = 4 * sqrt(beamdat.emit_y );
+		
+		double randx;
+		double randy;
+		
+		for(i=1; i<np;) {		
+
+			// Square in xy
+			//~ u = RandomNG::uniform(-pi,pi);
+			//~ p.x()	= rx * cos(u);
+			//~ p.xp()	= rx * sin(u);
+			
+			//~ u = RandomNG::uniform(-pi,pi);
+			//~ p.y()	= ry * cos(u);
+			//~ p.yp()	= ry * sin(u);
+			
+			// Filled ellipse in xy
+			//~ p.x()	= RandomGauss(beamdat.emit_x,cutoffs.x());
+			//~ p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
+			//~ p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
+			//~ p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
+			
+			//~ //Test - ring ellipse in xy?	
+			//~ u = RandomNG::uniform(-pi,pi);
+			//~ v = RandomNG::uniform(0.9,1.1);
+			//~ p.x()	= v * rx * cos(u);
+			//~ p.y()	= v * rx * sin(u);
+			
+			//~ p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
+			//~ p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
+			
+			//Test - ring between 4-6 sigma
+			u = RandomNG::uniform(-pi,pi);
+			randx = RandomNG::uniform(minx,maxx);
+			randy = RandomNG::uniform(miny,maxy);
+			
+			p.x()	= randx * cos(u);
+			p.y()	= randy * sin(u);
+			
+			p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
+			p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
+			
+			p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
+			p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
+			// cout<<p<<endl;
+			M.Apply(p);
+			p+=pbunch.front(); // add centroid
+			p.type() = -1.0;
+			p.location() = -1.0;
+			p.sd() = 0.0;
+			p.id() = i;
+			if(itsFilter==0 || itsFilter->Apply(p)) {
+				pbunch.push_back(p);
+				i++;
+			}
+		}
+	}
 	break;
     };
 
