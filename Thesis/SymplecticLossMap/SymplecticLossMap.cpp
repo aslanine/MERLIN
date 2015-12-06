@@ -43,14 +43,14 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed 			= (int)time(NULL);    	// seed for random number generators
-    int npart 			= 1E4;                	// number of particles to track
-    int nturns 			= 200;                 	// number of turns to track
+    int npart 			= 1E2;                	// number of particles to track
+    int nturns 			= 1;                 	// number of turns to track
 	
 	bool DoTwiss 		= 1;					// run twiss and align to beam envelope etc?
 	bool beam1 			= 1;					// beam 1 or 2
 	bool hard_edge 		= 0;					// if true, scattering is off in collimation
 	bool output_fluka_database = 1;				// FLUKA database of collimators
-	bool symplectic		= 0;					// SYMPLECTIC or TRANSPORT tracking
+	bool symplectic		= 1;					// SYMPLECTIC or TRANSPORT tracking
 	bool collimation	= 1;
 	
 	 
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 	
 	//~ string output_dir = "/test2/UserSim/outputs/HL/";
 	string output_dir = "/Build/Thesis/outputs/SymplecticLossMap/";
-	string batch_directory="LossMapDustbinTest/";
+	string batch_directory="06Dec15SymplecticTrackerTest/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -108,6 +108,8 @@ int main(int argc, char* argv[])
     //~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
+    //~ myMADinterface->TreatTypeAsDrift("VKICKER");
+    //~ myMADinterface->TreatTypeAsDrift("HKICKER");
 
     myMADinterface->ConstructApertures(false);
     AcceleratorModel* myAccModel = myMADinterface->ConstructModel();    
@@ -287,7 +289,8 @@ int main(int argc, char* argv[])
 
     // horizontalHaloDistribution1 is a halo in xx' plane, zero in yy'
     // horizontalHaloDistribution2 is a halo in xx' plane, gaussian in yy'
-    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution2);
+    //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution2);
+    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, normalDistribution);
     //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, SymplecticHorizontalHaloDistribution2);
 
     myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
