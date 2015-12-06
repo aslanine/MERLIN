@@ -24,11 +24,14 @@ clearvars tfilename delimiter startRow formatSpec tfileID tfile tdir dataArray a
 %% Import Symplectic Tracking data
 tdir = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/SymplecticLossMap/06Dec15SymplecticTrackerTest/';
 
+% SectorBendMapEF
+tfile = 'symp_SBend_EF.txt';
+
 % no pole faces for RBends
-tfile = 'symp_no_rbend_pfs.txt';
+% tfile = 'symp_no_rbend_pfs.txt';
 
 % standard symplectic
-%tfile = 'symp_no_rbend_pfs.txt.txt';
+% tfile = 'symp_no_rbend_pfs.txt.txt';
 
 tfilename = strcat(tdir,tfile);
 delimiter = ' ';

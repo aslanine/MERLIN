@@ -24,11 +24,29 @@ clearvars tfilename delimiter startRow formatSpec tfileID tfile tdir dataArray a
 %% Import Symplectic Tracking data
 tdir = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/SymplecticLossMap/06Dec15SymplecticTrackerTest/';
 
+% Replace symplectic rectmultipole with transport rectmultipole
+tfile = 'thin_kick_multi.txt'
+
+% Replace symplectic rectmultipole with transport rectmultipole
+% tfile = 'trans_multipole.txt'
+
+% no HORIZONTAL kickers
+% tfile = 'no_h_kickers.txt'
+
+% no VERTICAL kickers
+% tfile = 'no_v_kickers.txt'
+
+% no kickers
+% tfile = 'no_vh_kickers.txt'
+
+% SectorBendMapEF
+% tfile = 'symp_SBend_EF.txt';
+
 % no pole faces for RBends
-tfile = 'symp_no_rbend_pfs.txt';
+% tfile = 'symp_no_rbend_pfs.txt';
 
 % standard symplectic
-%tfile = 'symp_no_rbend_pfs.txt.txt';
+% tfile = 'symp_no_rbend_pfs.txt.txt';
 
 tfilename = strcat(tdir,tfile);
 delimiter = ' ';
@@ -74,8 +92,10 @@ subplot(2,1,1);
 %% HORIZONTAL
 %% Plot apertures
 % plot positive and negative apertures (assuming symmetric)
-plot(ap_s, ap_px, 'Color', 'black'), hold on;
-plot(ap_s, -ap_mx,'Color', 'black' ), hold on;
+plot(ap_s, ap_px, 'Color', 'black');
+hold on;
+plot(ap_s, -ap_mx,'Color', 'black' );
+hold on;
 
 
 %% sort and plot symplectic tracking data
