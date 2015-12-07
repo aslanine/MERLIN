@@ -2,7 +2,16 @@
 
 %% Import Transport Tracking data
 tdir = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/SymplecticLossMap/06Dec15SymplecticTrackerTest/';
+
+% full transport no sextupole kick component (normal full symp)
+% tfile = 'trans_no_sext_kick.txt';
+
+% complete transport
 tfile = 'transport.txt';
+
+% transport no kickers
+% tfile = 'trans_no_kickers.txt';
+
 tfilename = strcat(tdir,tfile);
 delimiter = ' ';
 startRow = 2;
@@ -24,8 +33,29 @@ clearvars tfilename delimiter startRow formatSpec tfileID tfile tdir dataArray a
 %% Import Symplectic Tracking data
 tdir = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/SymplecticLossMap/06Dec15SymplecticTrackerTest/';
 
-% Replace symplectic rectmultipole with transport rectmultipole
-tfile = 'thin_kick_multi.txt'
+% fix misuse of q and phi in symplectic multipoles
+tfile = 'new_multipole_6.txt'
+
+% full symplectic no sextupole kick component (normal full symp)
+% tfile = 'symp_no_sext_kick.txt';
+
+% full symplectic no kickers
+% tfile = 'symp_no_kickers.txt';
+
+% Original multipole
+% tfile = 'old_multipole.txt'
+
+% multi+thin only
+% tfile = 'multi_thin.txt'
+
+% edit of thin multi (didn't work)
+% tfile = 'new_multipole2.txt'
+
+% New mult 5 (thin + rearrange of multi kick)
+% tfile = 'new_multipole5.txt'
+
+% Put thin kick into symp multi
+% tfile = 'thin_kick_multi.txt'
 
 % Replace symplectic rectmultipole with transport rectmultipole
 % tfile = 'trans_multipole.txt'
@@ -98,24 +128,6 @@ plot(ap_s, -ap_mx,'Color', 'black' );
 hold on;
 
 
-%% sort and plot symplectic tracking data
-sAll=[s_id,s_x/1E3,s_y/1E3,s_s,s_turn];
-
-% sort the array
-sAll_sorted=sortrows(sAll,1);
-
-% not sure what is going on here? remove all zeros?
-sfff=[0;find(diff(sAll_sorted(:,1))~=0)];
-sfff=[0;sfff];
-
-szz=sAll_sorted(:,4);
-scc=sAll_sorted(:,2);
-
-for i=1:length(sfff)-1
-   plot(szz(sfff(i)+1:sfff(i+1)),scc(sfff(i)+1:sfff(i+1)),'Color','Green');
-   hold on;
-end
-
 %% sort and plot transport tracking data
 All=[t_id,t_x/1E3,t_y/1E3,t_s,t_turn];
 
@@ -136,12 +148,31 @@ end
 
 hold off
 
+%% sort and plot symplectic tracking data
+sAll=[s_id,s_x/1E3,s_y/1E3,s_s,s_turn];
+
+% sort the array
+sAll_sorted=sortrows(sAll,1);
+
+% not sure what is going on here? remove all zeros?
+sfff=[0;find(diff(sAll_sorted(:,1))~=0)];
+sfff=[0;sfff];
+
+szz=sAll_sorted(:,4);
+scc=sAll_sorted(:,2);
+
+for i=1:length(sfff)-1
+   plot(szz(sfff(i)+1:sfff(i+1)),scc(sfff(i)+1:sfff(i+1)),'--','Color','Green');
+   hold on;
+end
+
+
 %% HORIZONTAL plot settings
 hold on
 % Set plot axis limits
-%axis([19780,26659,-0.03,0.03])
+axis([19780,26659,-0.03,0.03])
 %axis([19780,20400,-0.02,0.02])
-axis([23100,23600,-0.03,0.03]);
+% axis([23100,23600,-0.03,0.03]);
 title('SYMPLECTIC vs TRANSPORT: Horizontal');
 xlabel('s [m]');
 ylabel('y [m]');
@@ -157,23 +188,6 @@ hold on;
 plot(ap_s, -ap_my,'Color', 'black' );
 hold on;
 
-%% sort and plot symplectic tracking data
-sAll=[s_id,s_x/1E3,s_y/1E3,s_s,s_turn];
-
-% sort the array
-sAll_sorted=sortrows(sAll,1);
-
-% not sure what is going on here? remove all zeros?
-sfff=[0;find(diff(sAll_sorted(:,1))~=0)];
-sfff=[0;sfff];
-
-szz=sAll_sorted(:,4);
-scc=sAll_sorted(:,3);
-
-for i=1:length(sfff)-1
-   plot(szz(sfff(i)+1:sfff(i+1)),scc(sfff(i)+1:sfff(i+1)),'Color','Green');
-   hold on;
-end
 
 
 %% Transport
@@ -195,12 +209,31 @@ for i=1:length(fff)-1
    hold on;
 end
 
+
+%% sort and plot symplectic tracking data
+sAll=[s_id,s_x/1E3,s_y/1E3,s_s,s_turn];
+
+% sort the array
+sAll_sorted=sortrows(sAll,1);
+
+% not sure what is going on here? remove all zeros?
+sfff=[0;find(diff(sAll_sorted(:,1))~=0)];
+sfff=[0;sfff];
+
+szz=sAll_sorted(:,4);
+scc=sAll_sorted(:,3);
+
+for i=1:length(sfff)-1
+   plot(szz(sfff(i)+1:sfff(i+1)),scc(sfff(i)+1:sfff(i+1)),'Color','--','Green');
+   hold on;
+end
+
 %% VERTICAL plot settings
 
 % Set plot axis limits
-%axis([19780,26659,-0.03,0.03])
+axis([19780,26659,-0.03,0.03])
 %axis([19780,20400,-0.02,0.02])
-axis([23100,23600,-0.03,0.03]);
+% axis([23100,23600,-0.03,0.03]);
 title('SYMPLECTIC vs TRANSPORT: Vertical');
 xlabel('s [m]');
 ylabel('y [m]');

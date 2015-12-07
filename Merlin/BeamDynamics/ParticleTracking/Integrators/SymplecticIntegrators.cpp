@@ -1,22 +1,24 @@
-#include "AcceleratorModel/TrackingInterface/ComponentTracker.h"
+#include <iostream>
+
 #include "AcceleratorModel/StdField/TWRFfield.h"
 #include "AcceleratorModel/StdField/SWRFfield.h"
+
+#include "AcceleratorModel/TrackingInterface/ComponentTracker.h"
+#include "AcceleratorModel/TrackingInterface/ComponentTracker.h"
+
 #include "BasicTransport/BasicTransportMaps.h"
 #include "BasicTransport/MatrixMaps.h"
 #include "BasicTransport/TransportMatrix.h"
+
 #include "BeamDynamics/ParticleTracking/ParticleBunch.h"
+#include "BeamDynamics/ParticleTracking/Integrators/StdIntegrators.h"
+
 #include "NumericalUtils/PhysicalUnits.h"
 #include "NumericalUtils/PhysicalConstants.h"
 
 #include "SymplecticIntegrators.h"
-#include "AcceleratorModel/TrackingInterface/ComponentTracker.h"
-#include "BeamDynamics/ParticleTracking/Integrators/StdIntegrators.h"
-
-#include <iostream>
 
 namespace ParticleTracking{
-
-
 
 namespace SYMPLECTIC {
 
@@ -346,15 +348,35 @@ END_INTG_SET
 		}
 	};
 
-	// Thin Rectangular Multipole Map
+	// Original Thin Rectangular Multipole Map
+	//~ struct MultipoleKick {
+	//~ private:
+		//~ const MultipoleField& field;
+		//~ Complex scale;
+		
+	//~ public:
+		//~ MultipoleKick(const MultipoleField& f, double ds, double P0, double phi=0) : field(f) {
+			//~ scale = ds*eV*SpeedOfLight/P0*Complex(cos(phi),sin(phi));
+		//~ }
+		
+		//~ void operator()(PSvector& v) {
+			//~ double x=v.x();
+			//~ double y=v.y();
+			//~ Complex F = scale*field.GetField2D(x,y);
+			//~ v.xp() += -F.real();
+			//~ v.yp() +=  F.imag();
+		//~ }
+	//~ };
+	
+	// Thin Rectangular Multipole Map HR 07.12.15
 	struct MultipoleKick {
 	private:
 		const MultipoleField& field;
 		Complex scale;
 		
 	public:
-		MultipoleKick(const MultipoleField& f, double ds, double P0, double phi=0) : field(f) {
-			scale = ds*eV*SpeedOfLight/P0*Complex(cos(phi),sin(phi));
+		MultipoleKick(const MultipoleField& f, double ds, double P0, double q, double phi=0) : field(f) {
+			scale = q*ds*eV*SpeedOfLight/P0*Complex(cos(phi),sin(phi));
 		}
 		
 		void operator()(PSvector& v) {
@@ -557,7 +579,7 @@ END_INTG_SET
 
 	inline void ApplyMultipoleKick(ParticleBunch* bunch, MultipoleField& field, double ds, double P0, double q) {
 		if(ds!=0)
-			for_each(bunch->begin(),bunch->end(),MultipoleKick(field, ds, P0));
+			for_each(bunch->begin(),bunch->end(),MultipoleKick(field, ds, P0, q));
 	}
 
 	inline void ApplyPoleFaceRotation(ParticleBunch* bunch, double h, const SectorBend::PoleFace& pf) {
@@ -696,7 +718,8 @@ END_INTG_SET
 			Rr.Apply(currentBunch->GetParticles());
 		}
 	}
-
+	
+	// Old Multipole: original	
 	//~ void RectMultipoleCI::TrackStep (double ds)
 	//~ {
 
@@ -706,20 +729,13 @@ END_INTG_SET
 		//~ using namespace TLAS;
 
 		//~ //if(ds==0) return;
+		//~ CHK_ZERO(ds);
 
 		//~ double P0 = currentBunch->GetReferenceMomentum();
 		//~ double q = currentBunch->GetChargeSign();
 		//~ double brho = P0/eV/SpeedOfLight;
 
-		//~ MultipoleField& field = currentComponent->GetField();		
-				
-		//~ // Thin lens kicks (for thin lens corrector dipoles) HR 06.12.15
-		//~ if(currentComponent->GetLength()==0 && ds == 0 && !field.IsNullField()){
-			//~ // Using a ds = 1.0 for thin correctors
-			//~ for_each( currentBunch->begin(), currentBunch->end(), MultipoleKick(field, 1.0, P0, q) );
-			//~ return;
-		//~ }
-		//~ CHK_ZERO(ds);
+		//~ MultipoleField& field = currentComponent->GetField();	
 
 		//~ const Complex cK1 = q*field.GetKn(1,brho);
 		//~ bool splitMagnet = field.GetCoefficient(0)!=0.0 || field.HighestMultipole()>1;
@@ -757,6 +773,8 @@ END_INTG_SET
 			//~ field.SetCoefficient(1,b1);
 		//~ }
 	//~ }	
+	
+	// New multipole 5: old + thin, rearranged split
 	void RectMultipoleCI::TrackStep (double ds)
 	{
 
@@ -800,17 +818,23 @@ END_INTG_SET
 				M.R = Rr*M.R*Transpose(Rr);
 				M.T = Rr*M.T*Transpose(Rr);
 			}
-			// Apply first half of Quad
+
 			M.Apply(currentBunch->GetParticles());
 			
-			// Multipole thin kick
-			Complex b1 = field.GetCoefficient(1);
-			field.SetCoefficient(1,Complex(0));
-			for_each(currentBunch->begin(),currentBunch->end(),MultipoleKick(field,ds,P0,q));
-			
-			// Apply second half of Quad
-			M.Apply(currentBunch->GetParticles());
-			field.SetCoefficient(1,b1);
+			if(splitMagnet) {
+				Complex b1 = field.GetCoefficient(1);
+				field.SetCoefficient(1,Complex(0));
+				if(cK1!=0.0) {
+					double phi = arg(cK1)/2;
+					for_each(currentBunch->begin(),currentBunch->end(),MultipoleKick(field,ds,P0,q,-phi));
+				}
+				else{
+					for_each(currentBunch->begin(),currentBunch->end(),MultipoleKick(field,ds,P0,q));
+				}
+				M.Apply(currentBunch->GetParticles());
+				field.SetCoefficient(1,b1);
+			}
+		
 		}
 		else
 			ApplyDriftMap(currentBunch,len);
@@ -819,10 +843,7 @@ END_INTG_SET
 			Complex b1 = field.GetCoefficient(1);
 			field.SetCoefficient(1,Complex(0));
 			for_each(currentBunch->begin(),currentBunch->end(),MultipoleKick(field,ds,P0,q));
-			if(b1!=0.0)
-				M.Apply(currentBunch->GetParticles());
-			else
-				ApplyDriftMap(currentBunch,len);
+			ApplyDriftMap(currentBunch,len);
 			field.SetCoefficient(1,b1);
 		}
 	}	
