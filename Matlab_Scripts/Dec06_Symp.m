@@ -224,7 +224,7 @@ szz=sAll_sorted(:,4);
 scc=sAll_sorted(:,3);
 
 for i=1:length(sfff)-1
-   plot(szz(sfff(i)+1:sfff(i+1)),scc(sfff(i)+1:sfff(i+1)),'Color','--','Green');
+   plot(szz(sfff(i)+1:sfff(i+1)),scc(sfff(i)+1:sfff(i+1)),'--','Color','Green');
    hold on;
 end
 

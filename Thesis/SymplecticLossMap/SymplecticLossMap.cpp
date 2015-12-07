@@ -108,8 +108,6 @@ int main(int argc, char* argv[])
     //~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
-    //~ myMADinterface->TreatTypeAsDrift("VKICKER");
-    //~ myMADinterface->TreatTypeAsDrift("HKICKER");
 
     myMADinterface->ConstructApertures(false);
     AcceleratorModel* myAccModel = myMADinterface->ConstructModel();    

@@ -14,7 +14,7 @@
 	ext<-".png"
 	
 	#Full
-	xlimits <- c(0,30000)	
+	xlimits <- c(0,26659)	
 	#IR7
 	#xlimits <- c(19700, 20600)
 	
