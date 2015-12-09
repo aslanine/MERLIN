@@ -575,10 +575,21 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		//~ double maxx = 6 * sqrt(beamdat.emit_x * beamdat.beta_x);
 		//~ double miny = 4 * sqrt(beamdat.emit_y * beamdat.beta_y);
 		//~ double maxy = 6 * sqrt(beamdat.emit_y * beamdat.beta_y);
-		double minx = 1 * sqrt(beamdat.emit_x );
-		double maxx = 4 * sqrt(beamdat.emit_x );
-		double miny = 1 * sqrt(beamdat.emit_y );
-		double maxy = 4 * sqrt(beamdat.emit_y );
+		
+		double minx(0.), maxx(0.), miny(0.), maxy(0.);
+
+		if( isnan(beamdat.min_sig_x) || isnan(beamdat.max_sig_x) || isnan(beamdat.min_sig_y) || isnan(beamdat.max_sig_y) ){
+			minx = 4 * sqrt(beamdat.emit_x );
+			maxx = 6 * sqrt(beamdat.emit_x );
+			miny = 4 * sqrt(beamdat.emit_y );
+			maxy = 6 * sqrt(beamdat.emit_y );					
+		}
+		else{
+			minx = beamdat.min_sig_x * sqrt(beamdat.emit_x );
+			maxx = beamdat.max_sig_x * sqrt(beamdat.emit_x );
+			miny = beamdat.min_sig_y * sqrt(beamdat.emit_y );
+			maxy = beamdat.max_sig_y * sqrt(beamdat.emit_y );
+		}
 		
 		double randx;
 		double randy;
@@ -611,8 +622,8 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			
 			//Test - ring between 4-6 sigma
 			u = RandomNG::uniform(-pi,pi);
-			randx = RandomNG::uniform(minx,maxx);
-			randy = RandomNG::uniform(miny,maxy);
+			randx = RandomNG::uniform(minx, maxx);
+			randy = RandomNG::uniform(miny, maxy);
 			
 			p.x()	= randx * cos(u);
 			p.y()	= randy * sin(u);
@@ -622,13 +633,14 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			
 			p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
 			p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
-			// cout<<p<<endl;
+
 			M.Apply(p);
 			p+=pbunch.front(); // add centroid
 			p.type() = -1.0;
 			p.location() = -1.0;
 			p.sd() = 0.0;
 			p.id() = i;
+			
 			if(itsFilter==0 || itsFilter->Apply(p)) {
 				pbunch.push_back(p);
 				i++;

@@ -80,6 +80,12 @@ public:
     //	The charge of the particles in the beam.
     //  <0 for electrons, >0 for positrons.
     double charge;
+    
+    //	For distributions with min/max sigma values
+    double min_sig_x;
+    double max_sig_x;
+    double min_sig_y;
+    double max_sig_y;
 
     double sigma_x() const { return sqrt(emit_x*beta_x); }
     double sigma_y() const { return sqrt(emit_y*beta_y); }

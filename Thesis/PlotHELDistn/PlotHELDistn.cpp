@@ -46,8 +46,8 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E4;                          	// number of particles to track
-    int nturns = 10;
+    int npart = 1E3;                          	// number of particles to track
+    int nturns = 1;
     
     if (argc >=2){	npart = atoi(argv[1]);	}
     if (argc >=3){  seed = atoi(argv[2]);	}
@@ -55,15 +55,17 @@ int main(int argc, char* argv[])
 		
     //~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";		//lxplus harafiqu
 	//~ string directory = "/home/haroon/git/Merlin/HR";						//iiaa1
-	string directory = "/home/HR/Downloads/MERLIN";								//M11x	
+	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";								//M11x	
 
 	string input_dir = "/Thesis/data/PlotHELDistn/";
 	
 	string output_dir = "/Build/Thesis/outputs/PlotHELDistn/";	
 
 	bool batch = 1;
+	full_output_dir = (directory+output_dir);
+	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	if(batch){
-		case_dir = "nH/";	
+		case_dir = "HELHalo/";	
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -72,7 +74,7 @@ int main(int argc, char* argv[])
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
-	bool cut_distn					= 1;
+	bool cut_distn					= 0;
 	bool collimation_on 			= 0;
 		bool sixtrack 				= 0; 		//use sixtrack like scattering?
 		bool dust 					= 0; 		//use dustbin
@@ -148,7 +150,9 @@ int main(int argc, char* argv[])
 	int ip1_element_number = myAccModel->FindElementLatticePosition(ip1_element.c_str());
 
 	int start_element_number = tcp_element_number;
+	//~ int start_element_number = ip1_element_number;
 		string start_element = tcp_element;
+		//~ string start_element = ip1_element;
 	int plot_element_number = hel_element_number;
 		string plot_element = hel_element;
 	
@@ -214,7 +218,7 @@ int main(int argc, char* argv[])
 
 	//CHECK FOR COLLIMATOR APERTURES	
 	vector<Collimator*> TCP;
-	int siz = myAccModel->ExtractTypedElements(TCP, start_element);
+	int siz = myAccModel->ExtractTypedElements(TCP, tcp_element);
 	
 	cout << "\n\t Found " << TCP.size() << " Collimators when extracting" << endl;
 
@@ -288,7 +292,8 @@ int main(int argc, char* argv[])
 	//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, CCDistn);
 	//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, CCDistn2);
 	//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn);
-	myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution1);
+	//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution1);
+	myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HELHaloDistribution);
 
 	if(cut_distn){ 
 			double h_offset = myTwiss->Value(1,0,0,start_element_number);
@@ -328,18 +333,20 @@ int main(int argc, char* argv[])
 
 	AcceleratorModel::Beamline preprebeamline = myAccModel->GetBeamline(tcp_element_number, end_element_number);
 	AcceleratorModel::Beamline prebeamline = myAccModel->GetBeamline(ip1_element_number, hel_element_number-1);
+	//~ AcceleratorModel::Beamline prebeamline = myAccModel->GetBeamline(ip1_element_number, tcp_element_number-1);
 	AcceleratorModel::RingIterator beamline = myAccModel->GetRing(hel_element_number);
     
 	myPrePreParticleTracker = new ParticleTracker(preprebeamline, myBunch);
 	myPreParticleTracker = new ParticleTracker(prebeamline, myBunch);
 	myParticleTracker = new ParticleTracker(beamline, myBunch);
 	
-	myPrePreParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());		
-	myPreParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());		
-	myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());	
-	//~ myPrePreParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());	
-	//~ myPreParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());		
-	//~ myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
+	//~ myPrePreParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());		
+	//~ myPreParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());		
+	//~ myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());	
+	//~ // myPrePreParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());	
+	myPrePreParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());	
+	myPreParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());		
+	myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
 
 	/***************
 	** COLLIMATION
@@ -435,7 +442,7 @@ int main(int argc, char* argv[])
 	{
 		cout << "Start tracking loop " << turn << endl;
 		
-		myParticleTracker->Track(myBunch);
+		//~ myParticleTracker->Track(myBunch);
 		
 		cout << "PreTracked " << turn << " turns" << endl;
 		if(every_bunch){myBunch->Output(*bo);}
