@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 	full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	if(batch){
-		case_dir = "HELHalo/";	
+		case_dir = "HELHalo_HL121/";	
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -103,6 +103,8 @@ int main(int argc, char* argv[])
 		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 
 	bool every_bunch			= 1;		//output whole bunch every turn in a single file
+	bool round_beams			= 1;
+	bool inject_at_ip1			= 1;
 
 
 	/*******************************************************
@@ -125,12 +127,19 @@ int main(int argc, char* argv[])
 	********************************/
 	cout << "MADInterface" << endl;
 	bool crossing = 0;
-	//~ MADInterface* myMADinterface = new MADInterface( directory+input_dir+"twiss_hllhc_b1_thick_HEL.tfs", beam_energy ); 		//HEL
 	MADInterface* myMADinterface;
-	//~ if(!crossing)
-		//~ myMADinterface = new MADInterface( directory+input_dir+"twiss_hllhc_b1_thick_CC.tfs", beam_energy ); 			//noHEL
-	//~ else
-		myMADinterface = new MADInterface( directory+input_dir+"HLv1.2.0+HEL.tfs", beam_energy ); 	//CrossingOn
+
+	// HL v1.2 thick HEL at LHC nominal position IP4 + ~40m
+	//~ myMADinterface = new MADInterface( directory+input_dir+"HLv1.2.0+HEL.tfs", beam_energy ); 
+	if(round_beams){
+		// HL v1.2.1 thin HEL @ IP4-30m
+		myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_-30m_thinHEL_RF.tfs", beam_energy ); 	
+	}
+	else{
+		// HL v1.2.1 thin HEL @ IP4-88.6m
+		//~ myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_-88.6m_thinHEL_RF.tfs", beam_energy ); 	
+	}		
+		
 	//~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
@@ -139,9 +148,19 @@ int main(int argc, char* argv[])
 
 	string tcp_element = "TCP.C6L7.B1";    // HORIZONTAL COLLIMATOR (x)
     int tcp_element_number = myAccModel->FindElementLatticePosition(tcp_element.c_str());
-
-    string hel_element = "HEL.B5R4.B1";
-	int hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());
+	
+	string hel_element;
+	int hel_element_number;
+	if(round_beams){
+		hel_element = "HEL-30m";
+		hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());
+	}
+	else{
+		hel_element = "HEL-88.6m";
+		hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());
+	}
+    //~ string hel_element = "HEL.B5R4.B1";
+	//~ int hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());
 
 	string end_element = "IP1.L1";
 	int end_element_number = myAccModel->FindElementLatticePosition(end_element.c_str());
@@ -149,10 +168,17 @@ int main(int argc, char* argv[])
 	string ip1_element = "IP1";
 	int ip1_element_number = myAccModel->FindElementLatticePosition(ip1_element.c_str());
 
-	int start_element_number = tcp_element_number;
-	//~ int start_element_number = ip1_element_number;
-		string start_element = tcp_element;
-		//~ string start_element = ip1_element;
+	int start_element_number;
+	string start_element;
+	if(inject_at_ip1){
+		start_element_number = ip1_element_number;
+		start_element = ip1_element;
+	}
+	else{
+		start_element_number = tcp_element_number;
+		start_element = tcp_element;
+	}
+
 	int plot_element_number = hel_element_number;
 		string plot_element = hel_element;
 	
@@ -187,7 +213,8 @@ int main(int argc, char* argv[])
 	** Collimator Setup 
 	********************/
 	MaterialDatabase* myMaterialDatabase = new MaterialDatabase();
-	CollimatorDatabase* collimator_db = new CollimatorDatabase( directory+input_dir+"ColDB_HLv1.2.0.txt", myMaterialDatabase,  true);
+	//~ CollimatorDatabase* collimator_db = new CollimatorDatabase( directory+input_dir+"ColDB_HLv1.2.0.txt", myMaterialDatabase,  true);
+	CollimatorDatabase* collimator_db = new CollimatorDatabase( directory+input_dir+"HL_v1.2.1_collDB.txt", myMaterialDatabase,  true);
    
     collimator_db->MatchBeamEnvelope(true);
     collimator_db->EnableJawAlignmentErrors(false);
@@ -211,7 +238,8 @@ int main(int argc, char* argv[])
 	/*************
 	** APERTURES
 	**************/
-	ApertureConfiguration* myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_HLv1.2.0.tfs",1);      
+	//~ ApertureConfiguration* myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_HLv1.2.0.tfs",1);      
+	ApertureConfiguration* myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"HL_v1.2.1_Aperture.tfs",1);      
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
@@ -262,8 +290,10 @@ int main(int argc, char* argv[])
     mybeam.emit_x = emittance * meter;
     
     //LHC beam
-    mybeam.sig_z = 7.55E-2;
-    mybeam.sig_dp = 1.13E-4;
+    //~ mybeam.sig_z = 7.55E-2;
+    //~ mybeam.sig_dp = 1.13E-4;
+    mybeam.sig_z = 0.;
+    mybeam.sig_dp = 0.;
 
     //Beam centroid
     mybeam.x0=myTwiss->Value(1,0,0,start_element_number);
@@ -277,6 +307,12 @@ int main(int argc, char* argv[])
     mybeam.c_xyp=0.0;
     mybeam.c_xpy=0.0;
     mybeam.c_xpyp=0.0;
+    
+    // Minimum and maximum sigma for HEL Halo Distribution
+    mybeam.min_sig_x = 4;
+    mybeam.max_sig_x = 6;
+    mybeam.min_sig_y = 4;
+    mybeam.max_sig_y = 6;
 
     delete myDispersion;
 
@@ -434,8 +470,9 @@ int main(int argc, char* argv[])
 	** TRACKING RUN
 	****************/
 	
-	
-	myPrePreParticleTracker->Track(myBunch);
+	if(!inject_at_ip1){
+		myPrePreParticleTracker->Track(myBunch);
+	}
 	myPreParticleTracker->Track(myBunch);
 
 	for (int turn=1; turn<=nturns; turn++)

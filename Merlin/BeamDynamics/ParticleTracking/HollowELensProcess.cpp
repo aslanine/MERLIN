@@ -80,7 +80,7 @@ void HollowELensProcess::SetCurrentComponent (AcceleratorComponent& component)
 	
 	if(active) {
 	    currentComponent = &component;
-	    EffectiveLength = currentComponent->GetLength();		
+	    //~ EffectiveLength = currentComponent->GetLength();		
 		
 		double Gamma_p = LorentzGamma(currentBunch->GetReferenceMomentum(), ProtonMass);
 		ProtonBeta = LorentzBeta(Gamma_p);

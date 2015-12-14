@@ -312,9 +312,10 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		ry = sqrt(beamdat.emit_y);
 		
 		//IP1 beta_x = 0.15m (HL v1.2)
-		double sigx = sqrt(beamdat.emit_x * 0.15);
+		//~ double sigx = sqrt(beamdat.emit_x * 0.15);
 		//IP1 beta_x = 0.55m (LHC v6.503)
-		//~ double sigx = sqrt(beamdat.emit_x * 0.55);
+		double sigx = sqrt(beamdat.emit_x * 0.55);
+		//~ double sigx = sqrt(beamdat.emit_x * beamdat.beta_x);
 		
 		//Nominal LHC		
 		//~ double sigx = 267.067E-6; //TCP.C6L7		
