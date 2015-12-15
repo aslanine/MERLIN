@@ -9,6 +9,9 @@ set multiplot layout 3,2 title "Initial Bunch" font ",14"
 set tmargin 3
 #
 set pointsize 0.2
+# Tev HEL Sigma
+#  0.0002919978486
+#
 # START PLOT
 #
 set title "XX'"
@@ -19,7 +22,12 @@ set ylabel "x' [rad]"
 #~ set xrange[:0]
 #~ set yrange[0:]
 #
-plot "HEL_bunch.txt" u 3:4 title ""
+f(y) = 0.001
+plot "HEL_bunch.txt" u 3:4 title "",f(y)
+#~ plot (4*0.0002919978486)
+#~ set arrow 1 from (4*0.0002919978486),1 to (4*0.0002919978486),-1 style arrow 7 nohead ls 1
+#~ set arrow 1 from (0.001),1 to (0.001),-1 style arrow 7 nohead ls 1
+
 #
 #END PLOT
 #
