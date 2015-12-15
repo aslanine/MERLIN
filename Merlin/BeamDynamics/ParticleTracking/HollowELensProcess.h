@@ -8,7 +8,7 @@
 //
 // Created:		2014 HR
 // Modified:	
-// Last Edited: 19.09.15 HR
+// Last Edited: 15.12.15 HR
 // 
 /////////////////////////////////////////////////////////////////////////
 #ifndef HollowELensProcess_h
@@ -54,10 +54,7 @@ public:
  	// Set minimum and maximum e- beam radii in [m] or [sigma]
     virtual void SetRadii (double rmin, double rmax);
     virtual void SetRadiiSigma (double rmin, double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss);
-    
-    // Used to align the e- lens with the beam envelope
-    virtual double CalcSigma (double emittance_x, double emittance_y, LatticeFunctionTable* twiss);
-    
+        
     // Set the effective length of the e- lens
     virtual void SetEffectiveLength (double l_e) {EffectiveLength = l_e;}
     
@@ -75,31 +72,41 @@ public:
 	
 	// Use simple profile to calculate kick
 	virtual double CalcKickSimple (Particle &p);
+	virtual double CalcKickSimple (double radius);
 	
 	// Use radial (measured) profile to calculate kick
 	virtual double CalcKickRadial (Particle &p);
+	virtual double CalcKickRadial (double radius);
 
 	// Change to radial (measured) profile, simple (perfect) is default
 	virtual void SetRadialProfile(){SimpleProfile = 0;}
 	virtual void SetPerfectProfile(){SimpleProfile = 1;}
 	
-	virtual void OutputKick(std::ostream* os){}
+	// Change electron direction (defualt opposite protons = 1)
+	virtual void SetElectronDirection(bool dir);
+	
+	// Output the HEL profile in x y phase space
+	virtual void OutputProfile(std::ostream* os, double E=7000, double min=0, double max=10);
 
 
 private:
     // Data Members for Class Attributes
+    
+    // Hardware parameters
 	double Rigidity;
 	double Current;
 	double ElectronBeta;
 	double ProtonBeta;
 	double EffectiveLength;
-	
+	double Rmin;
+	double Rmax;
+	double Sigma_x;
+	double Sigma_y;
+		
+	// Variables 
 	double ThetaMax;
 	double ParticleAngle;
 	double R;
-	double Rmin;
-	double Rmax;
-	
 	double XOffset;
 	double YOffset;
 
@@ -112,6 +119,7 @@ private:
 	double Nstep;
 	double OpTune;
 	double Phi;
+	
 	int Turn;
 	int SkipTurn;
 
@@ -121,6 +129,7 @@ private:
 	bool ACSet;
 	bool SimpleProfile;
 	bool AlignedToOrbit;
+	bool ElectronDirection;		// 1 = opposite protons (-ve kick), 0 = same as protons (+ve kick)
 
 	OperationMode OMode;
 

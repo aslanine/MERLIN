@@ -8,7 +8,7 @@
 //
 // Created:		2014 HR
 // Modified:	
-// Last Edited: 19.09.15 HR
+// Last Edited: 15.12.15 HR
 // 
 /////////////////////////////////////////////////////////////////////////
 #include <cmath>
@@ -33,7 +33,7 @@ namespace ParticleTracking {
 
 
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity)
-	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0)
+	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -43,7 +43,7 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 }
 
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double length_e)
-	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), EffectiveLength(length_e), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0)
+	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), EffectiveLength(length_e), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -54,7 +54,7 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 }
 
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double rmin, double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss)
-	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0)
+	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -102,8 +102,7 @@ void HollowELensProcess::SetAC (double tune, double deltatune, double tunevarper
 	Nstep = (2 * DeltaTune / TuneVarPerStep)+1;
 	Turn = 0;
 	ACSet = 1;
-	OMode = AC;
-	
+	OMode = AC;	
 }
 
 void HollowELensProcess::SetTurnskip (int skip)
@@ -114,6 +113,12 @@ void HollowELensProcess::SetTurnskip (int skip)
 
 void HollowELensProcess::DoProcess (double ds)
 {
+	
+	// NB
+	// CalcThetaMax returns +ve theta
+	// CalcKick Radial and Simple return -ve theta
+	// DoProcess should have p.xp() += theta * sin(ParticleAngle)	
+	
 	double theta = 0;
 	double Gamma_p = 0;
 	//cout << "Entered Hollow Electron Lens Process" << endl;
@@ -166,8 +171,8 @@ void HollowELensProcess::DoProcess (double ds)
 					
 					
 					//~ // Particle phase space angle and amplitude (radius)
-					(*p).xp() -= theta * cos(ParticleAngle);			
-					(*p).yp() -= theta * sin(ParticleAngle);
+					(*p).xp() += theta * cos(ParticleAngle);			
+					(*p).yp() += theta * sin(ParticleAngle);
 				}
 			}
 		}
@@ -196,8 +201,8 @@ void HollowELensProcess::DoProcess (double ds)
 						ParticleAngle = atan2((*p).y(), (*p).x());
 						
 						// Particle phase space angle and amplitude (radius)
-						(*p).xp() -= theta * cos(ParticleAngle);			
-						(*p).yp() -= theta * sin(ParticleAngle);
+						(*p).xp() += theta * cos(ParticleAngle);			
+						(*p).yp() += theta * sin(ParticleAngle);
 					}	
 				}
 			}
@@ -225,8 +230,8 @@ void HollowELensProcess::DoProcess (double ds)
 						
 					if(theta!=0){
 						// Particle phase space angle and amplitude (radius)
-						(*p).xp() -= theta * cos(ParticleAngle);			
-						(*p).yp() -= theta * sin(ParticleAngle);
+						(*p).xp() += theta * cos(ParticleAngle);			
+						(*p).yp() += theta * sin(ParticleAngle);
 					}			
 
 				}
@@ -254,8 +259,8 @@ void HollowELensProcess::DoProcess (double ds)
 					
 					if(theta!=0){
 						// Particle phase space angle and amplitude (radius)
-						(*p).xp() -= theta * cos(ParticleAngle);			
-						(*p).yp() -= theta * sin(ParticleAngle);
+						(*p).xp() += theta * cos(ParticleAngle);			
+						(*p).yp() += theta * sin(ParticleAngle);
 					}	
 
 				}
@@ -279,16 +284,24 @@ double HollowELensProcess::CalcThetaMax (double r)
 {	
 	if (r == 0){return 0;}
 
-	//cout << "L = " << EffectiveLength << " Current = " << Current << " Rigidity = " << Rigidity << " Rmax = " << Rmax << " ElectronBeta = " << ElectronBeta << endl;
+	//~ cout << "L = " << EffectiveLength << " Current = " << Current << " Rigidity = " << Rigidity << " Rmax = " << Rmax << " ElectronBeta = " << ElectronBeta << endl;
 
-	//OLD - Claiborne Smith et al. WE6RFP031
-	//ThetaMax = ((0.2 * EffectiveLength * Current) / (Rigidity * Rmax)) * ((1 + ElectronBeta)/(ElectronBeta));
+	// OLD - Claiborne Smith et al. WE6RFP031 - DOESN'T WORK in the current process
+	//~ ThetaMax = ((0.2 * EffectiveLength * Current) / (Rigidity * Rmax)) * ((1 + ElectronBeta)/(ElectronBeta));
 	
-	//NEW - Previtali et al. MOPWO044
-	//ThetaMax = ( -2.0 *  EffectiveLength * Current * (1 + ElectronBeta * ProtonBeta) ) / ( 4 * pi * FreeSpacePermittivity * r * Rigidity * ElectronBeta * ProtonBeta * SpeedOfLight * SpeedOfLight);  
+	// NEW - Previtali et al. MOPWO044
+	//~ ThetaMax = ( -2.0 *  EffectiveLength * Current * (1 + ElectronBeta * ProtonBeta) ) / ( 4 * pi * FreeSpacePermittivity * r * Rigidity * ElectronBeta * ProtonBeta * SpeedOfLight * SpeedOfLight);  
+	//~ ThetaMax = ( 2.0 *  EffectiveLength * Current * (1 + ElectronBeta * ProtonBeta) ) / ( 4 * pi * FreeSpacePermittivity * r * Rigidity * ElectronBeta * ProtonBeta * SpeedOfLight * SpeedOfLight);  
 
-	//Simplify 4 pi e0 c^2 = 1/10^-7 = 10^7	
-	ThetaMax = (2 * EffectiveLength * Current * (1 + (ElectronBeta * ProtonBeta) ) )/ ( r * 1E7 * Rigidity * ElectronBeta * ProtonBeta );	
+	// Simplify 4 pi e0 c^2 = 1/10^-7 = 10^7	
+	if(ElectronDirection){
+		// HEL electrons travelling opposite to LHC protons (summed kick) 
+		ThetaMax = (2 * EffectiveLength * Current * (1 + (ElectronBeta * ProtonBeta) ) )/ ( r * 1E7 * Rigidity * ElectronBeta * ProtonBeta );	
+	}
+	else{
+		// HEL electrons travelling in the same direction to LHC protons (smaller kick and opposite)
+		ThetaMax = -(2 * EffectiveLength * Current * (1 - (ElectronBeta * ProtonBeta) ) )/ ( r * 1E7 * Rigidity * ElectronBeta * ProtonBeta );	
+	}
 
 	return ThetaMax;
 }
@@ -300,7 +313,7 @@ double HollowELensProcess::CalcKickSimple (Particle &p)
 	double x = 0;
 	double y = 0;
 	
-	if(EffectiveLength == 0.){cout << "HELProcess: Length = 0, setting L = 2.0[m]" << endl; Length = 2.0;}
+	if(EffectiveLength == 0.){cout << "HELProcess: Length = 0, setting L = 3.0[m]" << endl; Length = 3.0;}
 	else{Length = EffectiveLength;}
 	//~ cout << "\n\tHEL Length = " << Length << endl;	
 
@@ -336,6 +349,39 @@ double HollowELensProcess::CalcKickSimple (Particle &p)
 
 }
 
+double HollowELensProcess::CalcKickSimple (double radius)
+{
+	double thet = 0;
+	double Length = 0;
+	
+	if(EffectiveLength == 0.){cout << "HELProcess: Length = 0, setting L = 3.0[m]" << endl; Length = 3.0;}
+	else{Length = EffectiveLength;}
+	//~ cout << "\n\tHEL Length = " << Length << endl;	
+	
+	R = radius;
+	
+	if (R < Rmin) {
+		//~ cout << "\t\tHELProcess :: Returning zero at R = " << R << " Rmin = " << Rmin << endl; 
+		return 0;
+	}
+	else if (R < Rmax && R > Rmin)
+	{
+		thet = ((pow(R,2) - pow(Rmin,2))/(pow(Rmax,2) - pow(Rmin,2))) * CalcThetaMax(R);     
+		//thet = ((R - Rmin)/(Rmax - Rmin)) * CalcThetaMax(R);     
+		//cout << "\nR < Rmax, theta = " << thet << " thetamax = " << CalcThetaMax(R) << "angle = " << ParticleAngle << endl;
+		return -1* thet;
+
+	}
+	else if (R >= Rmax)
+	{   
+		thet = CalcThetaMax(R);            
+		//cout << "\nR > Rmax, theta = " << thet << " thetamax = " << CalcThetaMax(Rmax) << "angle = " << ParticleAngle << endl;
+		return -1* thet;		  
+	}
+	return 0;
+
+}
+
 double HollowELensProcess::CalcKickRadial (Particle &p)
 {
 	double f = 0;
@@ -344,7 +390,7 @@ double HollowELensProcess::CalcKickRadial (Particle &p)
 	double x = 0;
 	double y = 0;
 	
-	if(EffectiveLength == 0.){Length = 2.0;}
+	if(EffectiveLength == 0.){cout << "HELProcess: Length = 0, setting L = 3.0[m]" << endl; Length = 3.0;}
 	else{Length = EffectiveLength;}
 	//~ cout << "\n\tHEL Length = " << Length << endl;	
 
@@ -358,6 +404,76 @@ double HollowELensProcess::CalcKickRadial (Particle &p)
 	
 	// Adapted from V. Previtali's SixTrack elense implementation 
 	
+	if (R < Rmin) {
+		return 0;
+	}
+	
+	// Define boundaries between parameterisation of measured radial profile
+	const double r0 = 222.5;
+	const double r1 = 252.5;
+	const double r2 = 287;
+	const double r3 = 364.5;
+	const double r4 = 426.5;
+	
+	double elense_r_min = Rmin; //Need to calculate 4 sigma at this point
+
+	double x0 = elense_r_min;
+	double y0 = 0;
+	double x1 = r1 / r0 * elense_r_min;
+	double y1 = 917;
+	double x2 = r2 / r0 * elense_r_min;
+	double y2 = 397;
+	double x3 = r3 / r0 * elense_r_min;
+	double y3 = 228;
+	double x4 = r4 / r0 * elense_r_min; 
+	double y4 = 0;
+	
+	double n0 = ((y1-y0)/(x1-x0)/3)*pow(x1,3)+(y0 -x0*(y1-y0)/(x1-x0))*pow(x1,2)/2 -(((y1-y0)/(x1-x0)/3)*pow(x0,3)+(y0 - x0*(y1-y0)/(x1-x0))*pow(x0,2)/2);
+	double n1 = (y2-y1)/(x2-x1)*pow(x2,3)/3+(y1 - x1 *(y2-y1)/(x2-x1))*pow(x2,2)/2 -((y2-y1)/(x2-x1)*pow(x1,3)/3+(y1 - x1 *(y2-y1)/(x2-x1))*pow(x1,2)/2);
+    double n2 = (y3-y2)/(x3-x2)*pow(x3,3)/3+(y2 - x2 *(y3-y2)/(x3-x2))*pow(x3,2)/2 -((y3-y2)/(x3-x2)*pow(x2,3)/3+(y2 - x2 *(y3-y2)/(x3-x2))*pow(x2,2)/2);
+    double n3 = (y4-y3)/(x4-x3)*pow(x4,3)/3+(y3 - x3 *(y4-y3)/(x4-x3))*pow(x4,2)/2 -((y4-y3)/(x4-x3)*pow(x3,3)/3+(y3 - x3 *(y4-y3)/(x4-x3))*pow(x3,2)/2);
+    double ntot = n0 + n1 + n2 + n3;
+    
+    if (R < x0){
+                 f=0;
+                 cout << "HEL warning: Radial profile: R < x0" << endl;     
+				}
+	else if (R < x1){
+                 f = (((y1-y0)/(x1-x0)/3)*pow(R,3)+(y0-x0 *(y1-y0)/(x1-x0))*pow(R,2)/2-(((y1-y0)/(x1-x0)/3)*pow(x0,3)+(y0-x0 *(y1-y0)/(x1-x0))*pow(x0,2)/2))/ntot;
+				}
+    else if (R < x2){
+                 f = (n0+(y2-y1)/(x2-x1)*pow(R,3)/3+(y1-x1*(y2-y1)/(x2-x1))*pow(R,2)/2-((y2-y1)/(x2-x1)*pow(x1,3)/3+(y1-x1*(y2-y1)/(x2-x1))*pow(x1,2)/2))/ntot;
+	}
+    else if (R < x3){
+                f = (n0+n1+(y3-y2)/(x3-x2)*pow(R,3)/3+(y2-x2*(y3-y2)/(x3-x2))*pow(R,2)/2-((y3-y2)/(x3-x2)*pow(x2,3)/3+(y2-x2*(y3-y2)/(x3-x2))*pow(x2,2)/2))/ntot;
+	}
+    else if (R < x4){
+                f = (n0+n1+n2+(y4-y3)/(x4-x3)*pow(R,3)/3+(y3-x3*(y4-y3)/(x4-x3))*pow(R,2)/2-((y4-y3)/(x4-x3)*pow(x3,3)/3+(y3-x3*(y4-y3)/(x4-x3))*pow(x3,2)/2))/ntot;
+	}
+    else{ 
+                f = 1;                 
+    } 
+	
+	thet = -1* CalcThetaMax(R) * f;
+	//cout << "\nR < Rmax, theta = " << thet << " thetamax = " << CalcThetaMax(R) << "angle = " << ParticleAngle << endl;
+	return thet;
+}
+
+double HollowELensProcess::CalcKickRadial (double radius)
+{
+	double f = 0;
+	double thet = 0;
+	double Length = 0;
+	double x = 0;
+	double y = 0;
+	
+	if(EffectiveLength == 0.){cout << "HELProcess: Length = 0, setting L = 3.0[m]" << endl; Length = 3.0;}
+	else{Length = EffectiveLength;}
+	
+	// Calculate particle transverse vector ('radius' in xy space)
+	R = radius;
+	
+	// Adapted from V. Previtali's SixTrack elense implementation 	
 	if (R < Rmin) {
 		return 0;
 	}
@@ -508,15 +624,49 @@ void HollowELensProcess::SetRadiiSigma (double rmin, double rmax, AcceleratorMod
 	
 	Rmin = rmin * sigma_x;
 	Rmax = rmax * sigma_x;
+	Sigma_x = sigma_x;
+	Sigma_y = sigma_y;
 	
 	cout << "HollowELensProcess::SetRadiiSigma : RMax = " << Rmax << " RMin= " << Rmin << endl;
 	
 }
 
-double HollowELensProcess::CalcSigma (double emittance_x, double emittance_y, LatticeFunctionTable* twiss)
+void HollowELensProcess::OutputProfile(std::ostream* os, double E, double min, double max)
 {
-	//TODO necessary?
-	return 0;
+	// Have to set ProtonBeta if running before it is set
+	double Gamma_p = LorentzGamma(E, ProtonMass);
+	ProtonBeta = LorentzBeta(Gamma_p);
+	
+	cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+	cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
+	cout << " L = " << EffectiveLength << endl;
+	cout << " Current = " << Current << endl;
+	cout << " Brho = " << Rigidity << endl;
+	cout << " ElectronBeta = " << ElectronBeta << endl;
+	cout << " ProtonBeta = " << ProtonBeta << endl;	
+	
+	double r = 0;
+	int points = 1000;
+	
+	(*os) << "#r\tkick_radial\tkick_simple\t|kick_r|\t|kick_s|" << endl;
+	
+	for(int i = 1; i < points; ++i){
+		(*os) << (r/Sigma_x) <<"\t"<< CalcKickRadial(r) <<"\t"<< CalcKickSimple(r) <<"\t"<< sqrt(pow(CalcKickRadial(r),2)) <<"\t"<< sqrt(pow(CalcKickSimple(r),2)) << endl;
+		//~ (*os) << (r/Sigma_x) <<"\t"<< CalcKickRadial(r) <<"\t"<< CalcKickSimple(r)  << endl;
+		//~ (*os) << (r/Sigma_x) <<"\t"<< sqrt(pow(CalcKickRadial(r),2)) <<"\t"<< sqrt(pow(CalcKickSimple(r),2)) << endl;
+		r += ((max-min)/points) * Sigma_x;
+	}		
+}
+
+
+void HollowELensProcess::SetElectronDirection(bool dir){
+	ElectronDirection = dir;
+	if(ElectronDirection){
+		cout << "HELProcess: electrons travelling opposite to protons: negative (focussing) kick" << endl;
+	}
+	else{
+		cout << "HELProcess: electrons travelling in the same direction as protons: positive (defocussing) kick" << endl;		
+	}
 }
 
 }; // end namespace ParticleTracking
