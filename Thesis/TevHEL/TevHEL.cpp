@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
     int npart = 41;                            // number of particles to track
-    int nturns = 5E3;                           // number of turns to track
+    int nturns = 20;                           // number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -478,9 +478,12 @@ int main(int argc, char* argv[])
 		}
 		else{			//Tevatron: 2m, 5KeV, 1.2A
 			myHELProcess = new HollowELensProcess(3, 1, 1.2, 0.138874007, 2.334948339E4, 2.0);
-			myHELProcess->SetRadiiSigma(4, 6, myAccModel, emittance, emittance, myTwiss);
+			//~ myHELProcess = new HollowELensProcess(3, 1, 1.2, 0.138874007, 2.334948339E4, 3.0);
+			myHELProcess->SetRadiiSigma(4, 6.8, myAccModel, emittance, emittance, myTwiss);
 		}
-				
+		
+		myHELProcess->SetElectronDirection(0);
+		
 		myHELProcess->SetRadialProfile();
 		//~ myHELProcess->SetPerfectProfile();					
 		
@@ -514,6 +517,14 @@ int main(int argc, char* argv[])
 			myParticleTracker3->AddProcess(myHELProcess);	
 			cout << "HEL set" << endl;		
 		}
+		
+		// Output HEL profile
+		string hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);
+		ostringstream hel_output_file;
+		hel_output_file << hel_dir << "profile.txt";
+		ofstream* hel_os = new ofstream(hel_output_file.str().c_str());
+		if(!hel_os->good()){ std::cerr << "Could not open HEL profile file" << std::endl; exit(EXIT_FAILURE); }  
+		myHELProcess->OutputProfile(hel_os, 7000, 0, 10);
 	}
 
 /*****************************
