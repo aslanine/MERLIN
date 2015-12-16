@@ -45,8 +45,8 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E2;                            // number of particles to track
-    int nturns = 100;                           // number of turns to track
+    int npart = 1E4;                            // number of particles to track
+    int nturns = 1;                           // number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	
-	string pn_dir, case_dir, bunch_dir, lattice_dir;	
+	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir;	
 	string input_dir = "/Thesis/data/HELIntegration/";	
 	string output_dir = "/Build/Thesis/outputs/HELIntegration/";
 	
@@ -76,33 +76,30 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "Poincare_-30m/";
+		case_dir = "16DecDistn/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
-	bool output_turn_bunch		= 1;
-		if(output_turn_bunch){	pn_dir = (full_output_dir+"ParticleNo/"); mkdir(pn_dir.c_str(), S_IRWXU); }		
+	bool output_turn_bunch		= 1;		if(output_turn_bunch){	pn_dir = (full_output_dir+"ParticleNo/"); mkdir(pn_dir.c_str(), S_IRWXU); }		
 	bool every_bunch			= 1;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
-	bool output_final_bunch 	= 1;
-		if (output_initial_bunch || output_final_bunch){ bunch_dir = (full_output_dir+"Bunch_Distn/"); mkdir(bunch_dir.c_str(), S_IRWXU); }		
+	bool output_final_bunch 	= 1;		if (output_initial_bunch || output_final_bunch){ bunch_dir = (full_output_dir+"Bunch_Distn/"); mkdir(bunch_dir.c_str(), S_IRWXU); }		
 	bool output_fluka_database 	= 1;
-	bool output_twiss			= 1;
-		
-		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
+	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
-	bool hel_on 				= 0; 		// Hollow electron lens process?
+	bool hel_on 				= 1; 		// Hollow electron lens process?
 		bool DCon				= 1;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
 		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
+		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 0;
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 0;		// true = -30m, false = -88.6m
+	bool round_beams			= 1;		// true = -30m, false = -88.6m
 	bool thin					= 1;		// true = use thin HEL instead of thick
 	bool symplectic				= 1;
 	
@@ -500,9 +497,17 @@ int main(int argc, char* argv[])
 		// HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double length_e);
 		HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 5A
 				
+		// 1 = opposite to protons (focussing)
+		myHELProcess->SetElectronDirection(1);
+				
+		// radial (measured) or perfect profile
 		myHELProcess->SetRadialProfile();
 		//~ myHELProcess->SetPerfectProfile();
 		
+		// for LHC hardware we need to scale the radial profile
+		myHELProcess->SetLHCRadialProfile();
+		
+		// centre the HEL on the closed orbit
 		myHELProcess->SetRadiiSigma(4, 8, myAccModel, emittance, emittance, myTwiss);			
 		
 		if(ACon){
@@ -525,11 +530,21 @@ int main(int argc, char* argv[])
 		
 		if(start_at_ip1){
 			myParticleTracker2->AddProcess(myHELProcess);	
-			cout << "HEL set" << endl;		
+			//~ cout << "HEL set" << endl;		
 		}
 		else{			
 			myParticleTracker3->AddProcess(myHELProcess);	
-			cout << "HEL set" << endl;		
+			//~ cout << "HEL set" << endl;		
+		}
+		
+		// Output HEL profile
+		if(output_hel_profile){
+			ostringstream hel_output_file;
+			hel_output_file << hel_dir << "profile.txt";
+			ofstream* hel_os = new ofstream(hel_output_file.str().c_str());
+			if(!hel_os->good()){ std::cerr << "Could not open HEL profile file" << std::endl; exit(EXIT_FAILURE); }  
+			//~ myHELProcess->OutputProfile(hel_os, 7000, 0, 10);
+			myHELProcess->OutputProfile(hel_os, 7000, 0, 14.3);
 		}
 	}
 

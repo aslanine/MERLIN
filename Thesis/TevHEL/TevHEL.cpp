@@ -45,8 +45,8 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 41;                            // number of particles to track
-    int nturns = 20;                           // number of turns to track
+    int npart = 1E4;                            // number of particles to track
+    int nturns = 1;                           // number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	
-	string pn_dir, case_dir, bunch_dir, lattice_dir;	
+	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir;	
 	string input_dir = "/Thesis/data/TevHEL/";	
 	string output_dir = "/Build/Thesis/outputs/TevHEL/";
 	
@@ -78,21 +78,17 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "14Dec15Test/";
+		case_dir = "16DecDistn/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
-	bool output_turn_bunch		= 1;
-		if(output_turn_bunch){	pn_dir = (full_output_dir+"ParticleNo/"); mkdir(pn_dir.c_str(), S_IRWXU); }		
+	bool output_turn_bunch		= 1;		if(output_turn_bunch){	pn_dir = (full_output_dir+"ParticleNo/"); mkdir(pn_dir.c_str(), S_IRWXU); }		
 	bool every_bunch			= 1;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
-	bool output_final_bunch 	= 1;
-		if (output_initial_bunch || output_final_bunch){ bunch_dir = (full_output_dir+"Bunch_Distn/"); mkdir(bunch_dir.c_str(), S_IRWXU); }		
+	bool output_final_bunch 	= 1;		if (output_initial_bunch || output_final_bunch){ bunch_dir = (full_output_dir+"Bunch_Distn/"); mkdir(bunch_dir.c_str(), S_IRWXU); }		
 	bool output_fluka_database 	= 1;
-	bool output_twiss			= 1;
-		
-		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
+	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
 	bool hel_on 				= 1; 		// Hollow electron lens process?
 	bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
@@ -100,6 +96,7 @@ int main(int argc, char* argv[])
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
 		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
+		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 0;
 	bool use_sixtrack_like_scattering = 0;
@@ -343,8 +340,8 @@ int main(int argc, char* argv[])
 		myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HELHaloDistribution);
 	}
     else{
-    	myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, tuneTestDistribution);
-    	//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HELHaloDistribution);
+    	//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, tuneTestDistribution);
+    	myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HELHaloDistribution);
 	}
     
 	if(collimation_on && cut_distn){ 
@@ -475,17 +472,21 @@ int main(int argc, char* argv[])
 		if(LHC_HEL){	// LHC: 3m, 10KeV, 5A
 			myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);
 			myHELProcess->SetRadiiSigma(4, 8, myAccModel, emittance, emittance, myTwiss);
+			
+			// for LHC hardware we need to scale the radial profile
+			myHELProcess->SetLHCRadialProfile();
 		}
 		else{			//Tevatron: 2m, 5KeV, 1.2A
 			myHELProcess = new HollowELensProcess(3, 1, 1.2, 0.138874007, 2.334948339E4, 2.0);
 			//~ myHELProcess = new HollowELensProcess(3, 1, 1.2, 0.138874007, 2.334948339E4, 3.0);
 			myHELProcess->SetRadiiSigma(4, 6.8, myAccModel, emittance, emittance, myTwiss);
 		}
-		
-		myHELProcess->SetElectronDirection(0);
-		
+				
 		myHELProcess->SetRadialProfile();
-		//~ myHELProcess->SetPerfectProfile();					
+		//~ myHELProcess->SetPerfectProfile();	
+		
+		// 1 = opposite to protons (focussing)
+		myHELProcess->SetElectronDirection(1);			
 		
 		if(ACon){
 			//Set AC variables
@@ -509,22 +510,24 @@ int main(int argc, char* argv[])
 			myParticleTracker1->AddProcess(myHELProcess);	
 			myParticleTracker2->AddProcess(myHELProcess);	
 			myParticleTracker3->AddProcess(myHELProcess);	
-			cout << "HEL set" << endl;		
+			//~ cout << "HEL set" << endl;		
 		}
 		else{			
 			myParticleTracker1->AddProcess(myHELProcess);	
 			myParticleTracker2->AddProcess(myHELProcess);	
 			myParticleTracker3->AddProcess(myHELProcess);	
-			cout << "HEL set" << endl;		
+			//~ cout << "HEL set" << endl;		
 		}
 		
 		// Output HEL profile
-		string hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);
-		ostringstream hel_output_file;
-		hel_output_file << hel_dir << "profile.txt";
-		ofstream* hel_os = new ofstream(hel_output_file.str().c_str());
-		if(!hel_os->good()){ std::cerr << "Could not open HEL profile file" << std::endl; exit(EXIT_FAILURE); }  
-		myHELProcess->OutputProfile(hel_os, 7000, 0, 10);
+		if(output_hel_profile){
+			ostringstream hel_output_file;
+			hel_output_file << hel_dir << "profile.txt";
+			ofstream* hel_os = new ofstream(hel_output_file.str().c_str());
+			if(!hel_os->good()){ std::cerr << "Could not open HEL profile file" << std::endl; exit(EXIT_FAILURE); }  
+			//~ myHELProcess->OutputProfile(hel_os, 7000, 0, 10);
+			myHELProcess->OutputProfile(hel_os, 7000, 0, 14.3);
+		}
 	}
 
 /*****************************
