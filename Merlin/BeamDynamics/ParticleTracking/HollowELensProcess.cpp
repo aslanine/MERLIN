@@ -33,7 +33,9 @@ namespace ParticleTracking {
 
 
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity)
-	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1)
+	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
+	 ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1),\
+	 LHC_Radial(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -43,7 +45,9 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 }
 
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double length_e)
-	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), EffectiveLength(length_e), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1)
+	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
+	EffectiveLength(length_e), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0),\
+	ElectronDirection(1),  LHC_Radial(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -53,8 +57,10 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 	
 }
 
-HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double rmin, double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss)
-	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1)
+HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double rmin,\
+ double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss)
+	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0),\
+	SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1), LHC_Radial(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -409,11 +415,23 @@ double HollowELensProcess::CalcKickRadial (Particle &p)
 	}
 	
 	// Define boundaries between parameterisation of measured radial profile
-	const double r0 = 222.5;
-	const double r1 = 252.5;
-	const double r2 = 287;
-	const double r3 = 364.5;
-	const double r4 = 426.5;
+	double r0,r1,r2,r3,r4;
+	
+	if(!LHC_Radial){
+		// Tevatron HEL 1.2A, 2m, 5KeV, 4-6.8sig
+		r0 = (const double) 222.5;
+		r1 = (const double) 252.5;
+		r2 = (const double) 287;
+		r3 = (const double) 364.5;
+		r4 = (const double) 426.5;
+	}
+	else{
+		// LHC HEL 5A, 3m, 10KeV, 4-8sig
+		r1 = (const double) 265;		// 0 - initial rise				(x1.191)
+		r2 = (const double) 315;		// rise - straight section		(x1.248)
+		r3 = (const double) 435;		// straight - left of peak		(x1.193)
+		r4 = (const double) 505;		// left - right of peak			(x1.184)
+	}	
 	
 	double elense_r_min = Rmin; //Need to calculate 4 sigma at this point
 
@@ -464,8 +482,6 @@ double HollowELensProcess::CalcKickRadial (double radius)
 	double f = 0;
 	double thet = 0;
 	double Length = 0;
-	double x = 0;
-	double y = 0;
 	
 	if(EffectiveLength == 0.){cout << "HELProcess: Length = 0, setting L = 3.0[m]" << endl; Length = 3.0;}
 	else{Length = EffectiveLength;}
@@ -479,13 +495,25 @@ double HollowELensProcess::CalcKickRadial (double radius)
 	}
 	
 	// Define boundaries between parameterisation of measured radial profile
-	const double r0 = 222.5;
-	const double r1 = 252.5;
-	const double r2 = 287;
-	const double r3 = 364.5;
-	const double r4 = 426.5;
+	double r0,r1,r2,r3,r4;
 	
-	double elense_r_min = Rmin; //Need to calculate 4 sigma at this point
+	if(!LHC_Radial){
+		// Tevatron HEL 1.2A, 2m, 5KeV, 4-6.8sig
+		r0 = (const double) 222.5;
+		r1 = (const double) 252.5;
+		r2 = (const double) 287;
+		r3 = (const double) 364.5;
+		r4 = (const double) 426.5;
+	}
+	else{
+		// LHC HEL 5A, 3m, 10KeV, 4-8sig
+		r1 = (const double) 265;		// 0 - initial rise				(x1.191)
+		r2 = (const double) 315;		// rise - straight section		(x1.248)
+		r3 = (const double) 435;		// straight - left of peak		(x1.193)
+		r4 = (const double) 505;		// left - right of peak			(x1.184)
+	}											
+		
+	double elense_r_min = Rmin; 
 
 	double x0 = elense_r_min;
 	double y0 = 0;
