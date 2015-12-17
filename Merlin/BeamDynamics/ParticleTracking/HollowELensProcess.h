@@ -54,6 +54,7 @@ public:
  	// Set minimum and maximum e- beam radii in [m] or [sigma]
     virtual void SetRadii (double rmin, double rmax);
     virtual void SetRadiiSigma (double rmin, double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss);
+    virtual void SetRadiiSigma (double rmin, double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss, double P0);
         
     // Set the effective length of the e- lens
     virtual void SetEffectiveLength (double l_e) {EffectiveLength = l_e;}
