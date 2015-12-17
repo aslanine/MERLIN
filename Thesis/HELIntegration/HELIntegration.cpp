@@ -45,7 +45,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E4;                            // number of particles to track
+    int npart = 1E0;                            // number of particles to track
     int nturns = 1;                           // number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "16DecDistn/";
+		case_dir = "17DecCollisionNonRoundLattice/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -99,9 +99,10 @@ int main(int argc, char* argv[])
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 1;		// true = -30m, false = -88.6m
+	bool round_beams			= 0;		// true = -30m, false = -88.6m
 	bool thin					= 1;		// true = use thin HEL instead of thick
 	bool symplectic				= 1;
+	bool collision				= 1;
 	
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
@@ -126,16 +127,28 @@ int main(int argc, char* argv[])
 	MADInterface* myMADinterface;
 
 	if(thin){
-		if(round_beams)
-			myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_-30m_thinHEL_RF.tfs", beam_energy );	//new HL v1.2
-			//~ myMADinterface = new MADInterface( directory+input_dir+"HLv1.2.0_C+S_RF_-30mHEL.tfs", beam_energy );		//old HL v1.2
-		else
-			myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_-88.6m_thinHEL_RF.tfs", beam_energy );
+		if(round_beams)	{
+			if(collision){
+				myMADinterface = new MADInterface( directory+input_dir+"HL1.2.1_Collision_nonflat_-30m_thin_RF.tfs", beam_energy );	//HL v1.2 nonflat collision 
+			}
+			else{
+				myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_-30m_thinHEL_RF.tfs", beam_energy );				//new HL v1.2
+			//~ myMADinterface = new MADInterface( directory+input_dir+"HLv1.2.0_C+S_RF_-30mHEL.tfs", beam_energy );				//old HL v1.2
+			}
+		}
+		else{
+			if(collision){
+				myMADinterface = new MADInterface( directory+input_dir+"HL1.2.1_Collision_nonflat_-88.6m_thin_RF.tfs", beam_energy );//HL v1.2 nonflat collision 
+			}
+			else{
+				myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_-88.6m_thinHEL_RF.tfs", beam_energy );
+			}
+		}
 	}
 	else{
 		if(round_beams)
-			myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_C+S_RF_-30mHEL.tfs", beam_energy );	//new HL v1.2
-			//~ myMADinterface = new MADInterface( directory+input_dir+"HLv1.2.0_C+S_RF_-30mHEL.tfs", beam_energy );		//old HL v1.2
+			myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_C+S_RF_-30mHEL.tfs", beam_energy );					//new HL v1.2
+			//~ myMADinterface = new MADInterface( directory+input_dir+"HLv1.2.0_C+S_RF_-30mHEL.tfs", beam_energy );				//old HL v1.2
 		else
 			myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_C+S_RF_-90mHEL.tfs", beam_energy );
 	}
@@ -202,6 +215,9 @@ int main(int argc, char* argv[])
     myTwiss->AddFunction(3,6,3);
     myTwiss->AddFunction(4,6,3);
     myTwiss->AddFunction(6,6,3);
+    myTwiss->AddFunction(0,0,1);
+    myTwiss->AddFunction(0,0,2);
+    myTwiss->AddFunction(0,0,3);
 
     double bscale1 = 1e-22;    
   
@@ -508,7 +524,7 @@ int main(int argc, char* argv[])
 		myHELProcess->SetLHCRadialProfile();
 		
 		// centre the HEL on the closed orbit
-		myHELProcess->SetRadiiSigma(4, 8, myAccModel, emittance, emittance, myTwiss);			
+		myHELProcess->SetRadiiSigma(4, 8, myAccModel, emittance, emittance, myTwiss, 7000);			
 		
 		if(ACon){
 			//Set AC variables

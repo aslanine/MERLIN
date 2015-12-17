@@ -177,7 +177,10 @@ int main(int argc, char* argv[])
     myTwiss->AddFunction(2,6,3);
     myTwiss->AddFunction(3,6,3);
     myTwiss->AddFunction(4,6,3);
-    myTwiss->AddFunction(6,6,3);
+    myTwiss->AddFunction(6,6,3); 
+    myTwiss->AddFunction(0,0,1);
+    myTwiss->AddFunction(0,0,2);
+    myTwiss->AddFunction(0,0,3);
 
     double bscale1 = 1e-22;    
   
@@ -471,7 +474,7 @@ int main(int argc, char* argv[])
 		
 		if(LHC_HEL){	// LHC: 3m, 10KeV, 5A
 			myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);
-			myHELProcess->SetRadiiSigma(4, 8, myAccModel, emittance, emittance, myTwiss);
+			myHELProcess->SetRadiiSigma(4, 8, myAccModel, emittance, emittance, myTwiss, 7000);
 			
 			// for LHC hardware we need to scale the radial profile
 			myHELProcess->SetLHCRadialProfile();
@@ -479,7 +482,7 @@ int main(int argc, char* argv[])
 		else{			//Tevatron: 2m, 5KeV, 1.2A
 			myHELProcess = new HollowELensProcess(3, 1, 1.2, 0.138874007, 2.334948339E4, 2.0);
 			//~ myHELProcess = new HollowELensProcess(3, 1, 1.2, 0.138874007, 2.334948339E4, 3.0);
-			myHELProcess->SetRadiiSigma(4, 6.8, myAccModel, emittance, emittance, myTwiss);
+			myHELProcess->SetRadiiSigma(4, 6.8, myAccModel, emittance, emittance, myTwiss, 7000);
 		}
 				
 		myHELProcess->SetRadialProfile();
