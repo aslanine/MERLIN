@@ -45,7 +45,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E0;                            // number of particles to track
+    int npart = 1E4;                            // number of particles to track
     int nturns = 1;                           // number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "17DecCollisionNonRoundLattice/";
+		case_dir = "20DecCollision_HELinj/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -106,8 +106,9 @@ int main(int argc, char* argv[])
 	
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
-	bool start_at_ip1			= 1;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
-										// False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP
+	bool start_at_ip1			= 0;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
+										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
+										// False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 										
 	bool cleaning				= 0;
 		if(cleaning){
@@ -201,7 +202,7 @@ int main(int argc, char* argv[])
     
     int start_element_number;
     if(start_at_ip1){ start_element_number = ip1_element_number;}
-	else{ start_element_number = tcp_element_number;}
+	else{ start_element_number = hel_element_number;}
 
     cout << "Found start element IP1 at element number " << start_element_number << endl;
     cout << "Found start element HEL at element number " << hel_element_number << endl;
@@ -339,8 +340,10 @@ int main(int argc, char* argv[])
 		mybeam.emit_y = emittance * meter;
 	}
     else{
-		mybeam.emit_x = impact * impact * emittance * meter;
-		mybeam.emit_y = impact * impact * emittance * meter;
+		mybeam.emit_x = emittance * meter;
+		mybeam.emit_y = emittance * meter;
+		//~ mybeam.emit_x = impact * impact * emittance * meter;
+		//~ mybeam.emit_y = impact * impact * emittance * meter;
 	}
     impact =1;
     //~ mybeam.emit_y = impact * impact * emittance * meter;
@@ -363,10 +366,10 @@ int main(int argc, char* argv[])
     mybeam.c_xpyp=0.0;
     
     // Minimum and maximum sigma for HEL Halo Distribution
-    mybeam.min_sig_x = 4;
-    mybeam.max_sig_x = 6;
-    mybeam.min_sig_y = 4;
-    mybeam.max_sig_y = 6;
+    mybeam.min_sig_x = 0;
+    mybeam.max_sig_x = 4;
+    mybeam.min_sig_y = 0;
+    mybeam.max_sig_y = 4;
 
     delete myDispersion;
 
@@ -447,9 +450,9 @@ int main(int argc, char* argv[])
 		}
 	}
 	else{
-		AcceleratorModel::Beamline beamline1 = myAccModel->GetBeamline(tcp_element_number, end_element_number);
-		AcceleratorModel::Beamline beamline2 = myAccModel->GetBeamline(ip1_element_number, hel_element_number-1);
-		AcceleratorModel::Beamline beamline3 = myAccModel->GetBeamline(hel_element_number, tcp_element_number-1);
+		AcceleratorModel::Beamline beamline1 = myAccModel->GetBeamline(hel_element_number, tcp_element_number-1);
+		AcceleratorModel::Beamline beamline2 = myAccModel->GetBeamline(tcp_element_number, end_element_number);
+		AcceleratorModel::Beamline beamline3 = myAccModel->GetBeamline(ip1_element_number, hel_element_number-1);
 		
 		myParticleTracker1 = new ParticleTracker(beamline1, myBunch);
 		myParticleTracker2 = new ParticleTracker(beamline2, myBunch);
@@ -603,17 +606,17 @@ int main(int argc, char* argv[])
         cout << "Turn " << turn <<"\tParticle number: " << myBunch->size() << endl;
 
 		if(start_at_ip1){	myParticleTracker1->Track(myBunch);}
-		else{				myParticleTracker1->Track(myBunch);
-							myParticleTracker2->Track(myBunch);}
 							
 			if(every_bunch){myBunch->Output(*bo);} //Split the tracker to output at HEL
         
         if(start_at_ip1){	myParticleTracker2->Track(myBunch);}
-		else{				myParticleTracker3->Track(myBunch);}	
+		else{				myParticleTracker1->Track(myBunch);}	
 		
 			if(every_bunch){myBunch->Output(*bot);} //Split the tracker to output at TCP
 		
-		if(start_at_ip1){	myParticleTracker3->Track(myBunch);}	
+		if(start_at_ip1){	myParticleTracker3->Track(myBunch);}
+		else{				myParticleTracker2->Track(myBunch);
+							myParticleTracker3->Track(myBunch);}
 		
 			if(output_turn_bunch){(*particle_no_output) << turn <<"\t" << myBunch->size() << endl;}
 			

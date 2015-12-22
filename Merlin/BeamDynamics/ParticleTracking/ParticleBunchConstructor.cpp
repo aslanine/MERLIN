@@ -314,8 +314,15 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		//IP1 beta_x = 0.15m (HL v1.2)
 		//~ double sigx = sqrt(beamdat.emit_x * 0.15);
 		//IP1 beta_x = 0.55m (LHC v6.503)
-		double sigx = sqrt(beamdat.emit_x * 0.55);
+		//~ double sigx = sqrt(beamdat.emit_x * 0.55);
+		//~ double sigx = sqrt(beamdat.emit_x) * beamdat.beta_x * 0.5;
+		
+		// No M.Apply
 		//~ double sigx = sqrt(beamdat.emit_x * beamdat.beta_x);
+		// M.Apply
+		//~ double sigx = sqrt(beamdat.emit_x) * beamdat.beta_x * 0.5;
+		double sigx = sqrt(beamdat.emit_x);
+		//~ double sigy = sqrt(beamdat.emit_y);
 		
 		//Nominal LHC		
 		//~ double sigx = 267.067E-6; //TCP.C6L7		
@@ -330,10 +337,13 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		//~ double last = 9*sigx; 	
 		//~ double first = 4*sigx; 
 		//~ double last = 8*sigx; 	
-		sigx = (sqrt(pow(sigx,2)));
+		//~ sigx = (sqrt(pow(sigx,2)));
 		
-		double first = 1*sigx; 
-		double last = 10*sigx; 	
+		//~ double first = 1*sigx; 
+		//~ double last = 10*sigx; 			
+		double first = beamdat.min_sig_x * sigx;
+		double last = beamdat.max_sig_x * sigx;
+		
 		//~ double first = 4*sigx; 
 		//~ double last = 5.9*sigx; 	
 			
@@ -352,7 +362,7 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			p.ct()	= 0.0;               
 			//~ p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
 			//~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);	               
-			//~ M.Apply(p);
+			M.Apply(p);
 			
 			p.type() = -1.0;
 			p.location() = -1.0;
@@ -422,115 +432,123 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 	}
 	break;
 	case CCDistn:
-	           rx = sqrt(beamdat.emit_x);
-	           ry = sqrt(beamdat.emit_y);
-	           for(i=1; i<np;) {
+	{
+		rx = sqrt(beamdat.emit_x);
+		ry = sqrt(beamdat.emit_y);
+		for(i=1; i<np;) {
 
-	              	
-	              //WORKING FUDGED               
-	               //~ p.x()	= RandomGauss(1E-5, 5E-3);	
-	               //~ p.xp()	= 0;		               
-	               //~ p.y()	= RandomGauss(1E-5, 5E-3);
-	               //~ p.yp()	= 0;
-	               //~ p.dp()	= 0;
-	               //~ p.ct()	= RandomGauss(0.1, 1);
-	               
-	               p.x()	= RandomGauss(1E-5, 5E-3);	
-	               p.xp()	= 0;		               
-	               p.y()	= RandomGauss(1E-10, 50);
-	               p.yp()	= 0;
-	               p.dp()	= 0;
-	               p.ct()	= RandomGauss(1E-2, 15);
-	               
-	               //~ M.Apply(p);
-	               p+=pbunch.front(); // add centroid
-	               p.type() = -1.0;
-	               p.location() = -1.0;
-	               p.sd() = 0.0;
-	               p.id() = i;
-	               if(itsFilter==0 || itsFilter->Apply(p)) {
-	                   pbunch.push_back(p);
-	                   i++;
-	               }
-	           }
+			
+		  //WORKING FUDGED               
+		   //~ p.x()	= RandomGauss(1E-5, 5E-3);	
+		   //~ p.xp()	= 0;		               
+		   //~ p.y()	= RandomGauss(1E-5, 5E-3);
+		   //~ p.yp()	= 0;
+		   //~ p.dp()	= 0;
+		   //~ p.ct()	= RandomGauss(0.1, 1);
+		   
+		   p.x()	= RandomGauss(1E-5, 5E-3);	
+		   p.xp()	= 0;		               
+		   p.y()	= RandomGauss(1E-10, 50);
+		   p.yp()	= 0;
+		   p.dp()	= 0;
+		   p.ct()	= RandomGauss(1E-2, 15);
+		   
+		   //~ M.Apply(p);
+		   p+=pbunch.front(); // add centroid
+		   p.type() = -1.0;
+		   p.location() = -1.0;
+		   p.sd() = 0.0;
+		   p.id() = i;
+		   if(itsFilter==0 || itsFilter->Apply(p)) {
+			   pbunch.push_back(p);
+			   i++;
+		   }
+		}
+	}
 	break;
 	case CCDistn2:
-	           rx = sqrt(beamdat.emit_x);
-	           ry = sqrt(beamdat.emit_y);
-	           for(i=1; i<np;) {
-	              	
-					p.x()	= RandomGauss(beamdat.emit_x,cutoffs.x());
-					p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
-					p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
-					p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
-	                //~ p.dp()	= 0;
-	                p.ct()	= RandomGauss(1E-2, 15);
-	                p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
-	                //~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
+	{
+	   rx = sqrt(beamdat.emit_x);
+	   ry = sqrt(beamdat.emit_y);
+	   for(i=1; i<np;) {
+			
+			p.x()	= RandomGauss(beamdat.emit_x,cutoffs.x());
+			p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
+			p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
+			p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
+			//~ p.dp()	= 0;
+			p.ct()	= RandomGauss(1E-2, 15);
+			p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
+			//~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
 
-					M.Apply(p);
-					p+=pbunch.front(); // add centroid
-					p.type() = -1.0;
-					p.location() = -1.0;
-					p.sd() = 0.0;
-					p.id() = i;
-					if(itsFilter==0 || itsFilter->Apply(p)) {
-	                   pbunch.push_back(p);
-	                   i++;
-	               }
-	           }
+			M.Apply(p);
+			p+=pbunch.front(); // add centroid
+			p.type() = -1.0;
+			p.location() = -1.0;
+			p.sd() = 0.0;
+			p.id() = i;
+			if(itsFilter==0 || itsFilter->Apply(p)) {
+			   pbunch.push_back(p);
+			   i++;
+		   }
+	   }
+	}
 	break;
 	case RFDistn:
-	           rx = sqrt(beamdat.emit_x);
-	           ry = sqrt(beamdat.emit_y);
-	           for(i=1; i<np;) {
-	              	
-					p.x()	= RandomGauss(beamdat.emit_x,cutoffs.x());
-					p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
-					p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
-					p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
-	                //~ p.dp()	= 0;
-	                p.ct()	= RandomGauss(1E-1, 15);
-	                p.dp()	= RandomNG::uniform(-10*beamdat.sig_dp,10*beamdat.sig_dp);
-	                //~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
+	{
+	   rx = sqrt(beamdat.emit_x);
+	   ry = sqrt(beamdat.emit_y);
+	   for(i=1; i<np;) {
+			
+			p.x()	= RandomGauss(beamdat.emit_x,cutoffs.x());
+			p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
+			p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
+			p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
+			//~ p.dp()	= 0;
+			p.ct()	= RandomGauss(1E-1, 15);
+			p.dp()	= RandomNG::uniform(-10*beamdat.sig_dp,10*beamdat.sig_dp);
+			//~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
 
-					M.Apply(p);
-					p+=pbunch.front(); // add centroid
-					p.type() = -1.0;
-					p.location() = -1.0;
-					p.sd() = 0.0;
-					p.id() = i;
-					if(itsFilter==0 || itsFilter->Apply(p)) {
-	                   pbunch.push_back(p);
-	                   i++;
-	               }
-	           }
+			M.Apply(p);
+			p+=pbunch.front(); // add centroid
+			p.type() = -1.0;
+			p.location() = -1.0;
+			p.sd() = 0.0;
+			p.id() = i;
+			if(itsFilter==0 || itsFilter->Apply(p)) {
+			   pbunch.push_back(p);
+			   i++;
+		   }
+	   }
+	}
 	break;
 	case LHCDistn:
-	           rx = sqrt(beamdat.emit_x);
-	           ry = sqrt(beamdat.emit_y);
-	           for(i=1; i<np;) {
-	              	
-					p.x()	= RandomGauss(beamdat.emit_x,cutoffs.x());
-					p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
-					p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
-					p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
-	                //~ p.dp()	= 0;
-	                p.ct()	= RandomGauss(1E-2, 15);
-	                p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
-	                //~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
+	{          
+		rx = sqrt(beamdat.emit_x);
+		ry = sqrt(beamdat.emit_y);
+		for(i=1; i<np;) {
+			
+			p.x()	= RandomGauss(beamdat.emit_x,cutoffs.x());
+			p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
+			p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
+			p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
+			//~ p.dp()	= 0;
+			p.ct()	= RandomGauss(1E-2, 15);
+			p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
+			//~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
 
-					M.Apply(p);
-					p+=pbunch.front(); // add centroid
-					p.type() = -1.0;
-					p.location() = -1.0;
-					p.sd() = 0.0;
-					p.id() = i;
-					if(itsFilter==0 || itsFilter->Apply(p)) {
-	                   pbunch.push_back(p);
-	                   i++;
-	               }
-	           }
+			M.Apply(p);
+			p+=pbunch.front(); // add centroid
+			p.type() = -1.0;
+			p.location() = -1.0;
+			p.sd() = 0.0;
+			p.id() = i;
+			if(itsFilter==0 || itsFilter->Apply(p)) {
+			   pbunch.push_back(p);
+			   i++;
+		   }
+	   }
+	}
 	break;
 	case SymplecticHorizontalHaloDistribution2:
 	{
@@ -572,18 +590,13 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		rx = sqrt(beamdat.emit_x);
 		ry = sqrt(beamdat.emit_y);
 		
-		//~ double minx = 4 * sqrt(beamdat.emit_x * beamdat.beta_x);
-		//~ double maxx = 6 * sqrt(beamdat.emit_x * beamdat.beta_x);
-		//~ double miny = 4 * sqrt(beamdat.emit_y * beamdat.beta_y);
-		//~ double maxy = 6 * sqrt(beamdat.emit_y * beamdat.beta_y);
-		
 		double minx(0.), maxx(0.), miny(0.), maxy(0.);
 
-		if( isnan(beamdat.min_sig_x) || isnan(beamdat.max_sig_x) || isnan(beamdat.min_sig_y) || isnan(beamdat.max_sig_y) ){
+		if( isnan(beamdat.min_sig_x) || isnan(beamdat.max_sig_x) || isnan(beamdat.min_sig_y) || isnan(beamdat.max_sig_y) ){		
 			minx = 4 * sqrt(beamdat.emit_x );
 			maxx = 6 * sqrt(beamdat.emit_x );
 			miny = 4 * sqrt(beamdat.emit_y );
-			maxy = 6 * sqrt(beamdat.emit_y );					
+			maxy = 6 * sqrt(beamdat.emit_y );				
 		}
 		else{
 			minx = beamdat.min_sig_x * sqrt(beamdat.emit_x );
@@ -597,31 +610,6 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		
 		for(i=1; i<np;) {		
 
-			// Square in xy
-			//~ u = RandomNG::uniform(-pi,pi);
-			//~ p.x()	= rx * cos(u);
-			//~ p.xp()	= rx * sin(u);
-			
-			//~ u = RandomNG::uniform(-pi,pi);
-			//~ p.y()	= ry * cos(u);
-			//~ p.yp()	= ry * sin(u);
-			
-			// Filled ellipse in xy
-			//~ p.x()	= RandomGauss(beamdat.emit_x,cutoffs.x());
-			//~ p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
-			//~ p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
-			//~ p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
-			
-			//~ //Test - ring ellipse in xy?	
-			//~ u = RandomNG::uniform(-pi,pi);
-			//~ v = RandomNG::uniform(0.9,1.1);
-			//~ p.x()	= v * rx * cos(u);
-			//~ p.y()	= v * rx * sin(u);
-			
-			//~ p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
-			//~ p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
-			
-			//Test - ring between 4-6 sigma
 			u = RandomNG::uniform(-pi,pi);
 			randx = RandomNG::uniform(minx, maxx);
 			randy = RandomNG::uniform(miny, maxy);
