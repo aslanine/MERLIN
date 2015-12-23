@@ -45,8 +45,9 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E3;                            // number of particles to track
-    int nturns = 1;                           // number of turns to track
+    int ncorepart 	= 1E4;						// number of core particles to track
+    int npart 		= 1E4;                     	// number of halo particles to track
+    int nturns 		= 1;                        // number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -70,23 +71,37 @@ int main(int argc, char* argv[])
 	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	
-	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir;	
-	string input_dir = "/Thesis/data/TevHEL/";	
-	string output_dir = "/Build/Thesis/outputs/TevHEL/";
+	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
+	string core_string =  "Core/";
+	string halo_string =  "Halo/";
 	
+	string input_dir = "/Thesis/data/TevHEL/";	
+	string output_dir = "/Build/Thesis/outputs/TevHEL/";	
+
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "22DecPoincare_HELinj/";
+		case_dir = "23DecDistn_HELinj/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
-	bool output_turn_bunch		= 1;		if(output_turn_bunch){	pn_dir = (full_output_dir+"ParticleNo/"); mkdir(pn_dir.c_str(), S_IRWXU); }		
+	bool output_turn_bunch		= 1;		
+		if(output_turn_bunch){			
+			pn_dir = (full_output_dir+"ParticleNo/"); 		mkdir(pn_dir.c_str(), S_IRWXU); 
+			cpn_dir = pn_dir + core_string;					mkdir(cpn_dir.c_str(), S_IRWXU);
+			hpn_dir = pn_dir + core_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
+		}		
 	bool every_bunch			= 1;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
-	bool output_final_bunch 	= 1;		if (output_initial_bunch || output_final_bunch){ bunch_dir = (full_output_dir+"Bunch_Distn/"); mkdir(bunch_dir.c_str(), S_IRWXU); }		
+	bool output_final_bunch 	= 1;		
+		if (output_initial_bunch || output_final_bunch){
+			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 
+			cbunch_dir = bunch_dir + core_string;			mkdir(cbunch_dir.c_str(), S_IRWXU);
+			hbunch_dir = bunch_dir + halo_string;			mkdir(hbunch_dir.c_str(), S_IRWXU);
+		}		
+	
 	bool output_fluka_database 	= 1;
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
@@ -99,6 +114,11 @@ int main(int argc, char* argv[])
 		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 0;
+		if(collimation_on){
+			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);
+			cdustbin_dir = dustbin_dir + core_string; 	mkdir(cdustbin_dir.c_str(), S_IRWXU);
+			hdustbin_dir = dustbin_dir + halo_string; 	mkdir(hdustbin_dir.c_str(), S_IRWXU);			
+		}
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
@@ -187,7 +207,7 @@ int main(int argc, char* argv[])
   
 	while(true)
 	{
-	cout << "start while(true) to scale bend path length" << endl;
+		cout << "start while(true) to scale bend path length" << endl;
 		myTwiss->ScaleBendPathLength(bscale1);
 		myTwiss->Calculate();
 
@@ -272,88 +292,149 @@ int main(int argc, char* argv[])
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
 
-/********************
-*	BEAM SETTINGS	*
-********************/
-    BeamData mybeam;
+/************************
+*	BEAM HALO SETTINGS	*
+************************/
+    BeamData myHaloBeam;
 
     // Default values for all members of BeamData are 0.0
     // Particles are treated as macro particles - this has no bearing on collimation
-    mybeam.charge = beam_charge/npart;
-    mybeam.p0 = beam_energy;
-    mybeam.beta_x = myTwiss->Value(1,1,1,start_element_number)*meter;
-    mybeam.beta_y = myTwiss->Value(3,3,2,start_element_number)*meter;
-    mybeam.alpha_x = -myTwiss->Value(1,2,1,start_element_number);
-    mybeam.alpha_y = -myTwiss->Value(3,4,2,start_element_number);
+    myHaloBeam.charge = beam_charge/npart;
+    myHaloBeam.p0 = beam_energy;
+    myHaloBeam.beta_x = myTwiss->Value(1,1,1,start_element_number)*meter;
+    myHaloBeam.beta_y = myTwiss->Value(3,3,2,start_element_number)*meter;
+    myHaloBeam.alpha_x = -myTwiss->Value(1,2,1,start_element_number);
+    myHaloBeam.alpha_y = -myTwiss->Value(3,4,2,start_element_number);
 
     // Dispersion
-    mybeam.Dx=myDispersion->Dx;
-    mybeam.Dy=myDispersion->Dy;
-    mybeam.Dxp=myDispersion->Dxp;
-    mybeam.Dyp=myDispersion->Dyp;
+    myHaloBeam.Dx=myDispersion->Dx;
+    myHaloBeam.Dy=myDispersion->Dy;
+    myHaloBeam.Dxp=myDispersion->Dxp;
+    myHaloBeam.Dyp=myDispersion->Dyp;
 
     // We set the beam emittance such that the bunch (created from this BeamData object later) will impact upon the primary collimator
     if(start_at_ip1){
-		mybeam.emit_x = emittance * meter;
-		mybeam.emit_y = emittance * meter;
+		myHaloBeam.emit_x = emittance * meter;
+		myHaloBeam.emit_y = emittance * meter;
 	}
     else{
-		mybeam.emit_x = emittance * meter;
-		mybeam.emit_y = emittance * meter;
-		//~ mybeam.emit_x = impact * impact * emittance * meter;
-		//~ mybeam.emit_y = impact * impact * emittance * meter;
+		myHaloBeam.emit_x = emittance * meter;
+		myHaloBeam.emit_y = emittance * meter;
+		//~ myHaloBeam.emit_x = impact * impact * emittance * meter;
+		//~ myHaloBeam.emit_y = impact * impact * emittance * meter;
 	}
     impact =1;
-    //~ mybeam.emit_y = impact * impact * emittance * meter;
-    
-    mybeam.sig_z = 0.0;
+    //~ myHaloBeam.emit_y = impact * impact * emittance * meter;
 
     //Beam centroid
-    mybeam.x0=myTwiss->Value(1,0,0,start_element_number);
-    mybeam.xp0=myTwiss->Value(2,0,0,start_element_number);
-    mybeam.y0=myTwiss->Value(3,0,0,start_element_number);
-    mybeam.yp0=myTwiss->Value(4,0,0,start_element_number);
-    mybeam.ct0=myTwiss->Value(5,0,0,start_element_number);
+    myHaloBeam.x0=myTwiss->Value(1,0,0,start_element_number);
+    myHaloBeam.xp0=myTwiss->Value(2,0,0,start_element_number);
+    myHaloBeam.y0=myTwiss->Value(3,0,0,start_element_number);
+    myHaloBeam.yp0=myTwiss->Value(4,0,0,start_element_number);
+    myHaloBeam.ct0=myTwiss->Value(5,0,0,start_element_number);
 
-    mybeam.sig_dp = 0.0;
+    myHaloBeam.sig_dp = 0.0;
+    myHaloBeam.sig_z = 0.0;
 
     // X-Y coupling
-    mybeam.c_xy=0.0;
-    mybeam.c_xyp=0.0;
-    mybeam.c_xpy=0.0;
-    mybeam.c_xpyp=0.0;
+    myHaloBeam.c_xy=0.0;
+    myHaloBeam.c_xyp=0.0;
+    myHaloBeam.c_xpy=0.0;
+    myHaloBeam.c_xpyp=0.0;
     
     // Minimum and maximum sigma for HEL Halo Distribution
-    //~ mybeam.min_sig_x = 0;
-    //~ mybeam.max_sig_x = 4;
-    //~ mybeam.min_sig_y = 0;
-    //~ mybeam.max_sig_y = 4;
-    mybeam.min_sig_x = 4;
-    mybeam.max_sig_x = 6.8;
-    mybeam.min_sig_y = 4;
-    mybeam.max_sig_y = 6.8;
+    myHaloBeam.min_sig_x = 4;
+    myHaloBeam.max_sig_x = 6;
+    myHaloBeam.min_sig_y = 4;
+    myHaloBeam.max_sig_y = 6;
+ 
+ /***********************
+*	BEAM CORE SETTINGS	*
+************************/   
+    
+    BeamData myCoreBeam;
+    
+    // Default values for all members of BeamData are 0.0
+    // Particles are treated as macro particles - this has no bearing on collimation
+    myCoreBeam.charge = beam_charge/ncorepart;
+    myCoreBeam.p0 = beam_energy;
+    myCoreBeam.beta_x = myTwiss->Value(1,1,1,start_element_number)*meter;
+    myCoreBeam.beta_y = myTwiss->Value(3,3,2,start_element_number)*meter;
+    myCoreBeam.alpha_x = -myTwiss->Value(1,2,1,start_element_number);
+    myCoreBeam.alpha_y = -myTwiss->Value(3,4,2,start_element_number);
 
+    // Dispersion
+    myCoreBeam.Dx=myDispersion->Dx;
+    myCoreBeam.Dy=myDispersion->Dy;
+    myCoreBeam.Dxp=myDispersion->Dxp;
+    myCoreBeam.Dyp=myDispersion->Dyp;
+
+    // We set the beam emittance such that the bunch (created from this BeamData object later) will impact upon the primary collimator
+    if(start_at_ip1){
+		myCoreBeam.emit_x = emittance * meter;
+		myCoreBeam.emit_y = emittance * meter;
+	}
+    else{
+		myCoreBeam.emit_x = emittance * meter;
+		myCoreBeam.emit_y = emittance * meter;
+		//~ myCoreBeam.emit_x = impact * impact * emittance * meter;
+		//~ myCoreBeam.emit_y = impact * impact * emittance * meter;
+	}
+    impact =1;
+    //~ myHaloBeam.emit_y = impact * impact * emittance * meter;
+    
+
+    //Beam centroid
+    myCoreBeam.x0=myTwiss->Value(1,0,0,start_element_number);
+    myCoreBeam.xp0=myTwiss->Value(2,0,0,start_element_number);
+    myCoreBeam.y0=myTwiss->Value(3,0,0,start_element_number);
+    myCoreBeam.yp0=myTwiss->Value(4,0,0,start_element_number);
+    myCoreBeam.ct0=myTwiss->Value(5,0,0,start_element_number);
+
+    myCoreBeam.sig_dp = 0.0;
+    myCoreBeam.sig_z = 0.0;
+
+    // X-Y coupling
+    myCoreBeam.c_xy=0.0;
+    myCoreBeam.c_xyp=0.0;
+    myCoreBeam.c_xpy=0.0;
+    myCoreBeam.c_xpyp=0.0;
+    
+    // Minimum and maximum sigma for HEL Halo Distribution
+    myCoreBeam.min_sig_x = 0;
+    myCoreBeam.max_sig_x = 4;
+    myCoreBeam.min_sig_y = 0;
+    myCoreBeam.max_sig_y = 4;
+    
     delete myDispersion;
 
 /************
 *	BUNCH	*
 ************/
 
-    ProtonBunch* myBunch;
     int node_particles = npart;
+    int core_particles = ncorepart;
+    
+    ProtonBunch* myHaloBunch;
+    ProtonBunch* myCoreBunch;
+    ParticleBunchConstructor* myHaloBunchCtor;
+    ParticleBunchConstructor* myCoreBunchCtor;
 
     // horizontalHaloDistribution1 is a halo in xx' plane, zero in yy'
     // horizontalHaloDistribution2 is a halo in xx' plane, gaussian in yy'
-    ParticleBunchConstructor* myBunchCtor;
     if(cleaning){
-		//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution2);
-		myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HELHaloDistribution);
+		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, horizontalHaloDistribution2);
+		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
+		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
 	}
     else{
-    	//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, tuneTestDistribution);
-    	myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HELHaloDistribution);
+    	//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
+    	//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, node_particles, tuneTestDistribution);
+		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
+		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
 	}
     
+    // Cut distn only on halo
 	if(collimation_on && cut_distn){ 
 		double h_offset = myTwiss->Value(1,0,0,start_element_number);
 		double JawPosition = (CollimatorJaw->GetFullWidth() / 2.0);
@@ -366,21 +447,33 @@ int main(int argc, char* argv[])
 		hFilter->SetHorizontalLimit(4*tcpsig);
 		hFilter->SetHorizontalOrbit(h_offset);
 
-		myBunchCtor->SetFilter(hFilter); 
+		myHaloBunchCtor->SetFilter(hFilter); 
 	}
 	
-	myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
-    delete myBunchCtor;
-
-    myBunch->SetMacroParticleCharge(mybeam.charge);
+	myHaloBunch = myHaloBunchCtor->ConstructParticleBunch<ProtonBunch>();
+    delete myHaloBunchCtor;
     
-   if(output_initial_bunch){
-		ostringstream bunch_output_file;
-		bunch_output_file << (bunch_dir + "initial_bunch.txt");
-		ofstream* bunch_output = new ofstream(bunch_output_file.str().c_str());
-		if(!bunch_output->good()) { std::cerr << "Could not open initial bunch output" << std::endl; exit(EXIT_FAILURE); }   
-		myBunch->Output(*bunch_output);			
-		delete bunch_output;
+	myCoreBunch = myCoreBunchCtor->ConstructParticleBunch<ProtonBunch>();
+    delete myCoreBunchCtor;
+
+    myHaloBunch->SetMacroParticleCharge(myHaloBeam.charge);
+    myCoreBunch->SetMacroParticleCharge(myCoreBeam.charge);    
+    
+   if(output_initial_bunch){	   		
+	
+		ostringstream hbunch_output_file;
+		hbunch_output_file << hbunch_dir << "initial_bunch.txt";
+		ofstream* hbunch_output = new ofstream(hbunch_output_file.str().c_str());
+		if(!hbunch_output->good()) { std::cerr << "Could not open initial halo bunch output" << std::endl; exit(EXIT_FAILURE); }   
+		myHaloBunch->Output(*hbunch_output);			
+		delete hbunch_output;	   
+
+		ostringstream cbunch_output_file;
+		cbunch_output_file << cbunch_dir << "initial_bunch.txt";
+		ofstream* cbunch_output = new ofstream(cbunch_output_file.str().c_str());
+		if(!cbunch_output->good()) { std::cerr << "Could not open initial core bunch output" << std::endl; exit(EXIT_FAILURE); }   
+		myCoreBunch->Output(*cbunch_output);			
+		delete cbunch_output;			
 	}
 
 /************************
@@ -396,9 +489,9 @@ int main(int argc, char* argv[])
 		AcceleratorModel::Beamline beamline2 = myAccModel->GetBeamline(hel_element_number, tcp_element_number-1);
 		AcceleratorModel::Beamline beamline3 = myAccModel->GetBeamline(tcp_element_number, end_element_number);
 		
-		myParticleTracker1 = new ParticleTracker(beamline1, myBunch);
-		myParticleTracker2 = new ParticleTracker(beamline2, myBunch);
-		myParticleTracker3 = new ParticleTracker(beamline3, myBunch);
+		myParticleTracker1 = new ParticleTracker(beamline1, myHaloBunch);
+		myParticleTracker2 = new ParticleTracker(beamline2, myHaloBunch);
+		myParticleTracker3 = new ParticleTracker(beamline3, myHaloBunch);
 
 		if(symplectic){
 			myParticleTracker1->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());	
@@ -416,9 +509,9 @@ int main(int argc, char* argv[])
 		AcceleratorModel::Beamline beamline2 = myAccModel->GetBeamline(tcp_element_number, end_element_number);
 		AcceleratorModel::Beamline beamline3 = myAccModel->GetBeamline(ip1_element_number, hel_element_number-1);
 		
-		myParticleTracker1 = new ParticleTracker(beamline1, myBunch);
-		myParticleTracker2 = new ParticleTracker(beamline2, myBunch);
-		myParticleTracker3 = new ParticleTracker(beamline3, myBunch);
+		myParticleTracker1 = new ParticleTracker(beamline1, myHaloBunch);
+		myParticleTracker2 = new ParticleTracker(beamline2, myHaloBunch);
+		myParticleTracker3 = new ParticleTracker(beamline3, myHaloBunch);
 				
 		if(symplectic){
 			myParticleTracker1->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());	
@@ -436,13 +529,15 @@ int main(int argc, char* argv[])
 *	Collimation Process		*
 ****************************/
 	
-	LossMapDustbin* myDustbin = new LossMapDustbin;
+	LossMapDustbin* myHaloDustbin = new LossMapDustbin;
+	LossMapDustbin* myCoreDustbin = new LossMapDustbin;
 
 	if(collimation_on){
 		cout << "Collimation on" << endl;
 		CollimateProtonProcess* myCollimateProcess = new CollimateProtonProcess(2, 4);
 			
-		myCollimateProcess->SetDustbin(myDustbin);       
+		myCollimateProcess->SetDustbin(myHaloDustbin);       
+		myCollimateProcess->SetDustbin(myCoreDustbin);       
 
 		//~ myCollimateProcess->ScatterAtCollimator(true);
 		myCollimateProcess->ScatterAtCollimator(false);
@@ -544,93 +639,131 @@ int main(int argc, char* argv[])
  *  Other Output Files
  ****************************/
 	 // No of particles per turn
-	ostringstream particle_no_file;
-	particle_no_file << pn_dir<< "No.txt";
-	ofstream* particle_no_output = new ofstream(particle_no_file.str().c_str());	
-	if(!particle_no_output->good())	{	std::cerr << "Could not open particle_no_output file" << std::endl;	exit(EXIT_FAILURE);	}
+	ostringstream hparticle_no_file;
+	hparticle_no_file << hpn_dir << "No.txt";
+	ofstream* hparticle_no_output = new ofstream(hparticle_no_file.str().c_str());	
+	if(!hparticle_no_output->good())	{	std::cerr << "Could not open halo particle_no_output file" << std::endl;	exit(EXIT_FAILURE);	}
+	
+	ostringstream cparticle_no_file;
+	cparticle_no_file << cpn_dir << "No.txt";
+	ofstream* cparticle_no_output = new ofstream(cparticle_no_file.str().c_str());	
+	if(!cparticle_no_output->good())	{	std::cerr << "Could not open core particle_no_output file" << std::endl;	exit(EXIT_FAILURE);	}
 
 	// Total bunch at a given s every turn
 	// Output bunch every turn @HEL in one file
-	ostringstream bo_file;
-	bo_file << bunch_dir << "HEL_bunch.txt";
+	ostringstream cbo_file;
+	cbo_file << cbunch_dir << "HEL_bunch.txt";
+	ostringstream hbo_file;
+	hbo_file << hbunch_dir << "HEL_bunch.txt";
 	
 	//truncate (clear) the file first to prevent appending to last run
-	ofstream* boclean = new ofstream(bo_file.str().c_str(), ios::trunc);
-	ofstream* bo = new ofstream(bo_file.str().c_str(), ios::app);	
-	if(!bo->good())	{ std::cerr << "Could not open every bunch HEL output file" << std::endl; exit(EXIT_FAILURE); }
+	ofstream* cboclean = new ofstream(cbo_file.str().c_str(), ios::trunc);
+	ofstream* hboclean = new ofstream(hbo_file.str().c_str(), ios::trunc);	
+	ofstream* cbo = new ofstream(cbo_file.str().c_str(), ios::app);	
+	ofstream* hbo = new ofstream(hbo_file.str().c_str(), ios::app);	
+	if(!cbo->good())	{ std::cerr << "Could not open every bunch HEL core output file" << std::endl; exit(EXIT_FAILURE); }
+	if(!hbo->good())	{ std::cerr << "Could not open every bunch HEL halo output file" << std::endl; exit(EXIT_FAILURE); }
 	
 	// Output bunch every turn @TCP in one file
-	ostringstream bot_file;
-	bot_file << bunch_dir << "TCP_bunch.txt";
+	ostringstream cbot_file;
+	cbot_file << cbunch_dir << "TCP_bunch.txt";
+	ostringstream hbot_file;
+	hbot_file << hbunch_dir << "TCP_bunch.txt";
 	
 	//truncate (clear) the file first to prevent appending to last run
-	ofstream* botclean = new ofstream(bot_file.str().c_str(), ios::trunc);
-	ofstream* bot = new ofstream(bot_file.str().c_str(), ios::app);	
-	if(!bot->good()){ std::cerr << "Could not open every bunch TCP output file" << std::endl; exit(EXIT_FAILURE); }
+	ofstream* cbotclean = new ofstream(cbot_file.str().c_str(), ios::trunc);
+	ofstream* hbotclean = new ofstream(hbot_file.str().c_str(), ios::trunc);
+	ofstream* cbot = new ofstream(cbot_file.str().c_str(), ios::app);	
+	ofstream* hbot = new ofstream(hbot_file.str().c_str(), ios::app);	
+	if(!cbot->good()){ std::cerr << "Could not open every bunch TCP core output file" << std::endl; exit(EXIT_FAILURE); }
+	if(!hbot->good()){ std::cerr << "Could not open every bunch TCP halo output file" << std::endl; exit(EXIT_FAILURE); }
 
 		
 /********************
  *  TRACKING RUN	*
  *******************/
-	if(output_turn_bunch){ (*particle_no_output) << "0\t" << myBunch->size() << endl; }
+	if(output_turn_bunch){ 	(*hparticle_no_output) << "0\t" << myHaloBunch->size() << endl; 
+							(*cparticle_no_output) << "0\t" << myCoreBunch->size() << endl; }
     
     for (int turn=1; turn<=nturns; turn++)
     {
-        cout << "Turn " << turn <<"\tParticle number: " << myBunch->size() << endl;
+        cout << "Turn " << turn <<"\tHalo particle number: " << myHaloBunch->size() << endl;
+        cout << "Turn " << turn <<"\tCore particle number: " << myCoreBunch->size() << endl;
 
-		if(start_at_ip1){	myParticleTracker1->Track(myBunch);}
+		if(start_at_ip1){	myParticleTracker1->Track(myHaloBunch); myParticleTracker1->Track(myCoreBunch);}
 							
-			if(every_bunch){myBunch->Output(*bo);} //Split the tracker to output at HEL
+			if(every_bunch){myHaloBunch->Output(*hbo); myCoreBunch->Output(*cbo);} //Split the tracker to output at HEL
         
-        if(start_at_ip1){	myParticleTracker2->Track(myBunch);}
-		else{				myParticleTracker1->Track(myBunch);}	
+        if(start_at_ip1){	myParticleTracker2->Track(myHaloBunch); myParticleTracker2->Track(myCoreBunch);}
+		else{				myParticleTracker1->Track(myHaloBunch); myParticleTracker1->Track(myCoreBunch);}	
 		
-			if(every_bunch){myBunch->Output(*bot);} //Split the tracker to output at TCP
+			if(every_bunch){myHaloBunch->Output(*hbot); myCoreBunch->Output(*cbot);} //Split the tracker to output at TCP
 		
-		if(start_at_ip1){	myParticleTracker3->Track(myBunch);}	
-		else{				myParticleTracker2->Track(myBunch);
-							myParticleTracker3->Track(myBunch);}
+		if(start_at_ip1){	myParticleTracker3->Track(myHaloBunch); myParticleTracker3->Track(myCoreBunch);}	
+		else{				myParticleTracker2->Track(myHaloBunch); myParticleTracker2->Track(myCoreBunch);
+							myParticleTracker3->Track(myHaloBunch); myParticleTracker3->Track(myCoreBunch);}
 		
-			if(output_turn_bunch){(*particle_no_output) << turn <<"\t" << myBunch->size() << endl;}
+			if(output_turn_bunch){	(*hparticle_no_output) << turn <<"\t" << myHaloBunch->size() << endl; 	
+									(*cparticle_no_output) << turn <<"\t" << myCoreBunch->size() << endl;}
 			
-        if( myBunch->size() <= 1 ) break;
+        if( myHaloBunch->size() <= 1 ) break;
     }
     
 /********************
  *  OUTPUT DUSTBIN	*
  *******************/
 	if(collimation_on){
-		ostringstream dustbin_file;
-		dustbin_file << (full_output_dir+"dustbin_losses.txt");	
-		ofstream* dustbin_output = new ofstream(dustbin_file.str().c_str());	
-		if(!dustbin_output->good()){ std::cerr << "Could not open dustbin loss file" << std::endl; exit(EXIT_FAILURE); }   
-		myDustbin->Finalise(); 
-		myDustbin->Output(dustbin_output); 
-		delete dustbin_output;
+		ostringstream hdustbin_file;
+		hdustbin_file << (hdustbin_dir + "dustbin_losses.txt");	
+		ofstream* hdustbin_output = new ofstream(hdustbin_file.str().c_str());	
+		if(!hdustbin_output->good()){ std::cerr << "Could not open halo dustbin loss file" << std::endl; exit(EXIT_FAILURE); }   
+		myHaloDustbin->Finalise(); 
+		myHaloDustbin->Output(hdustbin_output); 
+		delete hdustbin_output;
+		
+		ostringstream cdustbin_file;
+		cdustbin_file << (cdustbin_dir + "dustbin_losses.txt");	
+		ofstream* cdustbin_output = new ofstream(cdustbin_file.str().c_str());	
+		if(!cdustbin_output->good()){ std::cerr << "Could not open core dustbin loss file" << std::endl; exit(EXIT_FAILURE); }   
+		myCoreDustbin->Finalise(); 
+		myCoreDustbin->Output(cdustbin_output); 
+		delete cdustbin_output;
 	}
 	
 /********************
  *  OUTPUT BUNCH	*
  *******************/
 	if(output_final_bunch){
-		ostringstream bunch_output_file2;
-		bunch_output_file2 << bunch_dir << "final_bunch.txt";
-		ofstream* bunch_output2 = new ofstream(bunch_output_file2.str().c_str());
-		if(!bunch_output2->good()){ std::cerr << "Could not open final bunch output file" << std::endl; exit(EXIT_FAILURE); }  
-		myBunch->Output(*bunch_output2);
-		delete bunch_output2;
+		ostringstream hbunch_output_file2;
+		hbunch_output_file2 << hbunch_dir << "final_bunch.txt";
+		ofstream* hbunch_output2 = new ofstream(hbunch_output_file2.str().c_str());
+		if(!hbunch_output2->good()){ std::cerr << "Could not open final halo bunch output file" << std::endl; exit(EXIT_FAILURE); }  
+		myHaloBunch->Output(*hbunch_output2);
+		delete hbunch_output2;
+		
+		ostringstream cbunch_output_file2;
+		cbunch_output_file2 << cbunch_dir << "final_bunch.txt";
+		ofstream* cbunch_output2 = new ofstream(cbunch_output_file2.str().c_str());
+		if(!cbunch_output2->good()){ std::cerr << "Could not open final core bunch output file" << std::endl; exit(EXIT_FAILURE); }  
+		myHaloBunch->Output(*cbunch_output2);
+		delete cbunch_output2;
 	 }
 	 
 /************
  *  CLEANUP	*
  ***********/	
-	cout << "npart: " << npart << endl;
-	cout << "left: " << myBunch->size() << endl;
-	cout << "absorbed: " << npart - myBunch->size() << endl;
+	cout << "Halo particles: " << npart << endl;
+	cout << "Halo particles remaining: " << myHaloBunch->size() << endl;
+	cout << "Halo absorbed: " << npart - myHaloBunch->size() << endl;	
+	
+	cout << "Core particles: " << ncorepart << endl;
+	cout << "Core particles remaining: " << myCoreBunch->size() << endl;
+	cout << "Core absorbed: " << ncorepart - myCoreBunch->size() << endl;
 
 	// Cleanup our pointers on the stack for completeness
 	delete myMaterialDatabase;
-	delete myBunch;
+	delete myHaloBunch;
+	delete myCoreBunch;
 	delete myTwiss;
 	delete myAccModel;
 	delete myMADinterface;
@@ -639,11 +772,16 @@ int main(int argc, char* argv[])
 	delete myParticleTracker2;
 	delete myParticleTracker3;
 		
-	delete bo;
-	delete boclean;
-	delete bot;
-	delete botclean;
-	delete particle_no_output;
+	delete hbo;
+	delete cbo;
+	delete hboclean;
+	delete cboclean;
+	delete hbot;
+	delete cbot;
+	delete hbotclean;
+	delete cbotclean;
+	delete cparticle_no_output;
+	delete hparticle_no_output;
 	
 	// Need to fix destructors for:
 	//~ delete myDustbin;

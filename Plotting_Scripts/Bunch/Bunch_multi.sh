@@ -4,10 +4,6 @@
 set terminal png size 1600,2000
 set output "Initial_bunch.png"
 set multiplot layout 3,2 title "Initial Bunch" font ",14"
-#~ set format x "%.0s*10^%T"
-#~ set format y "%.0s*10^%T"
-#~ set format x "%s*10^{%S}"
-#~ set format x "%sx10^{%S}"
 #
 set tmargin 3
 set title "XY"

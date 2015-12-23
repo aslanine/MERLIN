@@ -37,6 +37,7 @@ thesis_run(ClosedOrbit ClosedOrbit ClosedOrbit.cpp)
 thesis_run(SymplecticHEL SymplecticHEL SymplecticHEL.cpp)
 thesis_run(SymplecticLossMap SymplecticLossMap SymplecticLossMap.cpp)
 thesis_run(HELHaloDistn HELHaloDistn HELHaloDistn.cpp)
+thesis_run(HELFullBeam HELFullBeam HELFullBeam.cpp)
 thesis_run(TevHEL TevHEL TevHEL.cpp)
 
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
