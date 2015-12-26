@@ -45,9 +45,9 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int ncorepart 	= 1E4;						// number of core particles to track
-    int npart 		= 1E4;                     	// number of halo particles to track
-    int nturns 		= 1;                        // number of turns to track
+    int ncorepart 	= 21;						// number of core particles to track
+    int npart 		= 21;                     	// number of halo particles to track
+    int nturns 		= 1E4;                      // number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -73,14 +73,14 @@ int main(int argc, char* argv[])
 	string core_string =  "Core/";
 	string halo_string =  "Halo/";
 		
-	string input_dir = "/Thesis/data/HELLFullBeam/";	
-	string output_dir = "/Build/Thesis/outputs/HELLFullBeam/";
+	string input_dir = "/Thesis/data/HELFullBeam/";	
+	string output_dir = "/Build/Thesis/outputs/HELFullBeam/";
 	
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "23DecCollision_HELinj/";
+		case_dir = "26DecCollision_Nonround_HELinj_Poincare/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -104,10 +104,10 @@ int main(int argc, char* argv[])
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
 	bool hel_on 				= 1; 		// Hollow electron lens process?
-		bool DCon				= 0;
+		bool DCon				= 1;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
-		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
+		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 0;
@@ -470,10 +470,10 @@ int main(int argc, char* argv[])
 		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
 	}
     else{
-    	//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
-    	//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, node_particles, tuneTestDistribution);
-		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
-		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
+    	myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
+    	myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, node_particles, tuneTestDistribution);
+		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
+		//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
 	}
     
 	if(collimation_on && cut_distn){ 
@@ -646,10 +646,14 @@ int main(int argc, char* argv[])
 		}
 		
 		if(start_at_ip1){
+			myParticleTracker1->AddProcess(myHELProcess);	
 			myParticleTracker2->AddProcess(myHELProcess);	
+			myParticleTracker3->AddProcess(myHELProcess);	
 			//~ cout << "HEL set" << endl;		
 		}
 		else{			
+			myParticleTracker1->AddProcess(myHELProcess);	
+			myParticleTracker2->AddProcess(myHELProcess);	
 			myParticleTracker3->AddProcess(myHELProcess);	
 			//~ cout << "HEL set" << endl;		
 		}

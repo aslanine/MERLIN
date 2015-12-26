@@ -44,10 +44,10 @@ using namespace PhysicalUnits;
 //e.g. for 1000 particles and a seed of 356: ./test 1000 356
 int main(int argc, char* argv[])
 {
-    int seed = (int)time(NULL);                 // seed for random number generators
-    int ncorepart 	= 1E4;						// number of core particles to track
-    int npart 		= 1E4;                     	// number of halo particles to track
-    int nturns 		= 1;                        // number of turns to track
+    int seed = (int)time(NULL);     // seed for random number generators
+    int ncorepart 	= 21;			// number of core particles to track
+    int npart 		= 21;           // number of halo particles to track
+    int nturns 		= 1E4;			// number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "23DecDistn_HELinj/";
+		case_dir = "26DecPoincare_HELinj/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 	bool output_fluka_database 	= 1;
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
-	bool hel_on 				= 1; 		// Hollow electron lens process?
+	bool hel_on 				= 0; 		// Hollow electron lens process?
 	bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 	
 	//~ bool round_beams			= 0;		// true = -30m, false = -88.6m
 	bool thin					= 1;		// true = use thin HEL instead of thick
-	bool symplectic				= 1;
+	bool symplectic				= 0;
 	
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
@@ -428,10 +428,10 @@ int main(int argc, char* argv[])
 		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
 	}
     else{
-    	//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
-    	//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, node_particles, tuneTestDistribution);
-		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
-		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
+    	myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
+    	myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, node_particles, tuneTestDistribution);
+		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
+		//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
 	}
     
     // Cut distn only on halo
