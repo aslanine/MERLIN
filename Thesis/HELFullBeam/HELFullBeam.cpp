@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "26DecCollision_Nonround_HELinj_Poincare/";
+		case_dir = "28DecCollision_Round_HELinj_Poincare/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -104,8 +104,8 @@ int main(int argc, char* argv[])
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
 	bool hel_on 				= 1; 		// Hollow electron lens process?
-		bool DCon				= 1;
-		bool ACon				= 0;		if(ACon){DCon=0;}
+		bool DCon				= 0;
+		bool ACon				= 1;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
 		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 0;		// true = -30m, false = -88.6m
+	bool round_beams			= 1;		// true = -30m, false = -88.6m
 	bool thin					= 1;		// true = use thin HEL instead of thick
 	bool symplectic				= 1;
 	bool collision				= 1;
