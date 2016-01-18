@@ -347,7 +347,7 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		//~ double first = 4*sigx; 
 		//~ double last = 5.9*sigx; 	
 		double partsi = 1;
-		if(np >=2){
+		if(np <=2){
 			partsi = 1;
 		}
 		else{
