@@ -150,6 +150,9 @@ void LatticeFunctionTable::UseDefaultFunctions()
     AddFunction(1,2,1); // -alfa_x
     AddFunction(3,3,2); // beta_y
     AddFunction(3,4,2); // -alfa_y
+    AddFunction(0,0,1); // phase advance: x
+    AddFunction(0,0,2); // phase advance: y
+    AddFunction(0,0,3); // ?
 }
 
 void LatticeFunctionTable::UseOrbitFunctions()
