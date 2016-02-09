@@ -641,6 +641,7 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			}
 		}
 	}
+	break;
 	case HorizontalHaloDistributionWithLimits:
 	{	
 		rx = sqrt(beamdat.emit_x);
