@@ -224,13 +224,13 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 							
 							double beta_x_mid = beta_x - 2 * (lc/2)*alpha_x_entrance + pow((lc/2),2) * pow(((1+ pow(alpha_x_entrance,2))/beta_x),2);
 							double beta_y_mid = beta_y - 2 * (lc/2)*alpha_y_entrance + pow((lc/2),2) * pow(((1+ pow(alpha_y_entrance,2))/beta_y),2);
-							cout << "\n Collimator:" << (CMapit->second)->GetName() << "\tB_x_entrance = " << beta_x << "\tB_x_middle = " << beta_x_mid << "\tB_x_exit = " << beta_x_exit << endl;
-							cout << "Collimator:" << (CMapit->second)->GetName() << "\tB_y_entrance = " << beta_y << "\tB_y_middle = " << beta_y_mid << "\tB_y_exit = " << beta_y_exit << endl;
+							//~ cout << "\n Collimator:" << (CMapit->second)->GetName() << "\tB_x_entrance = " << beta_x << "\tB_x_middle = " << beta_x_mid << "\tB_x_exit = " << beta_x_exit << endl;
+							//~ cout << "Collimator:" << (CMapit->second)->GetName() << "\tB_y_entrance = " << beta_y << "\tB_y_middle = " << beta_y_mid << "\tB_y_exit = " << beta_y_exit << endl;
 
 							double alpha_x_mid = alpha_x_entrance - (lc/2) * ((1+pow(alpha_x_entrance,2))/beta_x);
 							double alpha_y_mid = alpha_y_entrance - (lc/2) * ((1+pow(alpha_y_entrance,2))/beta_y);
-							cout << "Collimator:" << (CMapit->second)->GetName() << "\tA_x_entrance = " << alpha_x_entrance << "\tA_x_middle = " << alpha_x_mid << "\tA_x_exit = " << alpha_x_exit << endl;
-							cout << "Collimator:" << (CMapit->second)->GetName() << "\tA_y_entrance = " << alpha_y_entrance << "\tA_y_middle = " << alpha_y_mid << "\tA_y_exit = " << alpha_y_exit << endl;
+							//~ cout << "Collimator:" << (CMapit->second)->GetName() << "\tA_x_entrance = " << alpha_x_entrance << "\tA_x_middle = " << alpha_x_mid << "\tA_x_exit = " << alpha_x_exit << endl;
+							//~ cout << "Collimator:" << (CMapit->second)->GetName() << "\tA_y_entrance = " << alpha_y_entrance << "\tA_y_middle = " << alpha_y_mid << "\tA_y_exit = " << alpha_y_exit << endl;
 							
 							sigma_entrance = sqrt( ( beta_x_mid * emittance_x * cos(collimator_aperture_tilt) * cos(collimator_aperture_tilt)) + \
 								(beta_y_mid * emittance_y * sin(collimator_aperture_tilt) * sin(collimator_aperture_tilt)) );

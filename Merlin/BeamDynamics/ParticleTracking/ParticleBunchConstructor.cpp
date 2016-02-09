@@ -641,6 +641,67 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			}
 		}
 	}
+	case HorizontalHaloDistributionWithLimits:
+	{	
+		rx = sqrt(beamdat.emit_x);
+		ry = sqrt(beamdat.emit_y);
+		
+		double minx(0.), maxx(0.), miny(0.), maxy(0.);
+
+		if( isnan(beamdat.min_sig_x) || isnan(beamdat.max_sig_x) || isnan(beamdat.min_sig_y) || isnan(beamdat.max_sig_y) ){		
+			minx = 5.5 * sqrt(beamdat.emit_x );
+			maxx = 5.54 * sqrt(beamdat.emit_x );
+			//~ miny = 0 * sqrt(beamdat.emit_y );
+			//~ maxy = 3 * sqrt(beamdat.emit_y );				
+			miny = 0;
+			maxy = 3;		
+			cout << "\n\tParticleBunchConstructor: HorizontalHaloDistributionWithLimits: no min_sig_x etc set, using default values " << endl;		
+		}
+		else{
+			minx = beamdat.min_sig_x * sqrt(beamdat.emit_x );
+			maxx = beamdat.max_sig_x * sqrt(beamdat.emit_x );
+			//~ miny = beamdat.min_sig_y * sqrt(beamdat.emit_y );
+			//~ maxy = beamdat.max_sig_y * sqrt(beamdat.emit_y );
+			miny = beamdat.min_sig_y;
+			maxy = beamdat.max_sig_y;
+		}
+		
+		double randx;
+		double randy;
+		
+		for(i=1; i<np;) {		
+
+			u = RandomNG::uniform(-pi,pi);			
+			randx = RandomNG::uniform(minx, maxx);
+			p.x()	= randx * cos(u);
+			p.xp()	= randx * sin(u);			
+			
+			u = RandomNG::uniform(-pi,pi);	
+			//~ randy = RandomNG::uniform(miny, maxy);
+			//~ randy = RandomGauss(beamdat.emit_y,cutoffs.y());
+			//~ randy = RandomNG::uniform(miny, maxy)*RandomGauss(beamdat.emit_y,cutoffs.y());
+			//~ randy = RandomNG::uniform(0, 3)*RandomGauss(beamdat.emit_y,cutoffs.y());
+			//~ randy = RandomGauss(RandomNG::uniform(0, 3)*beamdat.emit_y,cutoffs.y());
+			randy = RandomGauss(RandomNG::uniform(miny, maxy)*beamdat.emit_y,cutoffs.y());
+			p.y()	= randy * cos(u);
+			p.yp()	= randy * sin(u);
+			
+			p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
+			p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
+
+			M.Apply(p);
+			p+=pbunch.front(); // add centroid
+			p.type() = -1.0;
+			p.location() = -1.0;
+			p.sd() = 0.0;
+			p.id() = i;
+			
+			if(itsFilter==0 || itsFilter->Apply(p)) {
+				pbunch.push_back(p);
+				i++;
+			}
+		}
+	}
 	break;
     };
 

@@ -21,6 +21,7 @@
 #include "Collimators/ScatteringProcess.h"
 #include "Collimators/ScatteringModel.h"
 #include "Collimators/CollimatorDatabase.h"
+#include "Collimators/CollimatorSurvey.h"
 #include "Collimators/MaterialDatabase.h"
 #include "Collimators/ApertureConfiguration.h"
 #include "Collimators/Dustbin.h"
@@ -45,9 +46,9 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);     // seed for random number generators
-    int ncorepart 	= 64;			// number of core particles to track
-    int npart 		= 64;           // number of halo particles to track
-    int nturns 		= 10000;			// number of turns to track
+    int ncorepart 	= 1E4;			// number of core particles to track
+    int npart 		= 1E4;           // number of halo particles to track
+    int nturns 		= 1;			// number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -82,7 +83,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "13Jan_ST_Diff/";
+		case_dir = "04Feb16_CollSurveyTest/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -91,9 +92,9 @@ int main(int argc, char* argv[])
 		if(output_turn_bunch){			
 			pn_dir = (full_output_dir+"ParticleNo/"); 		mkdir(pn_dir.c_str(), S_IRWXU); 
 			cpn_dir = pn_dir + core_string;					mkdir(cpn_dir.c_str(), S_IRWXU);
-			hpn_dir = pn_dir + core_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
+			hpn_dir = pn_dir + halo_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
 		}		
-	bool every_bunch			= 1;		// output whole bunch every turn in a single file
+	bool every_bunch			= 0;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 1;		
 		if (output_initial_bunch || output_final_bunch || every_bunch){
@@ -106,14 +107,14 @@ int main(int argc, char* argv[])
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
 	bool hel_on 				= 1; 		// Hollow electron lens process?
-	bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
-		bool DCon				= 0;
+	bool LHC_HEL				= 1;		// LHC or Tevatron Hardware
+		bool DCon				= 1;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
-		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
+		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
-	bool collimation_on 		= 0;
+	bool collimation_on 		= 1;
 		if(collimation_on){
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);
 			cdustbin_dir = dustbin_dir + core_string; 	mkdir(cdustbin_dir.c_str(), S_IRWXU);
@@ -132,7 +133,7 @@ int main(int argc, char* argv[])
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
 										// False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 																	
-	bool cleaning				= 0;
+	bool cleaning				= 1;
 		if(cleaning){
 			collimation_on		= 1;
 			every_bunch			= 0;
@@ -194,14 +195,15 @@ int main(int argc, char* argv[])
     cout << "Found start element START at element number " << start_element_number << endl;
 
   LatticeFunctionTable* myTwiss = new LatticeFunctionTable(myAccModel, beam_energy);
+  myTwiss->UseDefaultFunctions();
     myTwiss->AddFunction(1,6,3);
     myTwiss->AddFunction(2,6,3);
     myTwiss->AddFunction(3,6,3);
     myTwiss->AddFunction(4,6,3);
     myTwiss->AddFunction(6,6,3); 
-    myTwiss->AddFunction(0,0,1);
-    myTwiss->AddFunction(0,0,2);
-    myTwiss->AddFunction(0,0,3);
+    //~ myTwiss->AddFunction(0,0,1);
+    //~ myTwiss->AddFunction(0,0,2);
+    //~ myTwiss->AddFunction(0,0,3);
 
     double bscale1 = 1e-22;    
   
@@ -292,7 +294,19 @@ int main(int argc, char* argv[])
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
-
+    
+/****************************
+*	Collimator Survey	*
+****************************/
+	CollimatorSurvey* CollSurvey = new CollimatorSurvey(myAccModel, emittance, emittance, myTwiss); 
+	
+		ostringstream cs_output_file;
+		cs_output_file << bunch_dir << "coll_survey.txt";
+		ofstream* cs_output = new ofstream(cs_output_file.str().c_str());
+		if(!cs_output->good()) { std::cerr << "Could not open collimator survey output" << std::endl; exit(EXIT_FAILURE); }   
+		CollSurvey->Output(cs_output, 20);			
+		delete cs_output;	
+	
 /************************
 *	BEAM HALO SETTINGS	*
 ************************/
@@ -344,10 +358,14 @@ int main(int argc, char* argv[])
     myHaloBeam.c_xpyp=0.0;
     
     // Minimum and maximum sigma for HEL Halo Distribution
-    myHaloBeam.min_sig_x = 0;
-    myHaloBeam.max_sig_x = 32;
-    myHaloBeam.min_sig_y = 0;
-    myHaloBeam.max_sig_y = 32;
+    myHaloBeam.min_sig_x = 4;
+    myHaloBeam.max_sig_x = 6;
+    myHaloBeam.min_sig_y = 4;
+    myHaloBeam.max_sig_y = 6;
+    //~ myHaloBeam.min_sig_x = 5.5;
+    //~ myHaloBeam.max_sig_x = 5.54;
+    //~ myHaloBeam.min_sig_y = 0;
+    //~ myHaloBeam.max_sig_y = 3;
  
  /***********************
 *	BEAM CORE SETTINGS	*
@@ -403,9 +421,9 @@ int main(int argc, char* argv[])
     
     // Minimum and maximum sigma for HEL Halo Distribution
     myCoreBeam.min_sig_x = 0;
-    myCoreBeam.max_sig_x = 10;
+    myCoreBeam.max_sig_x = 4;
     myCoreBeam.min_sig_y = 0;
-    myCoreBeam.max_sig_y = 10;
+    myCoreBeam.max_sig_y = 4;
     
     delete myDispersion;
 
@@ -427,6 +445,8 @@ int main(int argc, char* argv[])
 		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, horizontalHaloDistribution2);
 		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
 		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
+		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HorizontalHaloDistributionWithLimits);
+		//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HorizontalHaloDistributionWithLimits);
 	}
     else{
     	myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
