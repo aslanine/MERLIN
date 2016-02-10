@@ -20,7 +20,7 @@ using namespace PhysicalUnits;
 //Read in file into some sensible structure
 
 CollimatorDatabase::CollimatorDatabase(string input_file, MaterialDatabase* db, bool sigma) : 
-	number_collimators(0),use_sigma(sigma),logFlag(false),ErrorLogFlag(false),EnableMatchBeamEnvelope(true),EnableMatchReferenceOrbit(true),JawFlattnessErrors(false),JawAlignmentErrors(false),EnableResistiveCollimatorWakes(false),AngleError(0),PositionError(0)
+	number_collimators(0),use_sigma(sigma),logFlag(false),ErrorLogFlag(false),EnableMatchBeamEnvelope(true),EnableMatchReferenceOrbit(true),JawFlattnessErrors(false),JawAlignmentErrors(false),EnableResistiveCollimatorWakes(false),AngleError(0),PositionError(0),midjaw(0)
 {
 
 	//Open file
@@ -212,8 +212,8 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 						double sigma_exit;
 						
 						/***************** HR use middle of collimator beta to set half gap etc *****************/
-						bool middle = 1;
-						if(middle){
+						//~ bool middle = 0;
+						if(midjaw){
 							
 							double alpha_x_entrance = -twiss->Value(1,2,1,j);
 							double alpha_y_entrance = -twiss->Value(3,4,2,j);

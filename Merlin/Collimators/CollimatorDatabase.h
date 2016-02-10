@@ -110,6 +110,9 @@ struct FlukaData
 	//Set jaw position angle sigma.
 	void SetJawAngleError(double);
 	
+	//use the middle of the jaw sigma value to set a constant jaw half gap (similar to SixTrack)
+	void UseMiddleJawHalfGap(){midjaw = 1;}
+	
 	//Vector to store FlukaData
 	vector<FlukaData*> StoredFlukaData;
 	//Function to output FlukaDatabase file
@@ -122,9 +125,12 @@ protected:
 	double ImpactSigma;					// Impact factor at collimator in number of sigmas
 	ostream* log;
 	bool logFlag;
-
+	
 	ostream* ErrorLog;
 	bool ErrorLogFlag;
+
+	// Used to set the jaw half gap to a constant using the middle jaw sigma value
+	bool midjaw;
 
 	// Flag for one side TCDQA jaw
 	bool OneSideJawTCDQA; 

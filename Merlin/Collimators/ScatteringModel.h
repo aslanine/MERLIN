@@ -21,6 +21,19 @@
 
 namespace Collimation {
 	
+struct JawInelasticData{
+	int turn;
+	int ID;
+	double x;
+	double xp;
+	double y;
+	double yp;
+	double ct;
+	double dp;	
+	double z;
+	string name;
+};
+	
 struct JawImpactData{
 	int turn;
 	int ID;
@@ -115,6 +128,14 @@ public:
 	vector<string> JawImpactNames;
 	bool JawImpact_on;
 	vector <JawImpactData*> StoredJawImpactData;
+	
+	// Jaw Inelastic Scatters
+	void JawInelastic(ParticleTracking::Particle& p, double z, int turn, string name);
+	void SetJawInelastic(string name, int single_turn = 0);
+	void OutputJawInelastic(string directory, int seed = 0);
+	vector<string> JawInelasticNames;
+	bool JawInelastic_on;
+	vector <JawInelasticData*> StoredJawInelasticData;
 
 	// vector holding all scattering processes
 	vector <Collimation::ScatteringProcess*> Processes;
