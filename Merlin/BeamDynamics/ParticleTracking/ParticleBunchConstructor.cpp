@@ -647,7 +647,7 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		rx = sqrt(beamdat.emit_x);
 		ry = sqrt(beamdat.emit_y);
 		
-		double minx(0.), maxx(0.), miny(0.), maxy(0.);
+		double minx(0.), maxx(0.), miny(0.), maxy(0.), minz(0.), maxz(0.);
 
 		if( isnan(beamdat.min_sig_x) || isnan(beamdat.max_sig_x) || isnan(beamdat.min_sig_y) || isnan(beamdat.max_sig_y) ){		
 			minx = 5.5 * sqrt(beamdat.emit_x );
@@ -656,6 +656,8 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			//~ maxy = 3 * sqrt(beamdat.emit_y );				
 			miny = 0;
 			maxy = 3;		
+			minz = 0;
+			maxz = 2 * sqrt(beamdat.sig_z);
 			cout << "\n\tParticleBunchConstructor: HorizontalHaloDistributionWithLimits: no min_sig_x etc set, using default values " << endl;		
 		}
 		else{
@@ -663,8 +665,12 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			maxx = beamdat.max_sig_x * sqrt(beamdat.emit_x );
 			//~ miny = beamdat.min_sig_y * sqrt(beamdat.emit_y );
 			//~ maxy = beamdat.max_sig_y * sqrt(beamdat.emit_y );
+			
 			miny = beamdat.min_sig_y;
 			maxy = beamdat.max_sig_y;
+			
+			minz = beamdat.min_sig_z;
+			maxz = beamdat.max_sig_z;
 		}
 		
 		double randx;
@@ -688,7 +694,9 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			p.yp()	= randy * sin(u);
 			
 			p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
-			p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
+			//~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
+            //~ p.ct()	= RandomGauss(dz2,cutoffs.ct());            
+			p.ct() = RandomGauss(RandomNG::uniform(minz, maxz)*dz2,cutoffs.ct());
 
 			M.Apply(p);
 			p+=pbunch.front(); // add centroid
