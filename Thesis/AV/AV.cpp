@@ -54,8 +54,8 @@ bool SortComponent(const AcceleratorComponent* first, const AcceleratorComponent
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 20000;                          // number of particles to track
-    int nturns = 200;                           // number of turns to track
+    int npart = 1E3;                          // number of particles to track
+    int nturns = 1;                           // number of turns to track
 	bool DoTwiss = 1;							// run twiss and align to beam envelope etc?
 	bool beam1 = 0;
 	
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 	//~ string batch_directory="beam2_test/";
 	
 	string output_dir = "/Build/Thesis/outputs/AV/";
-	string batch_directory="08Feb16_coll_Surveytest/";
+	string batch_directory="10Feb16_Distn_test/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -305,6 +305,8 @@ int main(int argc, char* argv[])
     mybeam.max_sig_x = 5.54;
     mybeam.min_sig_y = 0;
     mybeam.max_sig_y = 3;
+    mybeam.min_sig_z = 0;
+    mybeam.max_sig_z = 2;
     
     // Dispersion
     mybeam.Dx=myDispersion->Dx;
@@ -316,7 +318,9 @@ int main(int argc, char* argv[])
     //~ mybeam.emit_x = impact * impact * emittance * meter;
     //~ impact =1;
     //~ mybeam.emit_y = impact * impact * emittance * meter;
-    mybeam.sig_z = 0.0;
+    // sig_z in metres
+    // rms bunch length is ~7.55cm
+    mybeam.sig_z = 0.0755 * meter;
     
 	mybeam.emit_x = emittance * meter;
 	mybeam.emit_y = emittance * meter;
@@ -444,17 +448,24 @@ int main(int argc, char* argv[])
     ScatteringModel* myScatter = new ScatteringModel;
     if(beam1){
 		myScatter->SetScatterPlot("TCP.C6L7.B1");
-		myScatter->SetJawImpact("TCP.C6L7.B1");
 		myScatter->SetScatterPlot("TCP.B6L7.B1");
+		
+		myScatter->SetJawImpact("TCP.C6L7.B1");
 		myScatter->SetJawImpact("TCP.D6L7.B1");
 	}
 	else{ 
-		myScatter->SetScatterPlot("TCP.C6R7.B2");
+		myScatter->SetJawImpact("TCP.B6R7.B2");	
 		myScatter->SetJawImpact("TCP.C6R7.B2");
-		myScatter->SetScatterPlot("TCSG.B4R7.B2 ");
-		myScatter->SetJawImpact("TCSG.B4R7.B2 ");	
-		myScatter->SetScatterPlot("TCP.D6R7.B2 ");
-		myScatter->SetJawImpact("TCP.D6R7.B2 ");
+		myScatter->SetJawImpact("TCSG.B4R7.B2");	
+		myScatter->SetJawImpact("TCP.D6R7.B2");
+		
+		myScatter->SetScatterPlot("TCP.B6R7.B2");
+		myScatter->SetScatterPlot("TCP.C6R7.B2");
+		myScatter->SetScatterPlot("TCSG.B4R7.B2");
+		myScatter->SetScatterPlot("TCP.D6R7.B2");
+		
+		myScatter->SetJawInelastic("TCP.B6R7.B2");	
+		myScatter->SetJawInelastic("TCP.C6R7.B2");
 	}
 
     // MERLIN contains various ScatteringProcesses; namely the following
@@ -512,9 +523,10 @@ int main(int argc, char* argv[])
 
 	
 	/*********************************************************************
-	**	Output Jaw Impact
+	**	Output JawImpact JawInelastic and ScatterPlot
 	*********************************************************************/
 	myScatter->OutputJawImpact(full_output_dir,seed);
+	myScatter->OutputJawInelastic(full_output_dir,seed);
 	myScatter->OutputScatterPlot(full_output_dir,seed);	
 
 	/*********************************************************************
