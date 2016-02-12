@@ -45,9 +45,9 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int ncorepart 	= 21;						// number of core particles to track
-    int npart 		= 21;                     	// number of halo particles to track
-    int nturns 		= 1E4;                      // number of turns to track
+    int ncorepart 	= 3;						// number of core particles to track
+    int npart 		= 3;                     	// number of halo particles to track
+    int nturns 		= 1E6;                      // number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "28DecCollision_Round_HELinj_Poincare/";
+		case_dir = "03Jan_S_noRF_1E6/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 	bool output_fluka_database 	= 1;
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
-	bool hel_on 				= 1; 		// Hollow electron lens process?
+	bool hel_on 				= 0; 		// Hollow electron lens process?
 		bool DCon				= 0;
 		bool ACon				= 1;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 			myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_C+S_RF_-90mHEL.tfs", beam_energy );
 	}
 	
-    //~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
+    myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
 
