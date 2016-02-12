@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     int seed = (int)time(NULL);     // seed for random number generators
     int ncorepart 	= 21;			// number of core particles to track
     int npart 		= 21;           // number of halo particles to track
-    int nturns 		= 1E4;			// number of turns to track
+    int nturns 		= 1;			// number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "26DecPoincare_HELinj/";
+		case_dir = "07Jan_ST/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 	bool output_fluka_database 	= 1;
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
-	bool hel_on 				= 0; 		// Hollow electron lens process?
+	bool hel_on 				= 1; 		// Hollow electron lens process?
 	bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
@@ -124,11 +124,11 @@ int main(int argc, char* argv[])
 	
 	//~ bool round_beams			= 0;		// true = -30m, false = -88.6m
 	bool thin					= 1;		// true = use thin HEL instead of thick
-	bool symplectic				= 0;
+	bool symplectic				= 1;
 	
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
-	bool start_at_ip1			= 0;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
+	bool start_at_ip1			= 1;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
 										// False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 																	
@@ -343,10 +343,10 @@ int main(int argc, char* argv[])
     myHaloBeam.c_xpyp=0.0;
     
     // Minimum and maximum sigma for HEL Halo Distribution
-    myHaloBeam.min_sig_x = 4;
-    myHaloBeam.max_sig_x = 6;
-    myHaloBeam.min_sig_y = 4;
-    myHaloBeam.max_sig_y = 6;
+    myHaloBeam.min_sig_x = 0;
+    myHaloBeam.max_sig_x = 10;
+    myHaloBeam.min_sig_y = 0;
+    myHaloBeam.max_sig_y = 10;
  
  /***********************
 *	BEAM CORE SETTINGS	*
@@ -402,9 +402,9 @@ int main(int argc, char* argv[])
     
     // Minimum and maximum sigma for HEL Halo Distribution
     myCoreBeam.min_sig_x = 0;
-    myCoreBeam.max_sig_x = 4;
+    myCoreBeam.max_sig_x = 10;
     myCoreBeam.min_sig_y = 0;
-    myCoreBeam.max_sig_y = 4;
+    myCoreBeam.max_sig_y = 10;
     
     delete myDispersion;
 
