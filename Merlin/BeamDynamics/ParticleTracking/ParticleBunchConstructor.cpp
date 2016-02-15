@@ -647,7 +647,7 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		rx = sqrt(beamdat.emit_x);
 		ry = sqrt(beamdat.emit_y);
 		
-		double minx(0.), maxx(0.), miny(0.), maxy(0.), minz(0.), maxz(0.);
+		double minx(0.), maxx(0.), miny(0.), maxy(0.), minz(0.), maxz(0.), mindp(0.), maxdp(0.);
 
 		if( isnan(beamdat.min_sig_x) || isnan(beamdat.max_sig_x) || isnan(beamdat.min_sig_y) || isnan(beamdat.max_sig_y) ){		
 			minx = 5.5 * sqrt(beamdat.emit_x );
@@ -657,7 +657,9 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			miny = 0;
 			maxy = 3;		
 			minz = 0;
-			maxz = 2 * sqrt(beamdat.sig_z);
+			maxz = 2;
+			mindp = 0;
+			maxdp = 2;
 			cout << "\n\tParticleBunchConstructor: HorizontalHaloDistributionWithLimits: no min_sig_x etc set, using default values " << endl;		
 		}
 		else{
@@ -671,10 +673,17 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			
 			minz = beamdat.min_sig_z;
 			maxz = beamdat.max_sig_z;
+			
+			mindp = beamdat.min_sig_dp;
+			maxdp = beamdat.max_sig_dp;
 		}
 		
 		double randx;
 		double randy;
+		
+		double test;
+				
+		//RandomGauss takes a variance (sigma^2), and cutoff in sigma. Mean = 0 , cutoffs are +/- cutoff.
 		
 		for(i=1; i<np;) {		
 
@@ -684,20 +693,30 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			p.xp()	= randx * sin(u);			
 			
 			u = RandomNG::uniform(-pi,pi);	
-			//~ randy = RandomNG::uniform(miny, maxy);
 			//~ randy = RandomGauss(beamdat.emit_y,cutoffs.y());
-			//~ randy = RandomNG::uniform(miny, maxy)*RandomGauss(beamdat.emit_y,cutoffs.y());
-			//~ randy = RandomNG::uniform(0, 3)*RandomGauss(beamdat.emit_y,cutoffs.y());
 			//~ randy = RandomGauss(RandomNG::uniform(0, 3)*beamdat.emit_y,cutoffs.y());
 			randy = RandomGauss(RandomNG::uniform(miny, maxy)*beamdat.emit_y,cutoffs.y());
 			p.y()	= randy * cos(u);
 			p.yp()	= randy * sin(u);
-			
-			p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
-			//~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
-            //~ p.ct()	= RandomGauss(dz2,cutoffs.ct());            
-			p.ct() = RandomGauss(RandomNG::uniform(minz, maxz)*dz2,cutoffs.ct());
 
+			// this gives the full gaussian with no cutoffs
+			//~ p.ct() = RandomGauss(dz2,0);			
+			//~ p.dp() = RandomGauss(dp2,0);	
+			
+			// this is a square in phase space but otherwise correct
+			//~ p.ct() = RandomGauss(dz2,maxz);
+			//~ p.dp() = RandomGauss(dp2,maxdp);
+			
+			// This doesn't give precisely the right cutoffs but is roughly elliptical in phase space
+			//~ p.ct() = RandomGauss(RandomNG::uniform(minz, maxz)*dz2,maxz);
+			//~ p.dp() = RandomGauss(RandomNG::uniform(mindp, maxdp)*dp2,maxdp);
+			
+			// PERFECT - only works if maxz = maxdp
+			u = RandomNG::uniform(-pi,pi);	
+			test = RandomGauss(1,maxz);
+			p.ct() = test * cos(u) * beamdat.sig_z;
+			p.dp() = test * sin(u) * beamdat.sig_dp;
+				
 			M.Apply(p);
 			p+=pbunch.front(); // add centroid
 			p.type() = -1.0;
