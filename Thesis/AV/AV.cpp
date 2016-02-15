@@ -9,7 +9,6 @@
 #include <sys/stat.h> //to use mkdir
 
 //include relevant MERLIN headers
-#include "AcceleratorModel/Apertures/CollimatorAperture.h"
 #include "AcceleratorModel/ApertureSurvey.h"
 
 #include "BeamDynamics/ParticleTracking/ParticleBunchConstructor.h"
@@ -55,10 +54,11 @@ bool SortComponent(const AcceleratorComponent* first, const AcceleratorComponent
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E2;                          // number of particles to track
-    int nturns = 4;                           // number of turns to track
+    int npart = 1E3;                          // number of particles to track
+    int nturns = 1;                           // number of turns to track
 	bool DoTwiss = 1;							// run twiss and align to beam envelope etc?
-	bool beam1 = 1;
+	bool beam1 = 0;
+	
  
     if (argc >=2){
         npart = atoi(argv[1]);
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     }
 
 // Initialise the random number generator with the seed
-	seed=1;
+
     RandomNG::init(seed);
 
     double beam_energy = 6500.0;
@@ -94,14 +94,19 @@ int main(int argc, char* argv[])
 	bool output_fluka_database = 		1;
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
 	//~ string directory = "/home/haroon/git/Merlin/HR";				//iiaa1
-	string directory = "/home/HR/Downloads/MERLIN";					//M11x	
+	//~ string directory = "/afs/cern.ch/work/a/avalloni/private/MerlinforFluka/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/work/a/avalloni/private/MerlinforFluka/MERLIN";	//lxplus avalloni
+	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	
+	//~ string input_dir = "/UserSim/data/6p5TeV_RunII_FlatTop_B2/";
 	string input_dir = "/Thesis/data/AV/";
 	
 	//~ string output_dir = "/test2/UserSim/outputs/HL/";
+	//~ string output_dir = "/Build/UserSim/outputs/6p5TeV_RunII_FlatTop_B2/";
+	//~ string batch_directory="beam2_test/";
+	
 	string output_dir = "/Build/Thesis/outputs/AV/";
-	string batch_directory="outputAVtest/";
+	string batch_directory="10Feb16_Distn_test/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -239,18 +244,18 @@ int main(int argc, char* argv[])
 	}
     delete collimator_db;
     
-    //CHECK FOR COLLIMATOR APERTURES	
-	vector<Collimator*> TCP;
-	int siz = myAccModel->ExtractTypedElements(TCP, start_element);
+    //~ //CHECK FOR COLLIMATOR APERTURES	
+	//~ vector<Collimator*> TCP;
+	//~ int siz = myAccModel->ExtractTypedElements(TCP, start_element);
 
-	cout << "\n\t Found " << TCP.size() << " Collimators when extracting" << endl;
+	//~ cout << "\n\t Found " << TCP.size() << " Collimators when extracting" << endl;
 
-	Aperture *ap = (TCP[0])->GetAperture();
-	if(!ap){cout << "Could not get tcp ap" << endl;	abort();}
-	else{cout << "TCP aperture type = " << ap->GetApertureType() << endl;}
+	//~ Aperture *ap = (TCP[0])->GetAperture();
+	//~ if(!ap){cout << "Could not get tcp ap" << endl;	abort();}
+	//~ else{cout << "TCP aperture type = " << ap->GetApertureType() << endl;}
 
-	CollimatorAperture* CollimatorJaw = dynamic_cast<CollimatorAperture*>(ap);
-	if(!CollimatorJaw){cout << "Could not cast" << endl;	abort();}
+	//~ CollimatorAperture* CollimatorJaw = dynamic_cast<CollimatorAperture*>(ap);
+	//~ if(!CollimatorJaw){cout << "Could not cast" << endl;	abort();}
 
 ////////////////////////////
 // Aperture Configuration //
@@ -269,17 +274,11 @@ int main(int argc, char* argv[])
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
-
+ 
+	ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 5); 
 // The accelerator lattice, in the form of an AcceleratorModel, is now complete
 // The AcceleratorModel consists of a vector of AcceleratorComponent objects, each with it's own aperture and geometry
 // Each magnet has it's own field, and each collimator has it's own material
-
-//ApertureSurvey
-
-	//~ Only output this file once
-	//~ if(seed == 1)
-	ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 5);
-
 
 ///////////////////
 // BEAM SETTINGS //
@@ -300,7 +299,15 @@ int main(int argc, char* argv[])
     mybeam.beta_y = myTwiss->Value(3,3,2,start_element_number)*meter;
     mybeam.alpha_x = -myTwiss->Value(1,2,1,start_element_number);
     mybeam.alpha_y = -myTwiss->Value(3,4,2,start_element_number);
-
+    
+    // Minimum and maximum sigma for HEL Halo Distribution
+    mybeam.min_sig_x = 5;
+    mybeam.max_sig_x = 5.54;
+    mybeam.min_sig_y = 0;
+    mybeam.max_sig_y = 3;
+    mybeam.min_sig_z = 0;
+    mybeam.max_sig_z = 2;
+    
     // Dispersion
     mybeam.Dx=myDispersion->Dx;
     mybeam.Dy=myDispersion->Dy;
@@ -308,10 +315,15 @@ int main(int argc, char* argv[])
     mybeam.Dyp=myDispersion->Dyp;
 
     // We set the beam emittance such that the bunch (created from this BeamData object later) will impact upon the primary collimator
-    mybeam.emit_x = impact * impact * emittance * meter;
-    impact =1;
-    mybeam.emit_y = impact * impact * emittance * meter;
-    mybeam.sig_z = 0.0;
+    //~ mybeam.emit_x = impact * impact * emittance * meter;
+    //~ impact =1;
+    //~ mybeam.emit_y = impact * impact * emittance * meter;
+    // sig_z in metres
+    // rms bunch length is ~7.55cm
+    mybeam.sig_z = 0.0755 * meter;
+    
+	mybeam.emit_x = emittance * meter;
+	mybeam.emit_y = emittance * meter;
 
     //Beam centroid
     mybeam.x0=myTwiss->Value(1,0,0,start_element_number);
@@ -340,12 +352,26 @@ int main(int argc, char* argv[])
 
     // horizontalHaloDistribution1 is a halo in xx' plane, zero in yy'
     // horizontalHaloDistribution2 is a halo in xx' plane, gaussian in yy'
-    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution2);
+    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HorizontalHaloDistributionWithLimits);
 
     myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
     delete myBunchCtor;
 
     myBunch->SetMacroParticleCharge(mybeam.charge);
+    
+	//create string stream to add distribution and filename
+	ostringstream hbunch_output_file;
+	// add together the directory name and filename
+	hbunch_output_file << full_output_dir  << "initial_bunch.txt";
+	//create an output file stream using the above directory+name
+	ofstream* hbunch_output = new ofstream(hbunch_output_file.str().c_str());
+	//check that the file cna be opened (that the directory exists and is accessible)
+	if(!hbunch_output->good()) { std::cerr << "Could not open initial halo bunch output" << std::endl; exit(EXIT_FAILURE); }   
+	// output the bunch
+	myBunch->Output(*hbunch_output);			
+	// delete the pointer
+	delete hbunch_output;	   
+    
 
 // Our bunch is now complete and ready for tracking & collimation
 
@@ -359,27 +385,30 @@ int main(int argc, char* argv[])
     ParticleTracker* myParticleTracker = new ParticleTracker(beamline, myBunch);
     //~ myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
     myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());
-
-	//~ string tof = "Tracking_output_file.txt";
-	//~ string t_o_f = full_output_dir+tof;
-	//~ TrackingOutputASCII* myTrackingOutputASCII = new TrackingOutputASCII(t_o_f);
-	//~ myTrackingOutputASCII->SuppressUnscattered(npart+1);
+    
+    //~ string tof = "Tracking_output_file.txt";
+    //~ string TrackingOutputfile = full_output_dir+tof;
+    
+	//~ TrackingOutputASCII* myTrackingOutputASCII=new TrackingOutputASCII (TrackingOutputfile);
+	//~ myTrackingOutputASCII->SuppressUnscattered (npart +1);
 	//~ myTrackingOutputASCII->output_all = 1;
 	
 	//~ myParticleTracker->SetOutput(myTrackingOutputASCII);
-	
-	ostringstream alessias_sstream;
-	alessias_sstream << full_output_dir<<"Tracking_output_file"<< npart << "_" << seed << std::string(".txt");	
-	string alessias_file = alessias_sstream.str().c_str();	
-	
-	//~ string tof = "Tracking_output_file.txt";
-	//~ string t_o_f = full_output_dir+tof;
-	TrackingOutputAV* myTrackingOutputAV = new TrackingOutputAV(alessias_file);
-	myTrackingOutputAV->SetSRange(19000, 21000);
-	//~ myTrackingOutputAV->SetTurn(1);
-	myTrackingOutputAV->SetTurnRange(1,4);
-	
-	myParticleTracker->SetOutput(myTrackingOutputAV);
+	 string tof = "Tracking_output_file.txt";
+    string t_o_f = full_output_dir+tof;
+    
+     //~ OUTPUT AV
+    ostringstream trackingparticles_sstream;
+    trackingparticles_sstream << full_output_dir<<"Tracking_output_file_"<< npart << "_" << seed << std::string(".txt");     
+    string trackingparticles_file = trackingparticles_sstream.str().c_str();     
+     
+    TrackingOutputAV* myTrackingOutputAV = new TrackingOutputAV(trackingparticles_file);
+    //~ myTrackingOutputAV->SetSRange(19000, 21000);
+    myTrackingOutputAV->SetSRange(0, 27000);
+    myTrackingOutputAV->SetTurn(1);
+    myTrackingOutputAV->output_all = 1;
+     
+    //~ myParticleTracker->SetOutput(myTrackingOutputAV);
 
 /////////////////////////
 // Collimation Process //
@@ -419,15 +448,24 @@ int main(int argc, char* argv[])
     ScatteringModel* myScatter = new ScatteringModel;
     if(beam1){
 		myScatter->SetScatterPlot("TCP.C6L7.B1");
-		myScatter->SetJawImpact("TCP.C6L7.B1");
 		myScatter->SetScatterPlot("TCP.B6L7.B1");
+		
+		myScatter->SetJawImpact("TCP.C6L7.B1");
 		myScatter->SetJawImpact("TCP.D6L7.B1");
 	}
-	else{
-		myScatter->SetScatterPlot("TCP.C6R7.B2");
+	else{ 
+		myScatter->SetJawImpact("TCP.B6R7.B2");	
 		myScatter->SetJawImpact("TCP.C6R7.B2");
+		myScatter->SetJawImpact("TCSG.B4R7.B2");	
+		myScatter->SetJawImpact("TCP.D6R7.B2");
+		
 		myScatter->SetScatterPlot("TCP.B6R7.B2");
-		myScatter->SetJawImpact("TCP.D6R7.B2");	
+		myScatter->SetScatterPlot("TCP.C6R7.B2");
+		myScatter->SetScatterPlot("TCSG.B4R7.B2");
+		myScatter->SetScatterPlot("TCP.D6R7.B2");
+		
+		myScatter->SetJawInelastic("TCP.B6R7.B2");	
+		myScatter->SetJawInelastic("TCP.C6R7.B2");
 	}
 
     // MERLIN contains various ScatteringProcesses; namely the following
@@ -472,8 +510,6 @@ int main(int argc, char* argv[])
         // This line will give us an update of how many particles have survived after each turn
         cout << "Turn " << turn <<"\tParticle number: " << myBunch->size() << endl;
 
-		//~ myTrackingOutputAV->IncrementTurn();
-
         myParticleTracker->Track(myBunch);
 
         // An escape clause so that we do not needlessly track when if no particles have survived
@@ -487,10 +523,11 @@ int main(int argc, char* argv[])
 
 	
 	/*********************************************************************
-	**	Output Jaw Impact
+	**	Output JawImpact JawInelastic and ScatterPlot
 	*********************************************************************/
-	myScatter->OutputJawImpact(full_output_dir, seed);
-	myScatter->OutputScatterPlot(full_output_dir, seed);	
+	myScatter->OutputJawImpact(full_output_dir,seed);
+	myScatter->OutputJawInelastic(full_output_dir,seed);
+	myScatter->OutputScatterPlot(full_output_dir,seed);	
 
 	/*********************************************************************
 	** OUTPUT FLUKA LOSSES 

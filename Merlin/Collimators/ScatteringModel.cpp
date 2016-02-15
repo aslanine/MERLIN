@@ -40,6 +40,7 @@ ScatteringModel::ScatteringModel()
 	//~ ScatteringModelTurn = 1;	
 	ScatterPlot_on = 0;
 	JawImpact_on = 0;
+	JawInelastic_on = 0;
 }
 
 double ScatteringModel::PathLength(Material* mat, double E0){ 
@@ -288,8 +289,27 @@ void ScatteringModel::JawImpact(Particle& p, int turn, string name){
 	(*temp).dp = p.dp();
 	(*temp).turn = turn;	
 	(*temp).name = name;
+	//~ cout << "JawImpact IN: name = " << name << endl;
 	
 	StoredJawImpactData.push_back(temp);
+}
+
+void ScatteringModel::JawInelastic(Particle& p, double z, int turn, string name){
+	
+	JawInelasticData* temp = new JawInelasticData;
+	(*temp).ID = p.id();
+	(*temp).x = p.x();
+	(*temp).xp = p.xp();
+	(*temp).y = p.y();
+	(*temp).yp = p.yp();
+	(*temp).ct = p.ct();
+	(*temp).dp = p.dp();
+	(*temp).z = z;
+	(*temp).turn = turn;	
+	(*temp).name = name;
+	//~ cout << "JawImpact IN: name = " << name << endl;
+	
+	StoredJawInelasticData.push_back(temp);
 }
 	
 	
@@ -303,6 +323,11 @@ void ScatteringModel::SetJawImpact(string name, int single_turn){
 	JawImpact_on = 1;
 }
 
+void ScatteringModel::SetJawInelastic(string name, int single_turn){
+	JawInelasticNames.push_back(name);
+	JawInelastic_on = 1;
+}
+
 //~ void ScatteringModel::OutputScatterPlot(std::ostream* os){
 void ScatteringModel::OutputScatterPlot(string directory, int seed){
 	
@@ -313,7 +338,7 @@ void ScatteringModel::OutputScatterPlot(string directory, int seed){
 		//~ std::ostringstream scatter_plot_file = directory + "Scatter.txt";
 		std::ofstream* os = new std::ofstream(scatter_plot_file.str().c_str());	
 		if(!os->good())    {
-			std::cerr << "ScatteringModel::OutputJawImpact: Could not open ScatterPlot file for collimator " << (*name) << std::endl;
+			std::cerr << "ScatteringModel::OutputScatterPlot: Could not open ScatterPlot file for collimator " << (*name) << std::endl;
 			exit(EXIT_FAILURE);
 		} 
 		
@@ -345,6 +370,7 @@ void ScatteringModel::OutputScatterPlot(string directory, int seed){
 void ScatteringModel::OutputJawImpact(string directory, int seed){
 	
 	for(vector<string>::iterator name = JawImpactNames.begin(); name != JawImpactNames.end(); ++name){
+		//~ cout << "vector<string>::iterator = " << *name << endl;
 		std::ostringstream jaw_impact_file;
 		jaw_impact_file << directory << "jaw_impact_" << (*name) << "_" << seed << ".txt";
 		ofstream* os = new ofstream(jaw_impact_file.str().c_str());	
@@ -353,11 +379,12 @@ void ScatteringModel::OutputJawImpact(string directory, int seed){
 			exit(EXIT_FAILURE);
 		} 
 		
-		(*os) << "#\tparticle_id\tx\tx'\ty\ty'\tct\tdpctturn" << endl;
+		(*os) << "#\tparticle_id\tx\tx'\ty\ty'\tct\tdp\tturn" << endl;
 	
 		for(vector <JawImpactData*>::iterator its = StoredJawImpactData.begin(); its != StoredJawImpactData.end(); ++its)
 		{
 			if( (*its)->name == (*name) ){
+				//~ cout << "ColName = " << (*its)->name << endl;
 				(*os) << setw(10) << left << setprecision(10) <<  (*its)->ID;
 				(*os) << setw(30) << left << setprecision(20) << (*its)->x;
 				(*os) << setw(30) << left << setprecision(20) <<  (*its)->xp;
@@ -372,4 +399,38 @@ void ScatteringModel::OutputJawImpact(string directory, int seed){
 	}	
 		
 	StoredJawImpactData.clear();	
+}
+
+void ScatteringModel::OutputJawInelastic(string directory, int seed){
+	
+	for(vector<string>::iterator name = JawInelasticNames.begin(); name != JawInelasticNames.end(); ++name){
+		//~ cout << "vector<string>::iterator = " << *name << endl;
+		std::ostringstream jaw_inelastic_file;
+		jaw_inelastic_file << directory << "jaw_inelastic_" << (*name) << "_" << seed << ".txt";
+		ofstream* os = new ofstream(jaw_inelastic_file.str().c_str());	
+		if(!os->good())    {
+			std::cerr << "ScatteringModel::OutputJawInelastic: Could not open JawInelastic file for collimator " << (*name) << std::endl;
+			exit(EXIT_FAILURE);
+		} 
+		
+		(*os) << "#\tparticle_id\tx\tx'\ty\ty'\tct\tdp\tz\tturn" << endl;
+	
+		for(vector <JawInelasticData*>::iterator its = StoredJawInelasticData.begin(); its != StoredJawInelasticData.end(); ++its)
+		{
+			if( (*its)->name == (*name) ){
+				(*os) << setw(10) << left << setprecision(10) <<  (*its)->ID;
+				(*os) << setw(30) << left << setprecision(20) << (*its)->x;
+				(*os) << setw(30) << left << setprecision(20) <<  (*its)->xp;
+				(*os) << setw(30) << left << setprecision(20) <<  (*its)->y;
+				(*os) << setw(30) << left << setprecision(20) <<  (*its)->yp;
+				(*os) << setw(30) << left << setprecision(20) << (*its)->ct;
+				(*os) << setw(30) << left << setprecision(20) << (*its)->dp;
+				(*os) << setw(30) << left << setprecision(20) << (*its)->z;
+				(*os) << setw(10) << left << setprecision(10) <<  (*its)->turn;
+				(*os) << endl;
+			}
+		}
+	}	
+		
+	StoredJawInelasticData.clear();	
 }

@@ -95,16 +95,16 @@ void FlukaDustbin::Output(std::ostream* os)
 	(*os) << "#\t1=icoll\t2=c_rotation\t3=s\t4=x\t5=xp\t6=y\t7=yp\t8=nabs\t9=np\t10=ntu" << endl;
 	for(vector <LossData>::iterator its = OutputLosses.begin(); its != OutputLosses.end(); ++its)
 	{
-		(*os) << setw(16) << left << (*its).coll_id;
-		(*os) << setw(20) << left << (*its).angle;
-		(*os) << setw(20) << left << (*its).position;
-		(*os) << setw(20) << left << (*its).p.x();
-		(*os) << setw(20) << left << (*its).p.xp();
-		(*os) << setw(20) << left << (*its).p.y();
-		(*os) << setw(20) << left << (*its).p.yp();
-		(*os) << setw(20) << left << (*its).p.type();
-		(*os) << setw(20) << left << (*its).p.id();
-		(*os) << setw(20) << left << (*its).turn;			
+		(*os) << setw(16) << left << setprecision(12) << (*its).coll_id;
+		(*os) << setw(20) << left << setprecision(12) << (*its).angle;
+		(*os) << setw(20) << left << setprecision(12) << (*its).position;
+		(*os) << setw(20) << left << setprecision(12) << (*its).p.x();
+		(*os) << setw(20) << left << setprecision(12) << (*its).p.xp();
+		(*os) << setw(20) << left << setprecision(12) << (*its).p.y();
+		(*os) << setw(20) << left << setprecision(12) << (*its).p.yp();
+		(*os) << setw(20) << left << setprecision(12) << (*its).p.type();
+		(*os) << setw(20) << left << setprecision(12) << (*its).p.id();
+		(*os) << setw(20) << left << setprecision(12) << (*its).turn;			
 		(*os) << endl;
 	}	
 }

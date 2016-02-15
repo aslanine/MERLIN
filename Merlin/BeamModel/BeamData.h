@@ -86,6 +86,8 @@ public:
     double max_sig_x;
     double min_sig_y;
     double max_sig_y;
+    double min_sig_z;
+    double max_sig_z;
 
     double sigma_x() const { return sqrt(emit_x*beta_x); }
     double sigma_y() const { return sqrt(emit_y*beta_y); }

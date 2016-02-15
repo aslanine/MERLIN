@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     int ncorepart 	= 3;						// number of core particles to track
     int npart 		= 3;                     	// number of halo particles to track
     int nturns 		= 1E6;                      // number of turns to track
- 
+    
     if (argc >=2){npart = atoi(argv[1]);}
 
     if (argc >=3){seed = atoi(argv[2]);}
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "03Jan_S_noRF_1E6/";
+		case_dir = "04JanCleaning_test_diff/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -91,10 +91,10 @@ int main(int argc, char* argv[])
 			cpn_dir = pn_dir + core_string;					mkdir(cpn_dir.c_str(), S_IRWXU);
 			hpn_dir = pn_dir + core_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
 		}	
-	bool every_bunch			= 1;		// output whole bunch every turn in a single file
+	bool every_bunch			= 0;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 1;		
-		if (output_initial_bunch || output_final_bunch){
+		if (output_initial_bunch || output_final_bunch || every_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 
 			cbunch_dir = bunch_dir + core_string;			mkdir(cbunch_dir.c_str(), S_IRWXU);
 			hbunch_dir = bunch_dir + halo_string;			mkdir(hbunch_dir.c_str(), S_IRWXU);
@@ -105,12 +105,12 @@ int main(int argc, char* argv[])
 	
 	bool hel_on 				= 0; 		// Hollow electron lens process?
 		bool DCon				= 0;
-		bool ACon				= 1;		if(ACon){DCon=0;}
+		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
-		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
+		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
-	bool collimation_on 		= 0;
+	bool collimation_on 		= 1;
 		if(collimation_on){
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);
 			cdustbin_dir = dustbin_dir + core_string; 	mkdir(cdustbin_dir.c_str(), S_IRWXU);
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
 										// False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 										
-	bool cleaning				= 0;
+	bool cleaning				= 1;
 		if(cleaning){
 			collimation_on		= 1;
 			every_bunch			= 0;
