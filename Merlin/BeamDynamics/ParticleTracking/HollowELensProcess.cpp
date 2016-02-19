@@ -36,7 +36,7 @@ namespace ParticleTracking {
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity)
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
 	 ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1),\
-	 LHC_Radial(0)
+	 LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -48,7 +48,7 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double length_e)
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
 	EffectiveLength(length_e), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0),\
-	ElectronDirection(1),  LHC_Radial(0)
+	ElectronDirection(1),  LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -61,7 +61,8 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double rmin,\
  double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss)
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0),\
-	SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1), LHC_Radial(0)
+	SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1), LHC_Radial(0),\
+	 YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -128,7 +129,6 @@ void HollowELensProcess::DoProcess (double ds)
 	
 	double theta = 0;
 	double Gamma_p = 0;
-	//cout << "Entered Hollow Electron Lens Process" << endl;
 
 	ParticleBunch* newbunch = new ParticleBunch(currentBunch->GetReferenceMomentum(), currentBunch->GetTotalCharge()/currentBunch->size());
 	newbunch->clear();
@@ -329,7 +329,10 @@ double HollowELensProcess::CalcKickSimple (Particle &p)
 	y = p.y();	
 	
 	// Calculate particle transverse vector ('radius' in xy space)
-	R = sqrt( pow((x-XOffset),2) + pow((y-YOffset),2) );
+	// Old for circular operation only
+	//~ R = sqrt( pow((x-XOffset),2) + pow((y-YOffset),2) );
+	// New takes into account elliptical operation
+	R = sqrt( pow((x-XOffset+XShift),2) + pow((y-YOffset+YShift),2) );
 	//~ R = sqrt( pow((x),2) + pow((y),2) );
 	
 	//~ cout << "\n\n\t\tHELProcess :: R = " << R << " Rmin = " << Rmin << endl; 
@@ -356,7 +359,7 @@ double HollowELensProcess::CalcKickSimple (Particle &p)
 
 }
 
-double HollowELensProcess::CalcKickSimple (double radius)
+double HollowELensProcess::CalcKickSimple (double r)
 {
 	double thet = 0;
 	double Length = 0;
@@ -365,8 +368,11 @@ double HollowELensProcess::CalcKickSimple (double radius)
 	else{Length = EffectiveLength;}
 	//~ cout << "\n\tHEL Length = " << Length << endl;	
 	
-	R = radius;
+	// Calculate particle transverse vector ('radius' in xy space)
+	R = r;
 	
+	//~ cout << "\n\n\t\tHELProcess :: R = " << R << " Rmin = " << Rmin << endl; 
+
 	if (R < Rmin) {
 		//~ cout << "\t\tHELProcess :: Returning zero at R = " << R << " Rmin = " << Rmin << endl; 
 		return 0;
@@ -406,7 +412,10 @@ double HollowELensProcess::CalcKickRadial (Particle &p)
 	y = p.y();	
 	
 	// Calculate particle transverse vector ('radius' in xy space)
-	R = sqrt( pow((x-XOffset),2) + pow((y-YOffset),2) );
+	// Old for circular operation only
+	//~ R = sqrt( pow((x-XOffset),2) + pow((y-YOffset),2) );
+	// New takes into account elliptical operation
+	R = sqrt( pow((x-XOffset+XShift),2) + pow((y-YOffset+YShift),2) );
 	//~ R = sqrt( pow((x),2) + pow((y),2) );
 	
 	// Adapted from V. Previtali's SixTrack elense implementation 
@@ -478,7 +487,7 @@ double HollowELensProcess::CalcKickRadial (Particle &p)
 	return thet;
 }
 
-double HollowELensProcess::CalcKickRadial (double radius)
+double HollowELensProcess::CalcKickRadial (double r)
 {
 	double f = 0;
 	double thet = 0;
@@ -486,11 +495,13 @@ double HollowELensProcess::CalcKickRadial (double radius)
 	
 	if(EffectiveLength == 0.){cout << "HELProcess: Length = 0, setting L = 3.0[m]" << endl; Length = 3.0;}
 	else{Length = EffectiveLength;}
+	//~ cout << "\n\tHEL Length = " << Length << endl;	
 	
 	// Calculate particle transverse vector ('radius' in xy space)
-	R = radius;
+	R = r;
 	
-	// Adapted from V. Previtali's SixTrack elense implementation 	
+	// Adapted from V. Previtali's SixTrack elense implementation 
+	
 	if (R < Rmin) {
 		return 0;
 	}
@@ -512,9 +523,9 @@ double HollowELensProcess::CalcKickRadial (double radius)
 		r2 = (const double) 315;		// rise - straight section		(x1.248)
 		r3 = (const double) 435;		// straight - left of peak		(x1.193)
 		r4 = (const double) 505;		// left - right of peak			(x1.184)
-	}											
-		
-	double elense_r_min = Rmin; 
+	}	
+	
+	double elense_r_min = Rmin; //Need to calculate 4 sigma at this point
 
 	double x0 = elense_r_min;
 	double y0 = 0;
@@ -558,9 +569,9 @@ double HollowELensProcess::CalcKickRadial (double radius)
 	return thet;
 }
 
-
 void HollowELensProcess::SetRadii (double rmin, double rmax)
 {
+	g = rmax/rmin;
 	cout << "\n\tHEL warning: HEL radii not set using beam envelope, and not aligned to beam orbit" << endl;
 	Rmin = rmin;
 	Rmax = rmax;
@@ -568,7 +579,7 @@ void HollowELensProcess::SetRadii (double rmin, double rmax)
 
 void HollowELensProcess::SetRadiiSigma (double rmin, double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss)
 {
-	
+	g = rmax / rmin;
 	//How many HELs in lattice?
 	int Hel_no = 0;
 	//Element no of last HEL
@@ -668,7 +679,8 @@ void HollowELensProcess::SetRadiiSigma (double rmin, double rmax, AcceleratorMod
 
 void HollowELensProcess::SetRadiiSigma (double rmin, double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss, double P0)
 {
-	
+
+	g = rmax/rmin;
 	//How many HELs in lattice?
 	int Hel_no = 0;
 	//Element no of last HEL
@@ -810,6 +822,34 @@ void HollowELensProcess::OutputProfile(std::ostream* os, double E, double min, d
 	}		
 }
 
+void HollowELensProcess::OutputFootprint(std::ostream* os, int npart)
+{	
+	cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+	cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
+	cout << " L = " << EffectiveLength << endl;
+	cout << " Current = " << Current << endl;
+	cout << " Brho = " << Rigidity << endl;
+	cout << " ElectronBeta = " << ElectronBeta << endl;
+	cout << " ProtonBeta = " << ProtonBeta << endl;	
+	
+	// Make a 'distribution' in xy phase space
+	double x_probe;
+	double y_probe;
+	
+	// using up to 3*R
+	double max_xy = 3*(sqrt(pow(Rmax,2))/2);
+
+	(*os) << "#r\tx\ty\tr" << endl;
+		
+	// Note here we subtract XShift, for the particle distribution we add XShift	
+	for(int i = 0; i<npart; ++i){	
+		x_probe = RandomNG::uniform(-max_xy,max_xy) - XOffset - XShift;
+		y_probe = RandomNG::uniform(-max_xy,max_xy) - YOffset - YShift;
+		if( ((sqrt( pow((x_probe-XOffset-XShift),2) + pow((y_probe-YOffset-YShift),2) )) > Rmin) &&((sqrt( pow((x_probe-XOffset-XShift),2) + pow((y_probe-YOffset-YShift),2) )) < Rmax) ){
+			(*os) << x_probe << "\t" << y_probe << "\t" << sqrt(pow(x_probe,2) + pow(y_probe,2)) << endl;
+		}
+	}
+}
 
 void HollowELensProcess::SetElectronDirection(bool dir){
 	ElectronDirection = dir;
@@ -819,6 +859,48 @@ void HollowELensProcess::SetElectronDirection(bool dir){
 	else{
 		cout << "HELProcess: electrons travelling in the same direction as protons: positive (defocussing) kick" << endl;		
 	}
+}
+
+
+void HollowELensProcess::SetEllipticalMatching(bool io){
+	
+	Elliptical = io;
+	
+	// Old Radii in metres
+	double Rmin_old = Rmin;
+	double Rmax_old = Rmax;
+	// Radii in sigma
+	double rmin = Rmin/Sigma_x;
+	double rmax = Rmax/Sigma_x;
+	
+	
+	// Need to set SemiMajor and SemiMinor axes for our ellipse - will be used to fnd HEL R_min
+	// The ratio of Rmin to Max is set by hardware and is 2 for the LHC, and shoulf be set in SetRadiiSigma or SetRadii
+	if(g ==0.){g = 2.0;}
+	// Also need to set XShift or YShift for co-ordinate transforms
+	if(Elliptical){
+		// x larger than y, shift co-ordinates up in y
+		if(Sigma_x > Sigma_y){
+			SemiMinor = Sigma_y * rmin;
+			SemiMajor = Sigma_x * rmin;
+			Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			Rmax = g*Rmin;			
+			YShift = SemiMinor - Rmin;
+		}
+		// y larger than x, shift co-ordinates right in x (i.e. assuming beam1 for LHC)
+		else if(Sigma_x < Sigma_y){
+			SemiMinor = Sigma_x * rmin;
+			SemiMajor = Sigma_y * rmin;	
+			Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+			Rmax = g*Rmin;	
+			XShift = SemiMinor - Rmin;			
+		}
+		
+		EllipticalSet = 1;
+	}
+	else{		
+		EllipticalSet = 0;
+	}	
 }
 
 }; // end namespace ParticleTracking

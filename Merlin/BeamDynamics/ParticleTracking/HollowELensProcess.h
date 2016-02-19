@@ -73,11 +73,13 @@ public:
 	
 	// Use simple profile to calculate kick
 	virtual double CalcKickSimple (Particle &p);
-	virtual double CalcKickSimple (double radius);
+	// Need this to output profiles
+	virtual double CalcKickSimple (double r);
 	
 	// Use radial (measured) profile to calculate kick
 	virtual double CalcKickRadial (Particle &p);
-	virtual double CalcKickRadial (double radius);
+	// Need this to output profiles
+	virtual double CalcKickRadial (double r);
 
 	// Change to radial (measured) profile, simple (perfect) is default
 	virtual void SetRadialProfile(){SimpleProfile = 0;}
@@ -87,9 +89,14 @@ public:
 	// Change electron direction (defualt opposite protons = 1)
 	virtual void SetElectronDirection(bool dir);
 	
-	// Output the HEL profile in x y phase space
+	// Set to elliptical matching operation
+	virtual void SetEllipticalMatching(bool io);
+	
+	// Output the HEL radial profile in x y phase space (assumes circular HEL)
 	virtual void OutputProfile(std::ostream* os, double E=7000, double min=0, double max=10);
-
+	
+	// Output the HEL footprint in x y phase space using a mapping of particles
+	virtual void OutputFootprint(std::ostream* os, int npart = 1E3);
 
 private:
     // Data Members for Class Attributes
@@ -121,6 +128,15 @@ private:
 	double Nstep;
 	double OpTune;
 	double Phi;
+	
+	//For non-circular operation (fit to top of ellipse)
+	double SemiMinor;
+	double SemiMajor;
+	double YShift;
+	double XShift;
+	double g;				// Ratio of rmax/rmin
+	bool Elliptical;
+	bool EllipticalSet;
 	
 	int Turn;
 	int SkipTurn;

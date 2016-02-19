@@ -45,10 +45,10 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int ncorepart 	= 3;						// number of core particles to track
-    int npart 		= 3;                     	// number of halo particles to track
-    int nturns 		= 1E6;                      // number of turns to track
-    
+    int ncorepart 	= 1E5;						// number of core particles to track
+    int npart 		= 1E5;                     	// number of halo particles to track
+    int nturns 		= 1;                      // number of turns to track
+       
     if (argc >=2){npart = atoi(argv[1]);}
 
     if (argc >=3){seed = atoi(argv[2]);}
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "04JanCleaning_test_diff/";
+		case_dir = "16FebTest/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -103,12 +103,14 @@ int main(int argc, char* argv[])
 	bool output_fluka_database 	= 1;
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
-	bool hel_on 				= 0; 		// Hollow electron lens process?
+
+	bool hel_on 				= 1; 		// Hollow electron lens process?
+	bool elliptical_HEL			= 0;		// Use elliptical operation
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
 		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
-		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
+		bool output_hel_profile = 1;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 1;
 		if(collimation_on){
@@ -120,17 +122,14 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 	
 	bool round_beams			= 1;		// true = -30m, false = -88.6m
-	bool thin					= 1;		// true = use thin HEL instead of thick
-	bool symplectic				= 1;
-	bool collision				= 1;
-	
+
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
 	bool start_at_ip1			= 0;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
-										// False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
+										// // False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 										
-	bool cleaning				= 1;
+	bool cleaning				= 0;
 		if(cleaning){
 			collimation_on		= 1;
 			every_bunch			= 0;
@@ -140,6 +139,11 @@ int main(int argc, char* argv[])
 			output_initial_bunch= 1;
 			output_final_bunch	= 1;
 		}
+		
+	//ALWAYS TRUE
+	bool thin					= 1;		// true = use thin HEL instead of thick
+	bool symplectic				= 1;
+	bool collision				= 1;
 		
 /************************************
 *	ACCELERATORMODEL CONSTRUCTION	*
@@ -470,10 +474,10 @@ int main(int argc, char* argv[])
 		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
 	}
     else{
-    	myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
-    	myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, node_particles, tuneTestDistribution);
-		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
-		//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
+    	//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
+    	//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, tuneTestDistribution);
+		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
+		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
 	}
     
 	if(collimation_on && cut_distn){ 
@@ -645,6 +649,10 @@ int main(int argc, char* argv[])
 			myHELProcess->SetOpMode(Turnskip);
 		}
 		
+		if(elliptical_HEL){
+			myHELProcess->SetEllipticalMatching(1);
+		}
+		
 		if(start_at_ip1){
 			myParticleTracker1->AddProcess(myHELProcess);	
 			myParticleTracker2->AddProcess(myHELProcess);	
@@ -666,6 +674,12 @@ int main(int argc, char* argv[])
 			if(!hel_os->good()){ std::cerr << "Could not open HEL profile file" << std::endl; exit(EXIT_FAILURE); }  
 			//~ myHELProcess->OutputProfile(hel_os, 7000, 0, 10);
 			myHELProcess->OutputProfile(hel_os, 7000, 0, 14.3);
+			
+			ostringstream hel_footprint_file;
+			hel_footprint_file << hel_dir << "footprint.txt";
+			ofstream* helf_os = new ofstream(hel_footprint_file.str().c_str());
+			if(!helf_os->good()){ std::cerr << "Could not open HEL footprint file" << std::endl; exit(EXIT_FAILURE); }  
+			myHELProcess->OutputFootprint(helf_os, 1E4);			
 		}
 	}
 

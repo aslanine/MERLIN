@@ -54,7 +54,7 @@ bool SortComponent(const AcceleratorComponent* first, const AcceleratorComponent
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E3;                          // number of particles to track
+    int npart = 1E5;                          // number of particles to track
     int nturns = 1;                           // number of turns to track
 	bool DoTwiss = 1;							// run twiss and align to beam envelope etc?
 	bool beam1 = 0;
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 	//~ string batch_directory="beam2_test/";
 	
 	string output_dir = "/Build/Thesis/outputs/AV/";
-	string batch_directory="10Feb16_Distn_test/";
+	string batch_directory="18Feb16_Distn_test/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -307,6 +307,8 @@ int main(int argc, char* argv[])
     mybeam.max_sig_y = 3;
     mybeam.min_sig_z = 0;
     mybeam.max_sig_z = 2;
+    mybeam.min_sig_dp = 0;
+    mybeam.max_sig_dp = 2;
     
     // Dispersion
     mybeam.Dx=myDispersion->Dx;
@@ -319,8 +321,10 @@ int main(int argc, char* argv[])
     //~ impact =1;
     //~ mybeam.emit_y = impact * impact * emittance * meter;
     // sig_z in metres
-    // rms bunch length is ~7.55cm
-    mybeam.sig_z = 0.0755 * meter;
+    // rms bunch length is ~7.55cm = 4 sigma_z
+    //~ mybeam.sig_z = (0.0755/4) * meter;
+    // Speed of LHC proton ~ c-3 m/s
+    mybeam.sig_z = ((2.51840894498383E-10 * 299792455)/4) * meter;
     
 	mybeam.emit_x = emittance * meter;
 	mybeam.emit_y = emittance * meter;
@@ -332,7 +336,7 @@ int main(int argc, char* argv[])
     mybeam.yp0=myTwiss->Value(4,0,0,start_element_number);
     mybeam.ct0=myTwiss->Value(5,0,0,start_element_number);
 
-    mybeam.sig_dp = 0.0;
+    mybeam.sig_dp = (1.129E-4);
 
     // X-Y coupling
     mybeam.c_xy=0.0;

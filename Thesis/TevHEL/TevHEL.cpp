@@ -46,13 +46,8 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);     // seed for random number generators
-<<<<<<< HEAD
-    int ncorepart 	= 21;			// number of core particles to track
-    int npart 		= 21;           // number of halo particles to track
-=======
     int ncorepart 	= 1E4;			// number of core particles to track
     int npart 		= 1E4;           // number of halo particles to track
->>>>>>> 2e25057636b4b8bc1717c3b6bfe7111d930ed3a3
     int nturns 		= 1;			// number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
@@ -88,7 +83,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "07Jan_ST/";
+		case_dir = "16_Feb_HELTest/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -114,11 +109,12 @@ int main(int argc, char* argv[])
 	bool hel_on 				= 1; 		// Hollow electron lens process?
 
 	bool LHC_HEL				= 1;		// LHC or Tevatron Hardware
+	bool elliptical_HEL			= 1;		// Use elliptical operation
 		bool DCon				= 1;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
 		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
-		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
+		bool output_hel_profile = 1;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 1;
 		if(collimation_on){
@@ -639,6 +635,10 @@ int main(int argc, char* argv[])
 			myHELProcess->SetOpMode(Turnskip);
 		}
 		
+		if(elliptical_HEL){
+			myHELProcess->SetEllipticalMatching(1);
+		}
+		
 		if(start_at_ip1){
 			myParticleTracker1->AddProcess(myHELProcess);	
 			myParticleTracker2->AddProcess(myHELProcess);	
@@ -660,6 +660,12 @@ int main(int argc, char* argv[])
 			if(!hel_os->good()){ std::cerr << "Could not open HEL profile file" << std::endl; exit(EXIT_FAILURE); }  
 			//~ myHELProcess->OutputProfile(hel_os, 7000, 0, 10);
 			myHELProcess->OutputProfile(hel_os, 7000, 0, 14.3);
+			
+			ostringstream hel_footprint_file;
+			hel_footprint_file << hel_dir << "footprint.txt";
+			ofstream* helf_os = new ofstream(hel_footprint_file.str().c_str());
+			if(!helf_os->good()){ std::cerr << "Could not open HEL footprint file" << std::endl; exit(EXIT_FAILURE); }  
+			myHELProcess->OutputFootprint(helf_os, 1E5);			
 		}
 	}
 
