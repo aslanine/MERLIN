@@ -34,7 +34,8 @@ typedef enum {normalDistribution,flatDistribution,ringDistribution,skewHaloDistr
 		horizontalHaloDistribution1,verticalHaloDistribution1,horizontalHaloDistribution2,\
 		horizontalHaloDistribution3,verticalHaloDistribution2,tuneTestDistribution,\
 		vertTestDistribution, CCDistn, CCDistn2, RFDistn, LHCDistn,\
-		SymplecticHorizontalHaloDistribution2, HELHaloDistribution, HorizontalHaloDistributionWithLimits} DistributionType;
+		SymplecticHorizontalHaloDistribution2, HELHaloDistribution, \
+		HorizontalHaloDistributionWithLimits} DistributionType;
 
 //	Constructs a particle bunch with random particles taken
 //	from a 6D distribution. The phase space moments are

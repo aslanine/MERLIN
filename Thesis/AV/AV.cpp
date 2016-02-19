@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 	//~ string batch_directory="beam2_test/";
 	
 	string output_dir = "/Build/Thesis/outputs/AV/";
-	string batch_directory="10Feb16_Distn_test/";
+	string batch_directory="18Feb16_Distn_test/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);

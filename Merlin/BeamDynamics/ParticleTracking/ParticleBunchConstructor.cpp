@@ -663,10 +663,12 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			cout << "\n\tParticleBunchConstructor: HorizontalHaloDistributionWithLimits: no min_sig_x etc set, using default values " << endl;		
 		}
 		else{
-			minx = beamdat.min_sig_x * sqrt(beamdat.emit_x );
+			//Working
+			//~ minx = beamdat.min_sig_x * sqrt(beamdat.emit_x );
+			//~ maxx = beamdat.max_sig_x * sqrt(beamdat.emit_x );
+			//AV test
+			minx = beamdat.min_sig_x;
 			maxx = beamdat.max_sig_x * sqrt(beamdat.emit_x );
-			//~ miny = beamdat.min_sig_y * sqrt(beamdat.emit_y );
-			//~ maxy = beamdat.max_sig_y * sqrt(beamdat.emit_y );
 			
 			miny = beamdat.min_sig_y;
 			maxy = beamdat.max_sig_y;
@@ -686,18 +688,29 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		//RandomGauss takes a variance (sigma^2), and cutoff in sigma. Mean = 0 , cutoffs are +/- cutoff.
 		
 		for(i=1; i<np;) {		
-
+	
+			// AV test
 			u = RandomNG::uniform(-pi,pi);			
 			randx = RandomNG::uniform(minx, maxx);
-			p.x()	= randx * cos(u);
-			p.xp()	= randx * sin(u);			
-			
+			p.x()  = randx * sqrt(beamdat.emit_x ) * sqrt(beamdat.beta_x ) * sin(u);
+            p.xp() = randx * sqrt(beamdat.emit_x ) * sqrt(1/beamdat.beta_x) * (cos(u) - sin(u)*beamdat.alpha_x);
+            
 			u = RandomNG::uniform(-pi,pi);	
-			//~ randy = RandomGauss(beamdat.emit_y,cutoffs.y());
-			//~ randy = RandomGauss(RandomNG::uniform(0, 3)*beamdat.emit_y,cutoffs.y());
 			randy = RandomGauss(RandomNG::uniform(miny, maxy)*beamdat.emit_y,cutoffs.y());
 			p.y()	= randy * cos(u);
 			p.yp()	= randy * sin(u);
+		
+			
+			// Working
+			//~ u = RandomNG::uniform(-pi,pi);			
+			//~ randx = RandomNG::uniform(minx, maxx);
+			//~ p.x()	= randx * cos(u);
+			//~ p.xp()	= randx * sin(u);		
+			
+			//~ u = RandomNG::uniform(-pi,pi);	
+			//~ randy = RandomGauss(RandomNG::uniform(miny, maxy)*beamdat.emit_y,cutoffs.y());
+			//~ p.y()	= randy * cos(u);
+			//~ p.yp()	= randy * sin(u);
 
 			// this gives the full gaussian with no cutoffs
 			//~ p.ct() = RandomGauss(dz2,0);			
@@ -717,7 +730,8 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			p.ct() = test * cos(u) * beamdat.sig_z;
 			p.dp() = test * sin(u) * beamdat.sig_dp;
 				
-			M.Apply(p);
+			//~ M.Apply(p);
+			
 			p+=pbunch.front(); // add centroid
 			p.type() = -1.0;
 			p.location() = -1.0;
