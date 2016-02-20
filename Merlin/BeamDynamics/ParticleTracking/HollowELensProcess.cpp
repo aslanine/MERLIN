@@ -150,8 +150,7 @@ void HollowELensProcess::DoProcess (double ds)
 				//~ cout << "\n\tDC Mode, Rmin = " << Rmin << " Rmax = " << Rmax << endl;  
 				if(SimpleProfile){theta = CalcKickSimple(*p);}
 				else{theta = CalcKickRadial(*p);}
-							
-				ParticleAngle = atan2((*p).y(), (*p).x());
+				
 				//~ cout << "\n\tX = " << (*p).x() << endl;
 				//~ cout << "\n\tY = " << (*p).y() << endl;
 				//~ cout << "\n\tAngle = " << ParticleAngle << endl;
@@ -159,23 +158,42 @@ void HollowELensProcess::DoProcess (double ds)
 				//~ cout << "\n\tRadius = " << sqrt(pow((*p).x(),2) + pow((*p).y(),2))/ sqrt(pow(293.031E-6,2) + pow(287.801E-6,2))<< " sigma" << endl;
 				
 				if(theta!=0){
-        
+					
+					if(!Elliptical){			
+						ParticleAngle = atan2((*p).y(), (*p).x());
+					}
+					else{
+						ParticleAngle = atan2( ((*p).y()-YShift) , ((*p).x()-XShift)  );
+					}
+					
+					//~ cout << "\n Elliptical = " << Elliptical << endl;
 					//~ cout << " x = " << (*p).x() << endl;
 					//~ cout << " y = " << (*p).y() << endl;
 					//~ cout << " xp = " << (*p).xp() << endl;
 					//~ cout << " yp = " << (*p).yp() << endl;
-					//~ cout << " ParticleAngle = " << ParticleAngle << endl;
-					//~ cout << " R = " << sqrt(pow((*p).x(),2) + pow((*p).y(),2)) << endl;
+					
+					//~ cout << " SemiMajor = " << SemiMajor << endl;
+					//~ cout << " SemiMinor = " << SemiMinor << endl;	
+					//~ cout << " x_shift = " << XShift << endl;
+					//~ cout << " y_shift = " << YShift << endl;
+					//~ cout << " x - x_shift = " << (*p).x() - XShift << endl;
+					//~ cout << " y - y_shift = " << (*p).y() - YShift << endl;
+					
+					//~ cout << " ParticleAngle = " << ParticleAngle << endl;			
+					
 					//~ cout << " Rmin = " << Rmin << endl;
-					//~ cout << " Rmax = " << Rmax << endl;
+					//~ cout << " Rmax = " << Rmax << endl;			
+					
+					//~ cout << " R_beam = " << sqrt(pow((*p).x(),2) + pow((*p).y(),2)) << endl;
+					//~ cout << " R_HEL = " <<sqrt( pow(((*p).x()-XShift),2) + pow(((*p).y()-YShift),2) ) << endl;
+					
 					//~ cout << " L = " << EffectiveLength << endl;
 					//~ cout << " max_kick = " << CalcThetaMax(R) << endl;
 					//~ cout << " Current = " << Current << endl;
 					//~ cout << " Brho = " << Rigidity << endl;
 					//~ cout << " Gamma_p = " << Gamma_p << endl;
 					//~ cout << " theta = " << theta << endl;
-					//~ cout << "\n" << endl;
-					
+					//~ cout << "\n" << endl;					
 					
 					//~ // Particle phase space angle and amplitude (radius)
 					(*p).xp() += theta * cos(ParticleAngle);			
@@ -205,7 +223,12 @@ void HollowELensProcess::DoProcess (double ds)
 						Phi = Multiplier * ( Turn * OpTune * 2 * pi );
 						theta *= 0.5*(1 + cos(Phi));
 										
-						ParticleAngle = atan2((*p).y(), (*p).x());
+						if(!Elliptical){			
+							ParticleAngle = atan2((*p).y(), (*p).x());
+						}
+						else{
+							ParticleAngle = atan2( ((*p).y()-YShift) , ((*p).x()-XShift)  );
+						}
 						
 						// Particle phase space angle and amplitude (radius)
 						(*p).xp() += theta * cos(ParticleAngle);			
@@ -233,7 +256,12 @@ void HollowELensProcess::DoProcess (double ds)
 					//~ else{				ParticleAngle = atan2((*p).y(), (*p).x());		}		
 					//~ if ((*p).x() < 0){	ParticleAngle = 2*pi + atan2((*p).y(), (*p).x());	}
 					//~ else{				ParticleAngle = atan2((*p).y(), (*p).x());		}	
-					ParticleAngle = atan2((*p).y(), (*p).x());	
+					if(!Elliptical){			
+						ParticleAngle = atan2((*p).y(), (*p).x());
+					}
+					else{
+						ParticleAngle = atan2( ((*p).y()-YShift) , ((*p).x()-XShift)  );
+					}
 						
 					if(theta!=0){
 						// Particle phase space angle and amplitude (radius)
@@ -261,7 +289,12 @@ void HollowELensProcess::DoProcess (double ds)
 					//~ else{				ParticleAngle = atan2((*p).y(), (*p).x());		}		
 					//~ if ((*p).x() < 0){	ParticleAngle = pi + atan2((*p).y(), (*p).x());	}
 					//~ else{				ParticleAngle = atan2((*p).y(), (*p).x());		}
-					ParticleAngle = atan2((*p).y(), (*p).x());		
+					if(!Elliptical){			
+						ParticleAngle = atan2((*p).y(), (*p).x());
+					}
+					else{
+						ParticleAngle = atan2( ((*p).y()-YShift) , ((*p).x()-XShift)  );
+					}		
 	
 					
 					if(theta!=0){
@@ -860,7 +893,6 @@ void HollowELensProcess::SetElectronDirection(bool dir){
 		cout << "HELProcess: electrons travelling in the same direction as protons: positive (defocussing) kick" << endl;		
 	}
 }
-
 
 void HollowELensProcess::SetEllipticalMatching(bool io){
 	
