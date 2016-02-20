@@ -184,7 +184,8 @@ if(BUILD_STATIC)
 endif()
 
 #link to libgsl.
-target_link_libraries(merlin gsl gslcblas)
+#~ target_link_libraries(merlin gsl gslcblas)
+target_link_libraries(merlin)
 
 #We want to link to the mpi libraries if this is an MPI build.
 if(CMAKE_BUILD_TYPE STREQUAL MPI OR CMAKE_BUILD_TYPE STREQUAL MPIDEBUG)
