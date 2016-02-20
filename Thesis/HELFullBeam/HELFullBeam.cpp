@@ -45,9 +45,9 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int ncorepart 	= 1E5;						// number of core particles to track
-    int npart 		= 1E5;                     	// number of halo particles to track
-    int nturns 		= 1;                      // number of turns to track
+    int ncorepart 	= 1E3;						// number of core particles to track
+    int npart 		= 1E4;                     	// number of halo particles to track
+    int nturns 		= 1E4;                      // number of turns to track
        
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -65,8 +65,8 @@ int main(int argc, char* argv[])
     cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	//~ string directory = "/home/haroon/git/Merlin";				//iiaa1
-	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "16FebTest/";
+		case_dir = "19FebTest_NH_NR/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 		if(output_turn_bunch){			
 			pn_dir = (full_output_dir+"ParticleNo/"); 		mkdir(pn_dir.c_str(), S_IRWXU); 
 			cpn_dir = pn_dir + core_string;					mkdir(cpn_dir.c_str(), S_IRWXU);
-			hpn_dir = pn_dir + core_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
+			hpn_dir = pn_dir + halo_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
 		}	
 	bool every_bunch			= 0;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
@@ -104,12 +104,12 @@ int main(int argc, char* argv[])
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
 
-	bool hel_on 				= 1; 		// Hollow electron lens process?
+	bool hel_on 				= 0; 		// Hollow electron lens process?
 	bool elliptical_HEL			= 0;		// Use elliptical operation
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
-		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
+		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 1;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 1;
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 1;		// true = -30m, false = -88.6m
+	bool round_beams			= 0;		// true = -30m, false = -88.6m
 
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
 										// // False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 										
-	bool cleaning				= 0;
+	bool cleaning				= 1;
 		if(cleaning){
 			collimation_on		= 1;
 			every_bunch			= 0;
@@ -390,9 +390,9 @@ int main(int argc, char* argv[])
     
     // Minimum and maximum sigma for HEL Halo Distribution
     myHaloBeam.min_sig_x = 4;
-    myHaloBeam.max_sig_x = 6;
+    myHaloBeam.max_sig_x = 5.8;
     myHaloBeam.min_sig_y = 4;
-    myHaloBeam.max_sig_y = 6;
+    myHaloBeam.max_sig_y = 5.8;
  
  /***********************
 *	BEAM CORE SETTINGS	*
@@ -816,9 +816,6 @@ int main(int argc, char* argv[])
 	delete myAccModel;
 	delete myMADinterface;
 	delete CollimatorJaw;
-	delete myParticleTracker1;
-	delete myParticleTracker2;
-	delete myParticleTracker3;
 		
 	delete hbo;
 	delete cbo;
@@ -835,6 +832,9 @@ int main(int argc, char* argv[])
 	//~ delete myDustbin;
 	//~ delete collimator_db;
 	//~ delete ap;
+	//~ delete myParticleTracker1;
+	//~ delete myParticleTracker2;
+	//~ delete myParticleTracker3;
 	
     return 0;
 }
