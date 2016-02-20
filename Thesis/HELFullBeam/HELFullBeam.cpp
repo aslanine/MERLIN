@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 		if(output_turn_bunch){			
 			pn_dir = (full_output_dir+"ParticleNo/"); 		mkdir(pn_dir.c_str(), S_IRWXU); 
 			cpn_dir = pn_dir + core_string;					mkdir(cpn_dir.c_str(), S_IRWXU);
-			hpn_dir = pn_dir + core_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
+			hpn_dir = pn_dir + halo_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
 		}	
 	bool every_bunch			= 0;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
