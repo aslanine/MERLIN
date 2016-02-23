@@ -24,7 +24,7 @@
 #include "Collimators/MaterialDatabase.h"
 #include "Collimators/ApertureConfiguration.h"
 #include "Collimators/Dustbin.h"
-d
+
 #include "MADInterface/MADInterface.h"
 
 #include "NumericalUtils/PhysicalUnits.h"
