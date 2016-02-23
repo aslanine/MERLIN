@@ -24,7 +24,7 @@
 #include "Collimators/MaterialDatabase.h"
 #include "Collimators/ApertureConfiguration.h"
 #include "Collimators/Dustbin.h"
-
+d
 #include "MADInterface/MADInterface.h"
 
 #include "NumericalUtils/PhysicalUnits.h"
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 	string input_dir = "/Thesis/data/HELFullBeam/";	
 	string output_dir = "/Build/Thesis/outputs/HELFullBeam/";
 	
-	string full_output_dir = (directory+output_dir);haed
+	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
