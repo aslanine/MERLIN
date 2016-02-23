@@ -45,9 +45,9 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int ncorepart 	= 1;						// number of core particles to track
-    int npart 		= 1E2;                     	// number of halo particles to track
-    int nturns 		= 1;                      // number of turns to track
+    int ncorepart 	= 1E3;						// number of core particles to track
+    int npart 		= 1E4;                     	// number of halo particles to track
+    int nturns 		= 1E4;                      // number of turns to track
        
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -65,8 +65,8 @@ int main(int argc, char* argv[])
     cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
-	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
@@ -76,11 +76,11 @@ int main(int argc, char* argv[])
 	string input_dir = "/Thesis/data/HELFullBeam/";	
 	string output_dir = "/Build/Thesis/outputs/HELFullBeam/";
 	
-	string full_output_dir = (directory+output_dir);haed
+	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "20Feb_Elliptical_test/";
+		case_dir = "20Feb_Elliptical_R_AC/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -107,9 +107,9 @@ int main(int argc, char* argv[])
 	bool hel_on 				= 1; 		// Hollow electron lens process?
 	bool elliptical_HEL			= 1;		// Use elliptical operation
 		bool DCon				= 0;
-		bool ACon				= 0;		if(ACon){DCon=0;}
+		bool ACon				= 1;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
-		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
+		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 1;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 1;
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 0;		// true = -30m, false = -88.6m
+	bool round_beams			= 1;		// true = -30m, false = -88.6m
 
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
