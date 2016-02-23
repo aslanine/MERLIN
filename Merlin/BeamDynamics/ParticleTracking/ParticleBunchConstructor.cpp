@@ -724,6 +724,35 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			//~ p.ct() = RandomGauss(RandomNG::uniform(minz, maxz)*dz2,maxz);
 			//~ p.dp() = RandomGauss(RandomNG::uniform(mindp, maxdp)*dp2,maxdp);
 			
+			//Box-muller to exclude 0 use a small number instead
+			//~ u1= RandomNG::uniform(1E-20,1);  
+			//~ u2= RandomNG::uniform(-pi,pi);    
+
+			//~ R=sqrt(-2.0*log(u1));
+			
+			//~ set maxR = 2
+			//~ 4 = -2 log(u1)
+			//~ -2 = log(u1)
+			//~ max(u1) = e^-2 = 0.135335382
+			//~ or max(u1) = e^-(maxR^2/2)
+			
+			//~ set minR = 0
+			//~ min(u1) = e^0 = 1
+			
+			// This is a label, it's not nice code but it does the trick
+			//~ loop1:
+			//~ R=sqrt(-2.0*log(u1));
+			
+			//~ if( (R >= minR) && (R <= maxR) ){
+				//~ p.dp() =R*cos(u1);
+				//~ p.ct() = R*sin(u1);
+			//~ }			
+			//~ else{ goto loop1;}
+
+
+			
+			
+			
 			// PERFECT - only works if maxz = maxdp
 			u = RandomNG::uniform(-pi,pi);	
 			test = RandomGauss(1,maxz);
