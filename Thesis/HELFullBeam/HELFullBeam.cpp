@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     int seed = (int)time(NULL);                 // seed for random number generators
     int ncorepart 	= 1E3;						// number of core particles to track
     int npart 		= 1E3;                     	// number of halo particles to track
-    int nturns 		= 100;                      // number of turns to track
+    int nturns 		= 1;                      // number of turns to track
        
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "23Feb_Elliptical_Footprint_DC/";
+		case_dir = "24Feb_MADInterface_out_test/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
