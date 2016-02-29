@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "23Feb_Elliptical_Footprint_DC/";
+		case_dir = "23Feb_Elliptical_NR_DC/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 1;		// true = -30m, false = -88.6m
+	bool round_beams			= 0;		// true = -30m, false = -88.6m
 
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
 										// // False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 										
-	bool cleaning				= 0;
+	bool cleaning				= 1;
 		if(cleaning){
 			collimation_on		= 1;
 			every_bunch			= 0;
