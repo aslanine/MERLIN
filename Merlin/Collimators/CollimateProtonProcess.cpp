@@ -7,8 +7,8 @@
 // Copyright: see Merlin/copyright.txt
 //
 // Created:		2010	 RJB
-// Modified:	07.09.15 Haroon Rafique		
-// Last Edited: 03.11.15 HR
+// Modified:	25.02.16 Haroon Rafique		
+// Last Edited: 25.02.16 HR
 // 
 /////////////////////////////////////////////////////////////////////////
 
@@ -126,8 +126,9 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 		exit(EXIT_FAILURE);
 	}
 
-	int smode = scattermodel->GetScatteringPhysicsModel();		
-	
+	int smode = scattermodel->GetScatteringPhysicsModel();	
+		
+// Loop over lengthtogo	
 	while(lengthtogo>0){
 		double E1 = E0 * (1 + p.dp());
 		//Note that pathlength should be calculated with E0
@@ -167,6 +168,13 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 		
 		E2 = E0 * (1 + p.dp());
 		
+		if(flukaset){ //for ionisation
+			for(FlukaLossesIterator = FlukaLossesVector.begin(); FlukaLossesIterator != FlukaLossesVector.end(); ++FlukaLossesIterator){					
+					(*FlukaLossesIterator)->Record(*currentComponent, (z+zstep), p, ColParProTurn);
+			}
+		}		
+		
+// Energy cut		
 		//~ if(p.dp() < ((1/E0) - 1)){
 		if(E2 <=1.0){
 			p.ct() = z;
@@ -185,9 +193,16 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 			return false;					
 		}	
 
+		if(flukaset){ //for MCS
+			for(FlukaLossesIterator = FlukaLossesVector.begin(); FlukaLossesIterator != FlukaLossesVector.end(); ++FlukaLossesIterator){					
+					(*FlukaLossesIterator)->Record(*currentComponent, (z+zstep), p, ColParProTurn);
+			}
+		}
+
+// Increment Z		
+		z+=zstep;
 
 //Check if (returned to aperture) OR (travelled through length) 
-		z+=zstep;
 		if(scatter_plot){scattermodel->ScatterPlot(p, z, ColParProTurn, ColName);}
 		
 		if( (colap->PointInside( (p.x()), (p.y()), z)) || (xlen>lengthtogo) ) {		
@@ -201,27 +216,38 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 				scattermodel->DeathReport(p, step_size, currentComponent->GetComponentLatticePosition(), lostparticles);
 				if(dustset){					
 					for(DustbinIterator = DustbinVector.begin(); DustbinIterator != DustbinVector.end(); ++DustbinIterator){					
-						(*DustbinIterator)->Dispose(*currentComponent, (z+zstep), p, ColParProTurn);
+						(*DustbinIterator)->Dispose(*currentComponent, z, p, ColParProTurn);
 					}					
+				}
+				if(flukaset){ // for inelastic
+					for(FlukaLossesIterator = FlukaLossesVector.begin(); FlukaLossesIterator != FlukaLossesVector.end(); ++FlukaLossesIterator){					
+							(*FlukaLossesIterator)->Record(*currentComponent, (z), p, ColParProTurn);
+					}
 				}
 				if(jaw_inelastic){scattermodel->JawInelastic(p, z, ColParProTurn, ColName);}
 				return true;
 			}
 		}
 		
+		if(flukaset){ //for point like scattering
+			for(FlukaLossesIterator = FlukaLossesVector.begin(); FlukaLossesIterator != FlukaLossesVector.end(); ++FlukaLossesIterator){					
+					(*FlukaLossesIterator)->Record(*currentComponent, z, p, ColParProTurn);
+			}
+		}
+		
+// Energy cut
 		if( (p.dp() < -0.95) || (p.dp() < -1) ){
 			p.ct() = z;
 			scattermodel->DeathReport(p, step_size, currentComponent->GetComponentLatticePosition(), lostparticles);					
 			if(dustset){					
 				for(DustbinIterator = DustbinVector.begin(); DustbinIterator != DustbinVector.end(); ++DustbinIterator){					
-					(*DustbinIterator)->Dispose(*currentComponent, (z+zstep), p, ColParProTurn);
+					(*DustbinIterator)->Dispose(*currentComponent, z, p, ColParProTurn);
 				}					
 			}
 			return true;
 		}
 		
-		lengthtogo -= step_size;
-	
+		lengthtogo -= step_size;	
 	}
 }
 

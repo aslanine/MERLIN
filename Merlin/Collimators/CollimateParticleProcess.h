@@ -27,12 +27,15 @@
 #include "BeamModel/PSTypes.h"
 
 #include "Collimators/Dustbin.h"
+#include "Collimators/FlukaLosses.h"
 
 #include "Exception/MerlinException.h"
 
 #define COLL_AT_ENTRANCE 1
 #define COLL_AT_CENTER 2
 #define COLL_AT_EXIT 4
+
+using namespace Collimation;
 
 namespace ParticleTracking {
 
@@ -119,11 +122,15 @@ public:
     virtual double GetOutputBinSize() const;
     virtual void SetOutputBinSize(double);
     
-    //~ virtual void SetDustbin (Dustbin& odb){outputdustbin = &odb; dustset=1;}
     virtual void SetDustbin (Dustbin* odb){DustbinVector.push_back(odb); dustset=1;}
     
     vector<Dustbin*> DustbinVector;
     vector<Dustbin*>::iterator DustbinIterator;
+    
+    virtual void SetFlukaLosses (FlukaLosses* ofl){FlukaLossesVector.push_back(ofl); flukaset=1;}
+    
+    vector<FlukaLosses*> FlukaLossesVector;
+    vector<FlukaLosses*>::iterator FlukaLossesIterator;
     
     //~ Dustbin* outputdustbin;
 
@@ -158,6 +165,7 @@ protected:
 	
 	// 0 when no dustbin is set
     bool dustset;
+    bool flukaset;
     
     const double GetBinSize(){return bin_size;}
             

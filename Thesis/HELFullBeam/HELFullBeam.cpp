@@ -81,7 +81,8 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "23Feb_Elliptical_NR_DC/";
+
+		case_dir = "24Feb_MADInterface_out_test/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}

@@ -211,6 +211,8 @@ void ScatteringModel::EnergyLoss(PSvector& p, double x, Material* mat, double E0
 	double dp = ((xi * land) - deltaE) * MeV;
 
     p.dp() = ((E1 - dp) - E0) / E0;
+    // Set scatter type to any interaction
+    p.type() = 0;
 }
 
 
@@ -232,6 +234,8 @@ void ScatteringModel::Straggle(PSvector& p, double x, Material* mat, double E1, 
 	p.xp () += theta_plane_x; 
 	p.y ()  += y_plane;
 	p.yp () += theta_plane_y; 
+	// Set scatter type to Coulomb
+	p.type() = 5;
 	
  }
 
