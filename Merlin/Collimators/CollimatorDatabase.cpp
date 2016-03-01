@@ -291,20 +291,37 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 						//std::cout << "EnableMatchBeamEnvelope - " << EnableMatchBeamEnvelope << "\t" << JawFlattnessErrors << std::endl;
 						//Create an aperture for the collimator jaws
 						if(EnableMatchBeamEnvelope  && !JawFlattnessErrors && !JawAlignmentErrors)
-						{
+						{														// BEAM 1 TCDQ's
+							if( (CollData[i].name == "TCDQA.A4R6.B1") || (CollData[i].name == "TCDQA.B4R6.B1") || (CollData[i].name == "TCDQA.C4R6.B1") || (CollData[i].name == "TCDQA.A4L6.B2") || (CollData[i].name == "TCDQA.B4L6.B2") || (CollData[i].name == "TCDQA.C4L6.B2") )
+							{
+								OneSidedUnalignedCollimatorAperture* app=new OneSidedUnalignedCollimatorAperture(collimator_aperture_width_entrance,collimator_aperture_height_entrance,\
+								collimator_aperture_tilt,collimator_material,length, x_orbit, y_orbit);
+
+								app->SetExitWidth(collimator_aperture_width_exit);	//Horizontal
+								app->SetExitHeight(collimator_aperture_height_exit);	//Vertical
+								app->SetExitXOffset(x_orbit_exit);	//Horizontal
+								app->SetExitYOffset(y_orbit_exit);	//Vertical
+								
+								//Set the aperture for collimation
+								(CMapit->second)->SetAperture(app);
+								(CMapit->second)->SetMaterial(collimator_material);
+								//cout << "collimator: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
+							}							
+							else
+							{
+								CollimatorAperture* app=new CollimatorAperture(collimator_aperture_width_entrance,collimator_aperture_height_entrance,\
+								collimator_aperture_tilt,collimator_material,length, x_orbit, y_orbit);
+
+								app->SetExitWidth(collimator_aperture_width_exit);	//Horizontal
+								app->SetExitHeight(collimator_aperture_height_exit);	//Vertical
+								app->SetExitXOffset(x_orbit_exit);	//Horizontal
+								app->SetExitYOffset(y_orbit_exit);	//Vertical
+								//Set the aperture for collimation
+								(CMapit->second)->SetAperture(app);
+								(CMapit->second)->SetMaterial(collimator_material);
+							}
 							if(logFlag)
-							*log << std::setw(15) << collimator_aperture_width_entrance/2.0 << std::setw(15)<< collimator_aperture_height_entrance/2.0 << endl;
-
-							CollimatorAperture* app=new CollimatorAperture(collimator_aperture_width_entrance,collimator_aperture_height_entrance,\
-							collimator_aperture_tilt,collimator_material,length, x_orbit, y_orbit);
-
-							app->SetExitWidth(collimator_aperture_width_exit);	//Horizontal
-							app->SetExitHeight(collimator_aperture_height_exit);	//Vertical
-							app->SetExitXOffset(x_orbit_exit);	//Horizontal
-							app->SetExitYOffset(y_orbit_exit);	//Vertical
-							//Set the aperture for collimation
-							(CMapit->second)->SetAperture(app);
-							(CMapit->second)->SetMaterial(collimator_material);
+								*log << std::setw(15) << collimator_aperture_width_entrance/2.0 << std::setw(15)<< collimator_aperture_height_entrance/2.0 << endl;
 						}
 						else if(!EnableMatchBeamEnvelope  && !JawFlattnessErrors && !JawAlignmentErrors)
 						{
@@ -361,67 +378,15 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 							//Left jaw, right jaw?
 							
 							//*log << std::setw(15) << xj1 << std::setw(15)<< xj2 <<std::setw(15)<< x_pos << endl;
-							// BEAM 1 TCDQ's
-							if(CollData[i].name == "TCDQA.A4R6.B1")
+														if( (CollData[i].name == "TCDQA.A4R6.B1") || (CollData[i].name == "TCDQA.B4R6.B1") || (CollData[i].name == "TCDQA.C4R6.B1") || (CollData[i].name == "TCDQA.A4L6.B2") || (CollData[i].name == "TCDQA.B4L6.B2") || (CollData[i].name == "TCDQA.C4L6.B2") )
 							{
-							OneSidedUnalignedCollimatorAperture* app=new OneSidedUnalignedCollimatorAperture(x_size,y_size,\
-							collimator_aperture_tilt,collimator_material,length,x_pos,y_pos);
+								OneSidedUnalignedCollimatorAperture* app=new OneSidedUnalignedCollimatorAperture(x_size,y_size,\
+								collimator_aperture_tilt,collimator_material,length,x_pos,y_pos);
 
-							//Set the aperture for collimation
-							(CMapit->second)->SetAperture(app);
-							(CMapit->second)->SetMaterial(collimator_material);
-							//cout << "collimator: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
-							}
-							else if(CollData[i].name == "TCDQA.B4R6.B1")
-							{
-							OneSidedUnalignedCollimatorAperture* app=new OneSidedUnalignedCollimatorAperture(x_size,y_size,\
-							collimator_aperture_tilt,collimator_material,length,x_pos,y_pos);
-
-							//Set the aperture for collimation
-							(CMapit->second)->SetAperture(app);
-							(CMapit->second)->SetMaterial(collimator_material);
-							//cout << "collimator: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
-							}
-							else if(CollData[i].name == "TCDQA.C4R6.B1")
-							{
-							OneSidedUnalignedCollimatorAperture* app=new OneSidedUnalignedCollimatorAperture(x_size,y_size,\
-							collimator_aperture_tilt,collimator_material,length,x_pos,y_pos);
-
-							//Set the aperture for collimation
-							(CMapit->second)->SetAperture(app);
-							(CMapit->second)->SetMaterial(collimator_material);
-							//cout << "collimator: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
-							}
-							// BEAM 2 TCDQ's
-							if(CollData[i].name == "TCDQA.A4L6.B2")
-							{
-							OneSidedUnalignedCollimatorAperture* app=new OneSidedUnalignedCollimatorAperture(x_size,y_size,\
-							collimator_aperture_tilt,collimator_material,length,x_pos,y_pos);
-
-							//Set the aperture for collimation
-							(CMapit->second)->SetAperture(app);
-							(CMapit->second)->SetMaterial(collimator_material);
-							//cout << "collimator: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
-							}
-							else if(CollData[i].name == "TCDQA.B4L6.B2")
-							{
-							OneSidedUnalignedCollimatorAperture* app=new OneSidedUnalignedCollimatorAperture(x_size,y_size,\
-							collimator_aperture_tilt,collimator_material,length,x_pos,y_pos);
-
-							//Set the aperture for collimation
-							(CMapit->second)->SetAperture(app);
-							(CMapit->second)->SetMaterial(collimator_material);
-							//cout << "collimator: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
-							}
-							else if(CollData[i].name == "TCDQA.C4L6.B2")
-							{
-							OneSidedUnalignedCollimatorAperture* app=new OneSidedUnalignedCollimatorAperture(x_size,y_size,\
-							collimator_aperture_tilt,collimator_material,length,x_pos,y_pos);
-
-							//Set the aperture for collimation
-							(CMapit->second)->SetAperture(app);
-							(CMapit->second)->SetMaterial(collimator_material);
-							//cout << "collimator: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
+								//Set the aperture for collimation
+								(CMapit->second)->SetAperture(app);
+								(CMapit->second)->SetMaterial(collimator_material);
+								//cout << "collimator: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
 							}
 							else
 							{
