@@ -532,8 +532,8 @@ double MADInterface::ReadComponent ()
 
         if(len==0 && zeroLengths.find(type)!=zeroLengths.end())
         {
-		MerlinIO::warning() << "Ignoring zero length " << type << ": " << name << endl;
-		return 0;
+			MerlinIO::warning() << "Ignoring zero length " << type << ": " << name << endl;
+			return 0;
         }
 	else if(type =="KICKER")
 	{
