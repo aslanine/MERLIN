@@ -210,6 +210,7 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 						
 						double sigma_entrance;
 						double sigma_exit;
+						double x_orb_test;
 						
 						/***************** HR use middle of collimator beta to set half gap etc *****************/
 						//~ bool middle = 0;
@@ -220,7 +221,10 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 							double alpha_x_exit = -twiss->Value(1,2,1,j+1);
 							double alpha_y_exit = -twiss->Value(3,4,2,j+1);
 							
-							double lc = (CMapit->second)->GetLength();
+							double lc = (CMapit->second)->GetLength();							
+							
+							// track orbit forward half length of collimator
+							x_orb_test = x_orbit + (lc/2)*twiss->Value(2,0,0,j);
 							
 							double beta_x_mid = beta_x - 2 * (lc/2)*alpha_x_entrance + pow((lc/2),2) * pow(((1+ pow(alpha_x_entrance,2))/beta_x),2);
 							double beta_y_mid = beta_y - 2 * (lc/2)*alpha_y_entrance + pow((lc/2),2) * pow(((1+ pow(alpha_y_entrance,2))/beta_y),2);
@@ -245,6 +249,8 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 							//And the exit parameters
 							sigma_exit = sqrt( ( beta_x_exit * emittance_x * cos(collimator_aperture_tilt) * cos(collimator_aperture_tilt)) + \
 								(beta_y_exit * emittance_y * sin(collimator_aperture_tilt) * sin(collimator_aperture_tilt)) );
+								
+							x_orb_test = x_orbit;
 						}
 						
 							double collimator_aperture_width_entrance  = CollData[i].sigma_x*sigma_entrance*2;
@@ -270,6 +276,7 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 						
 						(CMapit->second)->SetCollID(i+1);
 						
+						//TODO: half_gap taking into account tilt
 						FlukaData* fluka_data = new FlukaData;						
 							fluka_data->id_coll 	= (CMapit->second)->GetCollID();
 							fluka_data->name 		= CollData[i].name;
@@ -277,7 +284,8 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 							fluka_data->angle 		= CollData[i].tilt;
 							fluka_data->beta_x 		= beta_x;
 							fluka_data->beta_y 		= beta_y;
-							fluka_data->half_gap 	= CollData[i].sigma_x*sigma_entrance;
+							//~ fluka_data->half_gap 	= CollData[i].sigma_x*sigma_entrance;
+							fluka_data->half_gap 	= CollData[i].sigma_x*sigma_entrance - x_orb_test;
 							fluka_data->material 	= collimator_material->GetSymbol();
 							fluka_data->length 		= length;
 							fluka_data->sig_x 		= sqrt(emittance_x * beta_x);
@@ -292,7 +300,10 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 						//Create an aperture for the collimator jaws
 						if(EnableMatchBeamEnvelope  && !JawFlattnessErrors && !JawAlignmentErrors)
 						{														// BEAM 1 TCDQ's
-							if( (CollData[i].name == "TCDQA.A4R6.B1") || (CollData[i].name == "TCDQA.B4R6.B1") || (CollData[i].name == "TCDQA.C4R6.B1") || (CollData[i].name == "TCDQA.A4L6.B2") || (CollData[i].name == "TCDQA.B4L6.B2") || (CollData[i].name == "TCDQA.C4L6.B2") )
+							if( (CollData[i].name == "TCDQA.A4R6.B1") || (CollData[i].name == "TCDQA.B4R6.B1") || (CollData[i].name == "TCDQA.C4R6.B1") \
+							 || (CollData[i].name == "TCDQA.A4L6.B2") || (CollData[i].name == "TCDQA.B4L6.B2") || (CollData[i].name == "TCDQA.C4L6.B2") \
+							 || (CollData[i].name == "TCDQM.B4R6.B2") || (CollData[i].name == "TCDQA.B4L6.B2") || (CollData[i].name == "TCDQA.C4L6.B2") \
+							 )
 							{
 								OneSidedUnalignedCollimatorAperture* app=new OneSidedUnalignedCollimatorAperture(collimator_aperture_width_entrance,collimator_aperture_height_entrance,\
 								collimator_aperture_tilt,collimator_material,length, x_orbit, y_orbit);
@@ -390,13 +401,13 @@ double CollimatorDatabase::ConfigureCollimators(AcceleratorModel* model,double e
 							}
 							else
 							{
-							UnalignedCollimatorAperture* app=new UnalignedCollimatorAperture(x_size,y_size,\
-							collimator_aperture_tilt,collimator_material,length,x_pos,y_pos);
+								UnalignedCollimatorAperture* app=new UnalignedCollimatorAperture(x_size,y_size,\
+								collimator_aperture_tilt,collimator_material,length,x_pos,y_pos);
 
-							//Set the aperture for collimation
-							(CMapit->second)->SetAperture(app);
-							(CMapit->second)->SetMaterial(collimator_material);
-							//cout << "COLLIMATOR: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
+								//Set the aperture for collimation
+								(CMapit->second)->SetAperture(app);
+								(CMapit->second)->SetMaterial(collimator_material);
+								//cout << "COLLIMATOR: " << CollData[i].name << "has aperture" << Collimators[i]->GetName() << endl;
 							}
 							if(logFlag)
 							*log << std::setw(15) << collimator_aperture_width_entrance/2.0 << std::setw(15)<< collimator_aperture_height_entrance/2.0 << endl;

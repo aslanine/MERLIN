@@ -275,7 +275,6 @@ void CollimateParticleProcess::DoCollimation ()
 			// If not a collimator, then do not scatter and directly remove the particle.
 			if(!is_collimator || DoScatter(*p))
 			{	
-				cout << "test" << endl;
 				if(is_collimator)
 				{
 					(*p).ct() += (s-bin_size);
