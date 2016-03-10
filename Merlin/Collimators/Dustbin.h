@@ -156,8 +156,11 @@ public:
 	virtual void Finalise();
 	virtual void Output(std::ostream* os);
 	virtual void Dispose(AcceleratorComponent& currcomponent, double pos, Particle& particle, int turn = 0);
+	virtual void Beam2(bool onoff){beam2 = onoff;}
 	
 protected:
+
+	bool beam2;
 
 private:
 
