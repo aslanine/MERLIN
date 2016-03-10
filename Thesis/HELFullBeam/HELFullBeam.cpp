@@ -46,8 +46,9 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
     int ncorepart 	= 1E3;						// number of core particles to track
-    int npart 		= 1E3;                     	// number of halo particles to track
-    int nturns 		= 100;                      // number of turns to track
+    int npart 		= 1E4;                     	// number of halo particles to track
+    int nturns 		= 1E4;                      // number of turns to track
+
        
     if (argc >=2){npart = atoi(argv[1]);}
 
@@ -65,8 +66,8 @@ int main(int argc, char* argv[])
     cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
-	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
@@ -80,7 +81,8 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "23Feb_Elliptical_Footprint_DC/";
+
+		case_dir = "24Feb_MADInterface_out_test/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -106,6 +108,7 @@ int main(int argc, char* argv[])
 
 	bool hel_on 				= 1; 		// Hollow electron lens process?
 	bool elliptical_HEL			= 1;		// Use elliptical operation
+
 		bool DCon				= 1;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
@@ -129,7 +132,7 @@ int main(int argc, char* argv[])
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
 										// // False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 										
-	bool cleaning				= 0;
+	bool cleaning				= 1;
 		if(cleaning){
 			collimation_on		= 1;
 			every_bunch			= 0;

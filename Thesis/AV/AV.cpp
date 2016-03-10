@@ -26,6 +26,8 @@
 #include "Collimators/MaterialDatabase.h"
 #include "Collimators/ApertureConfiguration.h"
 #include "Collimators/Dustbin.h"
+#include "Collimators/CollimatorSurvey.h"
+#include "Collimators/FlukaLosses.h"
 
 
 #include "MADInterface/MADInterface.h"
@@ -54,8 +56,8 @@ bool SortComponent(const AcceleratorComponent* first, const AcceleratorComponent
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E5;                          // number of particles to track
-    int nturns = 1;                           // number of turns to track
+    int npart = 200;                          // number of particles to track
+    int nturns = 2;                           // number of turns to track
 	bool DoTwiss = 1;							// run twiss and align to beam envelope etc?
 	bool beam1 = 0;
 	
@@ -94,17 +96,15 @@ int main(int argc, char* argv[])
 	bool output_fluka_database = 		1;
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
 	//~ string directory = "/home/haroon/git/Merlin/HR";				//iiaa1
-	//~ string directory = "/afs/cern.ch/work/a/avalloni/private/MerlinforFluka/MERLIN";					//M11x	
+		string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/work/a/avalloni/private/MerlinforFluka/MERLIN";	//lxplus avalloni
-	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	
 	//~ string input_dir = "/UserSim/data/6p5TeV_RunII_FlatTop_B2/";
 	string input_dir = "/Thesis/data/AV/";
 	
 	//~ string output_dir = "/test2/UserSim/outputs/HL/";
 	//~ string output_dir = "/Build/UserSim/outputs/6p5TeV_RunII_FlatTop_B2/";
-	//~ string batch_directory="beam2_test/";
-	
+	//~ string batch_directory="beam2_test_1000/";
 	string output_dir = "/Build/Thesis/outputs/AV/";
 	string batch_directory="10Mar16_Ap_test/";
 
@@ -112,6 +112,9 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);
 	full_output_dir = (directory+output_dir+batch_directory);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
+	
+	string fluka_dir = full_output_dir + "Fluka/";    
+	mkdir(fluka_dir.c_str(), S_IRWXU);  
 	
 ///////////////////////////////////
 // ACCELERATORMODEL CONSTRUCTION //
@@ -127,7 +130,9 @@ int main(int argc, char* argv[])
     if(beam1)
 		myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV.tfs", beam_energy );
     else
-		myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2.tfs", beam_energy );
+		//~ myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2.tfs", beam_energy );
+		//~ myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2_rf.tfs", beam_energy );
+		myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2_noRF.tfs", beam_energy );
 	cout << "MADInterface Done" << endl;
 
     // As we are only tracking for 200 turns we can choose to ignore the accelerating cavities
@@ -215,6 +220,9 @@ int main(int argc, char* argv[])
     // We use 1 micron as the standard impact parameter
     collimator_db->SelectImpactFactor(start_element, 1.0e-6);
 
+    // Flag to use a constant jaw opening using the sigma value from the centre of the jaw in s
+    collimator_db->UseMiddleJawHalfGap();
+
     double impact = 6;
     // Finally we set up the collimator jaws to appropriate sizes
     try{
@@ -234,7 +242,8 @@ int main(int argc, char* argv[])
     cout << "Impact factor number of sigmas: " << impact << endl;
     
     
-     if(output_fluka_database && seed == 1){
+     //~ if(output_fluka_database && seed == 1){
+     if(output_fluka_database){
 		ostringstream fd_output_file;
 		fd_output_file << (full_output_dir+"fluka_database.txt");
 
@@ -274,8 +283,22 @@ int main(int argc, char* argv[])
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
- 
+    
+        
+/****************************
+*	Collimator Survey	*
+****************************/
+	CollimatorSurvey* CollSurvey = new CollimatorSurvey(myAccModel, emittance, emittance, myTwiss); 
+	
+		ostringstream cs_output_file;
+		cs_output_file << full_output_dir << "coll_survey.txt";
+		ofstream* cs_output = new ofstream(cs_output_file.str().c_str());
+		if(!cs_output->good()) { std::cerr << "Could not open collimator survey output" << std::endl; exit(EXIT_FAILURE); }   
+		CollSurvey->Output(cs_output, 20);			
+		delete cs_output;
+		
 	ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.01, 0); 
+	
 // The accelerator lattice, in the form of an AcceleratorModel, is now complete
 // The AcceleratorModel consists of a vector of AcceleratorComponent objects, each with it's own aperture and geometry
 // Each magnet has it's own field, and each collimator has it's own material
@@ -283,11 +306,14 @@ int main(int argc, char* argv[])
 ///////////////////
 // BEAM SETTINGS //
 ///////////////////
+cout << "BeamSettings" << endl;
 
     // We need to calculate the dispersion for the BeamData object
     Dispersion* myDispersion = new Dispersion(myAccModel, beam_energy);
     int start_element_number = FindElementLatticePosition(start_element.c_str(), myAccModel);
     myDispersion->FindDispersion(start_element_number);
+
+cout << "Dispersion done" << endl;
 
     BeamData mybeam;
 
@@ -299,17 +325,17 @@ int main(int argc, char* argv[])
     mybeam.beta_y = myTwiss->Value(3,3,2,start_element_number)*meter;
     mybeam.alpha_x = -myTwiss->Value(1,2,1,start_element_number);
     mybeam.alpha_y = -myTwiss->Value(3,4,2,start_element_number);
-    
     // Minimum and maximum sigma for HEL Halo Distribution
-    mybeam.min_sig_x = 5;
+    mybeam.min_sig_x = 5.5;
     mybeam.max_sig_x = 5.54;
     mybeam.min_sig_y = 0;
     mybeam.max_sig_y = 3;
-    mybeam.min_sig_z = 0;
-    mybeam.max_sig_z = 2;
-    mybeam.min_sig_dp = 0;
-    mybeam.max_sig_dp = 2;
+    //mybeam.min_sig_z = 0;
+    //mybeam.max_sig_z = 2;
+    //mybeam.min_sig_dp = 0;
+    //mybeam.max_sig_dp = 2;
     
+   
     // Dispersion
     mybeam.Dx=myDispersion->Dx;
     mybeam.Dy=myDispersion->Dy;
@@ -317,17 +343,12 @@ int main(int argc, char* argv[])
     mybeam.Dyp=myDispersion->Dyp;
 
     // We set the beam emittance such that the bunch (created from this BeamData object later) will impact upon the primary collimator
-    //~ mybeam.emit_x = impact * impact * emittance * meter;
-    //~ impact =1;
-    //~ mybeam.emit_y = impact * impact * emittance * meter;
-    // sig_z in metres
-    // rms bunch length is ~7.55cm = 4 sigma_z
-    //~ mybeam.sig_z = (0.0755/4) * meter;
-    // Speed of LHC proton ~ c-3 m/s
-    mybeam.sig_z = ((2.51840894498383E-10 * 299792455)/4) * meter;
-    
-	mybeam.emit_x = emittance * meter;
-	mybeam.emit_y = emittance * meter;
+    //mybeam.emit_x = impact * impact * emittance * meter;
+    //impact =1;
+    mybeam.emit_x = emittance * meter;
+    mybeam.emit_y = emittance * meter;
+    //mybeam.emit_y = impact * impact * emittance * meter;
+    //mybeam.sig_z =0;
 
     //Beam centroid
     mybeam.x0=myTwiss->Value(1,0,0,start_element_number);
@@ -336,7 +357,10 @@ int main(int argc, char* argv[])
     mybeam.yp0=myTwiss->Value(4,0,0,start_element_number);
     mybeam.ct0=myTwiss->Value(5,0,0,start_element_number);
 
-    mybeam.sig_dp = (1.129E-4);
+    //mybeam.sig_dp = 0.0;
+    //mybeam.sig_z = 0;
+    mybeam.sig_z = ((2.51840894498383E-10 * 299792458)) * meter;
+    mybeam.sig_dp =  (1.129E-4);
 
     // X-Y coupling
     mybeam.c_xy=0.0;
@@ -356,25 +380,30 @@ int main(int argc, char* argv[])
 
     // horizontalHaloDistribution1 is a halo in xx' plane, zero in yy'
     // horizontalHaloDistribution2 is a halo in xx' plane, gaussian in yy'
-    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HorizontalHaloDistributionWithLimits);
+    //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HorizontalHaloDistributionWithLimits);
+    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution1);
 
     myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
     delete myBunchCtor;
 
     myBunch->SetMacroParticleCharge(mybeam.charge);
     
-	//create string stream to add distribution and filename
-	ostringstream hbunch_output_file;
-	// add together the directory name and filename
-	hbunch_output_file << full_output_dir  << "initial_bunch.txt";
-	//create an output file stream using the above directory+name
-	ofstream* hbunch_output = new ofstream(hbunch_output_file.str().c_str());
-	//check that the file cna be opened (that the directory exists and is accessible)
-	if(!hbunch_output->good()) { std::cerr << "Could not open initial halo bunch output" << std::endl; exit(EXIT_FAILURE); }   
-	// output the bunch
-	myBunch->Output(*hbunch_output);			
-	// delete the pointer
-	delete hbunch_output;	   
+//create string stream to add distribution and filename
+ostringstream hbunch_output_file;
+// add together the directory name and filename
+//hbunch_output_file << full_output_dir  << "initial_bunch.txt";
+hbunch_output_file << full_output_dir << "_" << seed  << "initial_bunch.txt";
+
+//create an output file stream using the above directory+name
+ofstream* hbunch_output = new ofstream(hbunch_output_file.str().c_str());
+//check that the file cna be opened (that the directory exists and is accessible)
+if(!hbunch_output->good()) { std::cerr << "Could not open initial halo bunch output" << std::endl; exit(EXIT_FAILURE); }   
+// output the bunch
+myBunch->Output(*hbunch_output);			
+// delete the pointer
+delete hbunch_output;	
+    
+    
     
 
 // Our bunch is now complete and ready for tracking & collimation
@@ -412,7 +441,7 @@ int main(int argc, char* argv[])
     myTrackingOutputAV->SetTurn(1);
     myTrackingOutputAV->output_all = 1;
      
-    //~ myParticleTracker->SetOutput(myTrackingOutputAV);
+    myParticleTracker->SetOutput(myTrackingOutputAV);
 
 /////////////////////////
 // Collimation Process //
@@ -427,8 +456,7 @@ int main(int argc, char* argv[])
     //~ if(!col_output->good())    {
         //~ std::cerr << "Could not open collimation loss file" << std::endl;
         //~ exit(EXIT_FAILURE);
-    //~ }   
-   
+    //~ }      
  
     // We declare our process, every PhysicsProcess takes a priority and a mode, as we have no other processes the priority is irrelevent
     // As we have set up no modes in the CollimateParticleProcess, the mode is also irrelevent
@@ -441,10 +469,12 @@ int main(int argc, char* argv[])
 	LossMapDustbin* myLossMapDustbin = new LossMapDustbin;
 	myCollimateProcess->SetDustbin(myLossMapDustbin);   
 	
-	
 	FlukaDustbin* myFlukaDustbin = new FlukaDustbin;
-	myCollimateProcess->SetDustbin(myFlukaDustbin);      
+	myCollimateProcess->SetDustbin(myFlukaDustbin);
 
+	FlukaLosses* myFlukaLosses = new FlukaLosses;
+	myCollimateProcess->SetFlukaLosses(myFlukaLosses);
+	
     // If the ScatterAtCollimator flag is true, collimation involves a full scattering simulation, if it is false, any particle to hit a collimator jaw is lost
     myCollimateProcess->ScatterAtCollimator(true);
    
@@ -452,24 +482,24 @@ int main(int argc, char* argv[])
     ScatteringModel* myScatter = new ScatteringModel;
     if(beam1){
 		myScatter->SetScatterPlot("TCP.C6L7.B1");
-		myScatter->SetScatterPlot("TCP.B6L7.B1");
-		
 		myScatter->SetJawImpact("TCP.C6L7.B1");
+		myScatter->SetScatterPlot("TCP.B6L7.B1");
 		myScatter->SetJawImpact("TCP.D6L7.B1");
 	}
 	else{ 
-		myScatter->SetJawImpact("TCP.B6R7.B2");	
+		//myScatter->SetScatterPlot("TCP.C6R7.B2");
 		myScatter->SetJawImpact("TCP.C6R7.B2");
+		//myScatter->SetScatterPlot("TCSG.B4R7.B2");
 		myScatter->SetJawImpact("TCSG.B4R7.B2");	
+		myScatter->SetJawImpact("TCSG.B5R7.B2");	
+		//myScatter->SetScatterPlot("TCP.D6R7.B2");
 		myScatter->SetJawImpact("TCP.D6R7.B2");
+		myScatter->SetJawImpact("TCP.B6R7.B2");
 		
-		myScatter->SetScatterPlot("TCP.B6R7.B2");
-		myScatter->SetScatterPlot("TCP.C6R7.B2");
-		myScatter->SetScatterPlot("TCSG.B4R7.B2");
-		myScatter->SetScatterPlot("TCP.D6R7.B2");
-		
-		myScatter->SetJawInelastic("TCP.B6R7.B2");	
-		myScatter->SetJawInelastic("TCP.C6R7.B2");
+		myScatter->SetJawInelastic("TCP.C6R7.B2");     
+        myScatter->SetJawInelastic("TCSG.B4R7.B2");
+        myScatter->SetJawInelastic("TCP.D6R7.B2");     
+        myScatter->SetJawInelastic("TCP.B6R7.B2");
 	}
 
     // MERLIN contains various ScatteringProcesses; namely the following
@@ -527,14 +557,14 @@ int main(int argc, char* argv[])
 
 	
 	/*********************************************************************
-	**	Output JawImpact JawInelastic and ScatterPlot
+	**	Output Jaw Impact
 	*********************************************************************/
 	myScatter->OutputJawImpact(full_output_dir,seed);
-	myScatter->OutputJawInelastic(full_output_dir,seed);
 	myScatter->OutputScatterPlot(full_output_dir,seed);	
-
+    myScatter->OutputJawInelastic(full_output_dir,seed);
+    
 	/*********************************************************************
-	** OUTPUT FLUKA LOSSES 
+	** OUTPUT FLUKA DUSTBIN 
 	*********************************************************************/
 	ostringstream fluka_dustbin_file;
 	fluka_dustbin_file << full_output_dir<<std::string("fluka_losses_")<< npart << "_" << seed << std::string(".txt");	   
@@ -543,10 +573,22 @@ int main(int argc, char* argv[])
 	if(!fluka_dustbin_output->good())    {
         std::cerr << "Could not open dustbin loss file" << std::endl;
         exit(EXIT_FAILURE);
-    }   
-	
+    } 	
 	myFlukaDustbin->Finalise(); 
 	myFlukaDustbin->Output(fluka_dustbin_output); 
+	
+	/*********************************************************************
+	** OUTPUT FLUKA LOSSES 
+	*********************************************************************/	
+	ostringstream fluka_file;
+	fluka_file << fluka_dir << std::string("fluka_new_losses_")<< npart << "_" << seed << std::string(".txt");	
+	
+	ofstream* fluka_output1 = new ofstream(fluka_file.str().c_str());   
+	if(!fluka_output1->good()){ std::cerr << "Could not open fluka loss file" << std::endl; exit(EXIT_FAILURE); }  
+	
+	myFlukaLosses->Finalise();
+	myFlukaLosses->Output(fluka_output1);
+	delete fluka_output1;  
   
   
    /*********************************************************************

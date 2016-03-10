@@ -61,7 +61,9 @@ namespace ParticleTracking {
 
 CollimateParticleProcess::CollimateParticleProcess (int priority, int mode, std::ostream* osp)
         : ParticleBunchProcess("PARTICLE COLLIMATION",priority),cmode(mode),os(osp),
-        createLossFiles(false), file_prefix(""), lossThreshold(1), nstart(0), pindex(0), scatter(false), bin_size(0.1*PhysicalUnits::meter), Imperfections(false), dustset(0), ColParProTurn(0), FirstElementSet(0)
+        createLossFiles(false), file_prefix(""), lossThreshold(1), nstart(0), pindex(0), \
+        scatter(false), bin_size(0.1*PhysicalUnits::meter), Imperfections(false), dustset(0), \
+        flukaset(0), ColParProTurn(0), FirstElementSet(0)
 {}
 
 CollimateParticleProcess::~CollimateParticleProcess ()
@@ -618,6 +620,7 @@ void CollimateParticleProcess::DoOutput (const PSvectorArray& lostb, const list<
 
 bool CollimateParticleProcess::DoScatter (Particle& p)
 {
+	cout << "ColParPro: WARNING : Using depreciated DoScatter" << endl;
 	const CollimatorAperture *tap = (CollimatorAperture*) currentComponent->GetAperture();
 
 	//int scatter_type = currentBunch->Scatter(p,len,tap);

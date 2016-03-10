@@ -69,7 +69,7 @@ void FlukaDustbin::Dispose(AcceleratorComponent& currcomponent, double pos, Part
 		
 		const CollimatorAperture* tap= dynamic_cast<const CollimatorAperture*> (currentComponent->GetAperture());
 		temp.angle = tap->GetCollimatorTilt();
-		
+				
 		temp.p = particle;
 		
 		//pushback vector

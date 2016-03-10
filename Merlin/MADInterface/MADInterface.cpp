@@ -532,8 +532,8 @@ double MADInterface::ReadComponent ()
 
         if(len==0 && zeroLengths.find(type)!=zeroLengths.end())
         {
-		MerlinIO::warning() << "Ignoring zero length " << type << ": " << name << endl;
-		return 0;
+			MerlinIO::warning() << "Ignoring zero length " << type << ": " << name << endl;
+			return 0;
         }
 	else if(type =="KICKER")
 	{
@@ -558,6 +558,10 @@ double MADInterface::ReadComponent ()
 		}
 	}
 */
+	else if(type=="LCAV")
+	{
+		type="RFCAVITY";
+	}
 	else if(type =="RFCAVITY")
 	{
 		double volts=prmMap->GetParameter("VOLT");
@@ -568,10 +572,6 @@ double MADInterface::ReadComponent ()
 			type="RFCAVITY";
 		}	
 	}
-	else if(type=="LCAV")
-	{
-		type="RFCAVITY";
-	}
 	else if(type=="RCOLLIMATOR")    // added by Adriana Bungau, 26 October 2006
 	{
 		type="COLLIMATOR";
@@ -581,10 +581,9 @@ double MADInterface::ReadComponent ()
 		type="COLLIMATOR";
 	}
 
-        if(type=="RBEND")
+    if(type=="RBEND")
         {
 		  if((prmMap->GetParameter("K0L"))!=0.0){ type="SBEND";}
-		 //~ type="SBEND";	//HR 14.11.15 test for symplectic not working
 	}
 
 	if(type=="MULTIPOLE")
@@ -835,7 +834,7 @@ double MADInterface::ReadComponent ()
 
 		// LHC TFS Table fix HR 11.11.15
 		if(single_cell_rf){			
-			cout << "\n\t MADInterface::RFCAVITY: Freq = " << freq << " Hz\tV: " << volts << " V\tncells: " << ncells << "\tWavelength/2: " << lambdaOver2 << " m\tLength: " << len1 << " m"<< endl;
+			cout << "\n\t MADInterface::RFCAVITY: Freq = " << freq << " Hz\tV: " << volts << " MV\tncells: " << ncells << "\tWavelength/2: " << lambdaOver2 << " m\tLength: " << len1 << " m"<< endl;
 			
 			double drift_len = len - lambdaOver2;
 			double rfcav_len = lambdaOver2;
@@ -974,7 +973,7 @@ double MADInterface::ReadComponent ()
 
 	if(component && log)
 	{
-		Log(component->GetQualifiedName(),ctor->GetCurrentFrameDepth(),*log);
+		//~ Log(component->GetQualifiedName(),ctor->GetCurrentFrameDepth(),*log);
 	}
 
 	if(component && incApertures && type!="COLLIMATOR")
