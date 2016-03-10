@@ -39,7 +39,7 @@ void ApertureConfiguration::LoadApertureConfiguration(string input_file)
 
 	string aptype;
 
-	//Lets assume we have the correct file layout
+	//Lets assume we have the correct file layout - i.e. cut out the first 47 lines of MAD data
 	if(input->good())
 	{
 		char getlinebuf[1024];
@@ -105,6 +105,7 @@ void ApertureConfiguration::ConfigureElementApertures(AcceleratorModel* model)
 
 			for(vector<ap>::iterator itr = ApertureList.begin(); itr!=ApertureList.end(); itr++)
 			{
+				
 				if(itr->s >= position)
 				{
 					//cout << (*comp)->GetName() << "\t" << itr->s << endl;

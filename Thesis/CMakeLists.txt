@@ -39,6 +39,7 @@ thesis_run(SymplecticLossMap SymplecticLossMap SymplecticLossMap.cpp)
 thesis_run(HELHaloDistn HELHaloDistn HELHaloDistn.cpp)
 thesis_run(HELFullBeam HELFullBeam HELFullBeam.cpp)
 thesis_run(TevHEL TevHEL TevHEL.cpp)
+thesis_run(ApertureTest ApertureTest ApertureTest.cpp)
 
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
 INCLUDE(Dart)
