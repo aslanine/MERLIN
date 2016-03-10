@@ -25,6 +25,7 @@
 #include "Collimators/MaterialDatabase.h"
 #include "Collimators/ApertureConfiguration.h"
 #include "Collimators/Dustbin.h"
+#include "Collimators/FlukaLosses.h"
 
 #include "MADInterface/MADInterface.h"
 
@@ -46,15 +47,15 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);     // seed for random number generators
-    int ncorepart 	= 1E4;			// number of core particles to track
-    int npart 		= 1E4;           // number of halo particles to track
-    int nturns 		= 1;			// number of turns to track
+    int ncorepart 	= 1;			// number of core particles to track
+    int npart 		= 20;           // number of halo particles to track
+    int nturns 		= 10;			// number of turns to track
  
     if (argc >=2){npart = atoi(argv[1]);}
 
     if (argc >=3){seed = atoi(argv[2]);}
     
-    seed = 1;
+    seed = 13;
 
     RandomNG::init(seed);
     
@@ -72,7 +73,7 @@ int main(int argc, char* argv[])
 	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	
-	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
+	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir, fluka_dir;			
 	string core_string =  "Core/";
 	string halo_string =  "Halo/";
 	
@@ -83,7 +84,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "16_Feb_HELTest/";
+		case_dir = "25_Feb_Fluka_Test/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -120,7 +121,9 @@ int main(int argc, char* argv[])
 		if(collimation_on){
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);
 			cdustbin_dir = dustbin_dir + core_string; 	mkdir(cdustbin_dir.c_str(), S_IRWXU);
-			hdustbin_dir = dustbin_dir + halo_string; 	mkdir(hdustbin_dir.c_str(), S_IRWXU);			
+			hdustbin_dir = dustbin_dir + halo_string; 	mkdir(hdustbin_dir.c_str(), S_IRWXU);		
+				
+			fluka_dir = full_output_dir + "Fluka/"; 	mkdir(fluka_dir.c_str(), S_IRWXU);	
 		}
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
@@ -361,10 +364,10 @@ int main(int argc, char* argv[])
     
     // Minimum and maximum sigma for HEL Halo Distribution
 
-    myHaloBeam.min_sig_x = 4;
-    myHaloBeam.max_sig_x = 6;
-    myHaloBeam.min_sig_y = 4;
-    myHaloBeam.max_sig_y = 6;
+    myHaloBeam.min_sig_x = 6;
+    myHaloBeam.max_sig_x = 8;
+    myHaloBeam.min_sig_y = 6;
+    myHaloBeam.max_sig_y = 8;
     //~ myHaloBeam.min_sig_x = 5.5;
     //~ myHaloBeam.max_sig_x = 5.54;
     //~ myHaloBeam.min_sig_y = 0;
@@ -424,9 +427,9 @@ int main(int argc, char* argv[])
     
     // Minimum and maximum sigma for HEL Halo Distribution
     myCoreBeam.min_sig_x = 0;
-    myCoreBeam.max_sig_x = 10;
+    myCoreBeam.max_sig_x = 4;
     myCoreBeam.min_sig_y = 0;
-    myCoreBeam.max_sig_y = 10;
+    myCoreBeam.max_sig_y = 4;
     
     delete myDispersion;
 
@@ -555,6 +558,8 @@ int main(int argc, char* argv[])
 	
 	LossMapDustbin* myHaloDustbin = new LossMapDustbin;
 	LossMapDustbin* myCoreDustbin = new LossMapDustbin;
+	FlukaLosses* myNormalFlukaLosses = new FlukaLosses;
+	FlukaLosses* myFullFlukaLosses = new FlukaLosses(1,0,0,0,0,0,0);
 
 	if(collimation_on){
 		cout << "Collimation on" << endl;
@@ -562,9 +567,11 @@ int main(int argc, char* argv[])
 			
 		myCollimateProcess->SetDustbin(myHaloDustbin);       
 		myCollimateProcess->SetDustbin(myCoreDustbin);       
+		myCollimateProcess->SetFlukaLosses(myNormalFlukaLosses);       
+		myCollimateProcess->SetFlukaLosses(myFullFlukaLosses);       
 
-		//~ myCollimateProcess->ScatterAtCollimator(true);
-		myCollimateProcess->ScatterAtCollimator(false);
+		myCollimateProcess->ScatterAtCollimator(true);
+		//~ myCollimateProcess->ScatterAtCollimator(false);
 	   
 		ScatteringModel* myScatter = new ScatteringModel;
 
@@ -762,6 +769,22 @@ int main(int argc, char* argv[])
 		myCoreDustbin->Finalise(); 
 		myCoreDustbin->Output(cdustbin_output); 
 		delete cdustbin_output;
+
+		ostringstream fluka_norm_file;
+		fluka_norm_file << (fluka_dir + "fluka_norm_losses.txt");	
+		ofstream* fluka_output1 = new ofstream(fluka_norm_file.str().c_str());	
+		if(!fluka_output1->good()){ std::cerr << "Could not open fluka loss file 1" << std::endl; exit(EXIT_FAILURE); }   
+		myNormalFlukaLosses->Finalise(); 
+		myNormalFlukaLosses->Output(fluka_output1); 
+		delete fluka_output1;
+		
+		ostringstream fluka_full_file;
+		fluka_full_file << (fluka_dir + "fluka_full_losses.txt");	
+		ofstream* fluka_output2 = new ofstream(fluka_full_file.str().c_str());	
+		if(!fluka_output2->good()){ std::cerr << "Could not open fluka loss file 2" << std::endl; exit(EXIT_FAILURE); }   
+		myFullFlukaLosses->Finalise(); 
+		myFullFlukaLosses->Output(fluka_output2); 
+		delete fluka_output2;
 	}
 	
 /********************
@@ -802,9 +825,6 @@ int main(int argc, char* argv[])
 	delete myAccModel;
 	delete myMADinterface;
 	delete CollimatorJaw;
-	delete myParticleTracker1;
-	delete myParticleTracker2;
-	delete myParticleTracker3;
 		
 	delete hbo;
 	delete cbo;
@@ -820,7 +840,10 @@ int main(int argc, char* argv[])
 	// Need to fix destructors for:
 	//~ delete myDustbin;
 	//~ delete collimator_db;
-	//~ delete ap;
+	//~ delete ap;	
+	//~ delete myParticleTracker1;
+	//~ delete myParticleTracker2;
+	//~ delete myParticleTracker3;
 	
     return 0;
 }

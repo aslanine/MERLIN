@@ -94,7 +94,7 @@ void CollimatorSurvey::Output(std::ostream* os, int no_points){
 
 void CollimatorSurvey::SurveyAperture(Aperture* ap, double s, double *aps){
 	//~ cout << "CheckAperture" << endl;
-	const double step = 1e-6;
+	const double step = 1e-8;
 	const double max = 1.0;
 	const double min = 0.0;
 	
