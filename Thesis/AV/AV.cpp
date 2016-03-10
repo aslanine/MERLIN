@@ -26,6 +26,8 @@
 #include "Collimators/MaterialDatabase.h"
 #include "Collimators/ApertureConfiguration.h"
 #include "Collimators/Dustbin.h"
+#include "Collimators/CollimatorSurvey.h"
+#include "Collimators/FlukaLosses.h"
 
 
 #include "MADInterface/MADInterface.h"
@@ -104,12 +106,15 @@ int main(int argc, char* argv[])
 	//~ string output_dir = "/Build/UserSim/outputs/6p5TeV_RunII_FlatTop_B2/";
 	//~ string batch_directory="beam2_test_1000/";
 	string output_dir = "/Build/Thesis/outputs/AV/";
-	string batch_directory="24Feb16_RF_test/";
+	string batch_directory="1Mar16_ColldbTest/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
 	full_output_dir = (directory+output_dir+batch_directory);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
+	
+	string fluka_dir = full_output_dir + "Fluka/";    
+	mkdir(fluka_dir.c_str(), S_IRWXU);  
 	
 ///////////////////////////////////
 // ACCELERATORMODEL CONSTRUCTION //
@@ -126,7 +131,8 @@ int main(int argc, char* argv[])
 		myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV.tfs", beam_energy );
     else
 		//~ myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2.tfs", beam_energy );
-		myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2_rf.tfs", beam_energy );
+		//~ myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2_rf.tfs", beam_energy );
+		myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2_noRF.tfs", beam_energy );
 	cout << "MADInterface Done" << endl;
 
     // As we are only tracking for 200 turns we can choose to ignore the accelerating cavities
@@ -214,6 +220,9 @@ int main(int argc, char* argv[])
     // We use 1 micron as the standard impact parameter
     collimator_db->SelectImpactFactor(start_element, 1.0e-6);
 
+    // Flag to use a constant jaw opening using the sigma value from the centre of the jaw in s
+    collimator_db->UseMiddleJawHalfGap();
+
     double impact = 6;
     // Finally we set up the collimator jaws to appropriate sizes
     try{
@@ -233,7 +242,8 @@ int main(int argc, char* argv[])
     cout << "Impact factor number of sigmas: " << impact << endl;
     
     
-     if(output_fluka_database && seed == 1){
+     //~ if(output_fluka_database && seed == 1){
+     if(output_fluka_database){
 		ostringstream fd_output_file;
 		fd_output_file << (full_output_dir+"fluka_database.txt");
 
@@ -273,7 +283,23 @@ int main(int argc, char* argv[])
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
- ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 5); 
+    
+        
+/****************************
+*	Collimator Survey	*
+****************************/
+	CollimatorSurvey* CollSurvey = new CollimatorSurvey(myAccModel, emittance, emittance, myTwiss); 
+	
+		ostringstream cs_output_file;
+		cs_output_file << full_output_dir << "coll_survey.txt";
+		ofstream* cs_output = new ofstream(cs_output_file.str().c_str());
+		if(!cs_output->good()) { std::cerr << "Could not open collimator survey output" << std::endl; exit(EXIT_FAILURE); }   
+		CollSurvey->Output(cs_output, 20);			
+		delete cs_output;
+		
+ //~ ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 5); 
+ ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 0); 
+ 
 // The accelerator lattice, in the form of an AcceleratorModel, is now complete
 // The AcceleratorModel consists of a vector of AcceleratorComponent objects, each with it's own aperture and geometry
 // Each magnet has it's own field, and each collimator has it's own material
@@ -431,8 +457,7 @@ delete hbunch_output;
     //~ if(!col_output->good())    {
         //~ std::cerr << "Could not open collimation loss file" << std::endl;
         //~ exit(EXIT_FAILURE);
-    //~ }   
-   
+    //~ }      
  
     // We declare our process, every PhysicsProcess takes a priority and a mode, as we have no other processes the priority is irrelevent
     // As we have set up no modes in the CollimateParticleProcess, the mode is also irrelevent
@@ -445,10 +470,12 @@ delete hbunch_output;
 	LossMapDustbin* myLossMapDustbin = new LossMapDustbin;
 	myCollimateProcess->SetDustbin(myLossMapDustbin);   
 	
-	
 	FlukaDustbin* myFlukaDustbin = new FlukaDustbin;
-	myCollimateProcess->SetDustbin(myFlukaDustbin);      
+	myCollimateProcess->SetDustbin(myFlukaDustbin);
 
+	FlukaLosses* myFlukaLosses = new FlukaLosses;
+	myCollimateProcess->SetFlukaLosses(myFlukaLosses);
+	
     // If the ScatterAtCollimator flag is true, collimation involves a full scattering simulation, if it is false, any particle to hit a collimator jaw is lost
     myCollimateProcess->ScatterAtCollimator(true);
    
@@ -536,8 +563,9 @@ delete hbunch_output;
 	myScatter->OutputJawImpact(full_output_dir,seed);
 	myScatter->OutputScatterPlot(full_output_dir,seed);	
     myScatter->OutputJawInelastic(full_output_dir,seed);
+    
 	/*********************************************************************
-	** OUTPUT FLUKA LOSSES 
+	** OUTPUT FLUKA DUSTBIN 
 	*********************************************************************/
 	ostringstream fluka_dustbin_file;
 	fluka_dustbin_file << full_output_dir<<std::string("fluka_losses_")<< npart << "_" << seed << std::string(".txt");	   
@@ -546,10 +574,22 @@ delete hbunch_output;
 	if(!fluka_dustbin_output->good())    {
         std::cerr << "Could not open dustbin loss file" << std::endl;
         exit(EXIT_FAILURE);
-    }   
-	
+    } 	
 	myFlukaDustbin->Finalise(); 
 	myFlukaDustbin->Output(fluka_dustbin_output); 
+	
+	/*********************************************************************
+	** OUTPUT FLUKA LOSSES 
+	*********************************************************************/	
+	ostringstream fluka_file;
+	fluka_file << fluka_dir << std::string("fluka_new_losses_")<< npart << "_" << seed << std::string(".txt");	
+	
+	ofstream* fluka_output1 = new ofstream(fluka_file.str().c_str());   
+	if(!fluka_output1->good()){ std::cerr << "Could not open fluka loss file" << std::endl; exit(EXIT_FAILURE); }  
+	
+	myFlukaLosses->Finalise();
+	myFlukaLosses->Output(fluka_output1);
+	delete fluka_output1;  
   
   
    /*********************************************************************
