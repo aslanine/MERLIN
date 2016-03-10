@@ -141,11 +141,7 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 		double step_size = interacted ? xlen : lengthtogo;
 		
 		double zstep = step_size * sqrt( 1 - p.xp()*p.xp() - p.yp()*p.yp() );
-		
-		
-		p.x() += step_size * p.xp();
-		p.y() += step_size * p.yp();
-		
+			
 //Jaw Impact
 		if(jaw_impact && z == 0){
 				scattermodel->JawImpact(p, ColParProTurn, ColName);
@@ -154,7 +150,11 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 //Scatter Plot
 		if(scatter_plot && z == 0){
 				scattermodel->ScatterPlot(p, z, ColParProTurn, ColName);
-		}
+		}	
+			
+		p.x() += step_size * p.xp();
+		p.y() += step_size * p.yp();
+
 		
 //Energy Loss		
 		if(smode == 1 || smode == 4){
