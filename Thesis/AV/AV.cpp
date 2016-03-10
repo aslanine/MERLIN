@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 	//~ string batch_directory="beam2_test/";
 	
 	string output_dir = "/Build/Thesis/outputs/AV/";
-	string batch_directory="18Feb16_Distn_test/";
+	string batch_directory="10Mar16_Ap_test/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
  
-	ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 5); 
+	ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.01, 0); 
 // The accelerator lattice, in the form of an AcceleratorModel, is now complete
 // The AcceleratorModel consists of a vector of AcceleratorComponent objects, each with it's own aperture and geometry
 // Each magnet has it's own field, and each collimator has it's own material
