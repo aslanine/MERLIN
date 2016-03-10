@@ -643,6 +643,79 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 	}
 	break;
 	case HorizontalHaloDistributionWithLimits:
+	{   
+        double minx(0.), maxx(0.), minz(0.), maxz(0.), mindp(0.), maxdp(0.);
+       
+        if( isnan(beamdat.min_sig_x) || isnan(beamdat.max_sig_x) || isnan(beamdat.min_sig_y) || isnan(beamdat.max_sig_y) ){       
+            minx = 5.5;
+            maxx = 5.54;
+            minz = 0;
+            maxz = 2;
+            mindp = 0;
+            maxdp = 2;
+            //cout << "\n\tParticleBunchConstructor: HorizontalHaloDistributionWithLimits: no min_sig_x etc set, using default values " << endl;       
+        }
+        else{
+           
+            minx = beamdat.min_sig_x;
+            maxx = beamdat.max_sig_x;
+           
+            minz = beamdat.min_sig_z;
+            maxz = beamdat.max_sig_z;
+           
+            mindp = beamdat.min_sig_dp;
+            maxdp = beamdat.max_sig_dp;
+        }
+       
+        double randx;
+        double u1;
+        double R;
+       
+        //RandomGauss takes a variance (sigma^2), and cutoff in sigma. Mean = 0 , cutoffs are +/- cutoff.
+        //cout<<"minx"<<'\t'<<minx<<endl;
+        //cout<<"maxx"<<'\t'<<maxx<<endl;
+        //cout<<"beamdat.max_sig_x"<<'\t'<<beamdat.max_sig_x<<endl;
+        //cout<<"beamdat.min_sig_x"<<'\t'<<beamdat.min_sig_x<<endl;
+        //cout<<"sqrt(beamdat.emit_x )"<<'\t'<<sqrt(beamdat.emit_x )<<endl;
+        for(i=1; i<np;) {       
+
+            u = RandomNG::uniform(-pi,pi);           
+            randx = RandomNG::uniform(minx, maxx);
+            //cout<<"randx"<<'\t'<<randx<<endl;
+            randx=randx*sqrt(beamdat.emit_x);
+            p.x()    = randx * cos(u);
+            p.xp()    = randx * sin(u);   
+            u = RandomNG::uniform(-pi,pi);
+            //cout<<"u"<<'\t'<<u<<endl;
+            p.y()    = RandomGauss(beamdat.emit_y,cutoffs.y());
+            p.yp()    = RandomGauss(beamdat.emit_y,cutoffs.yp());       
+           
+            u1= RandomNG::uniform(exp(-2),1);
+            //cout<<"u1"<<'\t'<<u1<<endl;
+            //cout<<"R"<<'\t'<<R<<endl;
+           
+           
+            R=sqrt(-2.0*log(u1));
+            p.dp() =R*cos(u)* (1.129E-4);
+            p.ct() = R*sin(u)*((2.51840894498383E-10 * 299792458))  ;
+
+           
+       
+            M.Apply(p);
+            p+=pbunch.front(); // add centroid
+            p.type() = -1.0;
+            p.location() = -1.0;
+            p.sd() = 0.0;
+            p.id() = i;
+           
+            if(itsFilter==0 || itsFilter->Apply(p)) {
+                pbunch.push_back(p);
+                i++;
+            }
+        }
+    }
+	break;	
+	case HorizontalHaloDistributionWithLimits2:
 	{	
 		rx = sqrt(beamdat.emit_x);
 		ry = sqrt(beamdat.emit_y);
