@@ -56,7 +56,7 @@ bool SortComponent(const AcceleratorComponent* first, const AcceleratorComponent
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E5;                          // number of particles to track
+    int npart = 1E2;                          // number of particles to track
     int nturns = 1;                           // number of turns to track
 	bool DoTwiss = 1;							// run twiss and align to beam envelope etc?
 	bool beam1 = 0;
@@ -279,7 +279,7 @@ int main(int argc, char* argv[])
     if(beam1) 
 		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV.tfs",1);   
     else   
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV_beam2.tfs",1);      
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV_beam2_test.tfs",1);      
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;

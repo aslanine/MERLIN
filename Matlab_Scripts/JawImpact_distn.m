@@ -35,46 +35,61 @@ b_ct = dataArray{:, 7};
 b_dp = dataArray{:, 8};
 clearvars filename formatSpec fileID dataArray ans;
 
+%% Figure with subplots
+figure;
+subplot(2,1,1);
+title('Positive Jaw');
+
+%% Plot initial bunch
+scatter(b_x, b_y, 10), hold on
+
 %% Plot JawImpact
 scatter(ji_x, ji_y, 5, 'filled'), hold on
 
 
-%% Plot tracked back 10cm bunch
-
-% track back a bin
-% for ii = 1:length(b_x)
-%     b_x(ii) = b_x(ii) - 0.1*b_xp(ii);
-%     b_y(ii) = b_y(ii) - 0.1*b_yp(ii);
-% end
-% track forward a bin
-% for ii = 1:length(b_x)
-%     b_x(ii) = b_x(ii) + 0.1*b_xp(ii);
-%     b_y(ii) = b_y(ii) + 0.1*b_yp(ii);
-% end
-
-% scatter((b_x + 0.1*b_xp), (b_y + 0.1*b_yp), 5), hold on
-
-%% Plot initial bunch
-scatter(b_x, b_y, 5), hold on
-
-%% Plot jaw half gaps
+%% Plot jaw half gap
 
 % positive gap
 pgap = 0.00151633;
 line([pgap pgap],[-1E-3 1E-3]), hold on
+
+%% Plot options
+minx = 1.5E-3;
+maxx = 1.57E-3;
+miny = -1E-3; 
+maxy = 1E-3;
+axis([minx,maxx,miny,maxy])
+
+xlabel('x [m]');
+ylabel('y [m]');
+
+hold off;
+%% Negative Jaw
+subplot(2,1,2);
+title('Positive Jaw');
+
+%% Plot initial bunch
+scatter(b_x, b_y, 10), hold on
+
+%% Plot JawImpact
+scatter(ji_x, ji_y, 5, 'filled'), hold on
+
+%% Plot jaw half gap
 %negative gap
 ngap = pgap;
 line([-ngap -ngap],[-1E-3 1E-3]), hold on
 
 %% Plot options
-minx = 1.5E-3;
-maxx = 1.57E-3;
-% minx = -1.57E-3;
-% maxx = -1.5E-3;
+minx = -1.57E-3;
+maxx = -1.5E-3;
 
 miny = -1E-3; 
 maxy = 1E-3;
+
 axis([minx,maxx,miny,maxy])
+
+xlabel('x [m]');
+ylabel('y [m]');
 
 hold off;
 clear all;
