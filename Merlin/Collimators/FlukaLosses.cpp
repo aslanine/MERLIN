@@ -46,11 +46,11 @@ FlukaLosses::FlukaLosses(bool zero, bool one, bool two, bool three, bool four, b
 }
 void FlukaLosses::Record(AcceleratorComponent& currcomponent, double pos, Particle& particle, int turn)
 {
-	cout << "\nFlukaLosss :: particle.type() = "<< particle.type() << endl;
+	//~ cout << "\nFlukaLosss :: particle.type() = "<< particle.type() << endl;
 	// Have to check p.type() to see if we are recording that type of loss
 	if( on_0 || (particle.type() == 1 && on_1) || (particle.type() == 2 && on_2) || (particle.type() == 3 && on_3) || (particle.type() == 4 && on_4) || (particle.type() == 5 && on_5) || (particle.type() == 6 && on_6) ){
 		
-		cout << "FlukaLosses : Storing loss " << particle.type() << endl;
+		//~ cout << "FlukaLosses : Storing loss " << particle.type() << endl;
 		// If current component is a collimator we store the loss, otherwise we do not
 		if (currentComponent != &currcomponent)
 		{	

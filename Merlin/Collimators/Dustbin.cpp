@@ -35,6 +35,7 @@ Dustbin::Dustbin(OutputType ot)
 LossMapDustbin::LossMapDustbin(OutputType ot)
 {
 	otype = ot;
+	beam2 = 0;
 }
 
 FlukaDustbin::FlukaDustbin(OutputType ot)
@@ -159,17 +160,30 @@ void LossMapDustbin::Dispose(AcceleratorComponent& currcomponent, double pos, Pa
 	//else {temp.temperature = 2;}	
 
 	//For LHC Loss Maps
-	if(currentComponent->GetType() =="Collimator"){temp.temperature = 0;}				
-	else if(temp.ElementName.substr(0, 14) =="SectorBend.MBW"){temp.temperature = 2;}	
-	else if(temp.ElementName.substr(0, 15) =="SectorBend.MBXW"){temp.temperature = 2;}
-	else if(temp.ElementName.substr(0, 14) =="Quadrupole.MQW"){temp.temperature = 2;}
-	else if(temp.ElementName.substr(0, 9) =="XCor.MCBW"){temp.temperature = 2;}
-	else if(temp.ElementName.substr(0, 9) =="YCor.MCBW"){temp.temperature = 2;}
-	else if(temp.ElementName.substr(0, 9) =="BPM.BPMWE"){temp.temperature = 2;}
-	else if(temp.ElementName.substr(0, 10) =="Drift.MCBW"){temp.temperature = 2;}
-	else if( (temp.s > 1.9790884399999788E+04) && (temp.s <= 2.0244198399999801E+04 ) && (temp.ElementName.substr(0, 11) == "Drift.DRIFT") ) {temp.temperature = 2;} //Drifts in IR7
-	else {temp.temperature = 1;}	
-
+	if(beam2){
+		if(currentComponent->GetType() =="Collimator"){temp.temperature = 0;}				
+		else if(temp.ElementName.substr(0, 14) =="SectorBend.MBW"){temp.temperature = 2;}	
+		else if(temp.ElementName.substr(0, 15) =="SectorBend.MBXW"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 14) =="Quadrupole.MQW"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 9) =="XCor.MCBW"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 9) =="YCor.MCBW"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 9) =="BPM.BPMWE"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 10) =="Drift.MCBW"){temp.temperature = 2;}
+		else if( (temp.s >      6.414684799990198e+03 ) && (temp.s <=6.867998799990211e+03 ) && (temp.ElementName.substr(0, 11) =="Drift.DRIFT") ) {temp.temperature = 2;} //Drifts in IR7
+		else {temp.temperature = 1;}	
+	}
+	else{
+		if(currentComponent->GetType() =="Collimator"){temp.temperature = 0;}				
+		else if(temp.ElementName.substr(0, 14) =="SectorBend.MBW"){temp.temperature = 2;}	
+		else if(temp.ElementName.substr(0, 15) =="SectorBend.MBXW"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 14) =="Quadrupole.MQW"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 9) =="XCor.MCBW"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 9) =="YCor.MCBW"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 9) =="BPM.BPMWE"){temp.temperature = 2;}
+		else if(temp.ElementName.substr(0, 10) =="Drift.MCBW"){temp.temperature = 2;}
+		else if( (temp.s > 1.9790884399999788E+04) && (temp.s <= 2.0244198399999801E+04 ) && (temp.ElementName.substr(0, 11) == "Drift.DRIFT") ) {temp.temperature = 2;} //Drifts in IR7
+		else {temp.temperature = 1;}	
+	}
 	temp.p = particle;
 	//pushback vector
 	DeadParticles.push_back(temp);

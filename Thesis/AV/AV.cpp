@@ -56,8 +56,8 @@ bool SortComponent(const AcceleratorComponent* first, const AcceleratorComponent
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 200;                          // number of particles to track
-    int nturns = 2;                           // number of turns to track
+    int npart = 1E2;                          // number of particles to track
+    int nturns = 1;                           // number of turns to track
 	bool DoTwiss = 1;							// run twiss and align to beam envelope etc?
 	bool beam1 = 0;
 	
@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     }
 
 // Initialise the random number generator with the seed
-
+	seed =0;
     RandomNG::init(seed);
 
     double beam_energy = 6500.0;
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 	//~ string output_dir = "/Build/UserSim/outputs/6p5TeV_RunII_FlatTop_B2/";
 	//~ string batch_directory="beam2_test_1000/";
 	string output_dir = "/Build/Thesis/outputs/AV/";
-	string batch_directory="1Mar16_ColldbTest/";
+	string batch_directory="10Mar16_Ap_test/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -279,7 +279,7 @@ int main(int argc, char* argv[])
     if(beam1) 
 		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV.tfs",1);   
     else   
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV_beam2.tfs",1);      
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV_beam2_test.tfs",1);      
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
@@ -297,9 +297,8 @@ int main(int argc, char* argv[])
 		CollSurvey->Output(cs_output, 20);			
 		delete cs_output;
 		
- //~ ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 5); 
- ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 0); 
- 
+	ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.01, 0); 
+	
 // The accelerator lattice, in the form of an AcceleratorModel, is now complete
 // The AcceleratorModel consists of a vector of AcceleratorComponent objects, each with it's own aperture and geometry
 // Each magnet has it's own field, and each collimator has it's own material
@@ -381,8 +380,8 @@ cout << "Dispersion done" << endl;
 
     // horizontalHaloDistribution1 is a halo in xx' plane, zero in yy'
     // horizontalHaloDistribution2 is a halo in xx' plane, gaussian in yy'
-    //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HorizontalHaloDistributionWithLimits);
-    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution1);
+    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HorizontalHaloDistributionWithLimits);
+    //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, horizontalHaloDistribution1);
 
     myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
     delete myBunchCtor;
@@ -405,8 +404,6 @@ myBunch->Output(*hbunch_output);
 delete hbunch_output;	
     
     
-    
-
 // Our bunch is now complete and ready for tracking & collimation
 
 /////////////////////
@@ -428,21 +425,22 @@ delete hbunch_output;
 	//~ myTrackingOutputASCII->output_all = 1;
 	
 	//~ myParticleTracker->SetOutput(myTrackingOutputASCII);
-	 string tof = "Tracking_output_file.txt";
-    string t_o_f = full_output_dir+tof;
+	//~ string tof = "Tracking_output_file.txt";
+    //~ string t_o_f = full_output_dir+tof;
     
-     //~ OUTPUT AV
-    ostringstream trackingparticles_sstream;
-    trackingparticles_sstream << full_output_dir<<"Tracking_output_file_"<< npart << "_" << seed << std::string(".txt");     
-    string trackingparticles_file = trackingparticles_sstream.str().c_str();     
+/////////////////////
+// TrackingOutput  //
+/////////////////////
+    //~ ostringstream trackingparticles_sstream;
+    //~ trackingparticles_sstream << full_output_dir<<"Tracking_output_file_"<< npart << "_" << seed << std::string(".txt");     
+    //~ string trackingparticles_file = trackingparticles_sstream.str().c_str();     
      
-    TrackingOutputAV* myTrackingOutputAV = new TrackingOutputAV(trackingparticles_file);
-    //~ myTrackingOutputAV->SetSRange(19000, 21000);
-    myTrackingOutputAV->SetSRange(0, 27000);
-    myTrackingOutputAV->SetTurn(1);
-    myTrackingOutputAV->output_all = 1;
+    //~ TrackingOutputAV* myTrackingOutputAV = new TrackingOutputAV(trackingparticles_file);
+    //~ myTrackingOutputAV->SetSRange(0, 27000);
+    //~ myTrackingOutputAV->SetTurn(1);
+    //~ myTrackingOutputAV->output_all = 1;
      
-    myParticleTracker->SetOutput(myTrackingOutputAV);
+    //~ myParticleTracker->SetOutput(myTrackingOutputAV);
 
 /////////////////////////
 // Collimation Process //
@@ -450,15 +448,6 @@ delete hbunch_output;
     // Finally we create any PhysicsProcesses and assign them to the tracker
     // In this case we only need the collimation process
 
-    // Output stream to store collimator losses
-    //~ ostringstream col_output_file; 
-    //~ col_output_file << (directory+output_dir+std::string("HLossMr_")) << npart << "_" << seed << std::string(".txt");
-    //~ ofstream* col_output = new ofstream(col_output_file.str().c_str());
-    //~ if(!col_output->good())    {
-        //~ std::cerr << "Could not open collimation loss file" << std::endl;
-        //~ exit(EXIT_FAILURE);
-    //~ }      
- 
     // We declare our process, every PhysicsProcess takes a priority and a mode, as we have no other processes the priority is irrelevent
     // As we have set up no modes in the CollimateParticleProcess, the mode is also irrelevent
     // We also give the output file created earlier as an argument to CollimateProtonProcess
