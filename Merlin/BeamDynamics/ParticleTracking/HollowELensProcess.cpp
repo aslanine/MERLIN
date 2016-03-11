@@ -916,6 +916,7 @@ void HollowELensProcess::SetEllipticalMatching(bool io){
 			SemiMinor = Sigma_y * rmin;
 			SemiMajor = Sigma_x * rmin;
 			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
 			Rmax = g*Rmin;			
 			YShift = SemiMinor - Rmin;
 		}
@@ -924,6 +925,7 @@ void HollowELensProcess::SetEllipticalMatching(bool io){
 			SemiMinor = Sigma_x * rmin;
 			SemiMajor = Sigma_y * rmin;	
 			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
 			Rmax = g*Rmin;	
 			XShift = SemiMinor - Rmin;			
 		}
