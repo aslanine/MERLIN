@@ -41,6 +41,7 @@ thesis_run(HELFullBeam HELFullBeam HELFullBeam.cpp)
 thesis_run(TevHEL TevHEL TevHEL.cpp)
 thesis_run(ApertureTest ApertureTest ApertureTest.cpp)
 thesis_run(HELSplit HELSplit HELSplit.cpp)
+thesis_run(6p5TeV 6p5TeV 6p5TeV.cpp)
 
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
 INCLUDE(Dart)
