@@ -68,6 +68,8 @@ int main(int argc, char* argv[])
     if (argc >=3){
         seed = atoi(argv[2]);
     }
+    
+    seed=1;
 
 // Initialise the random number generator with the seed
 
@@ -129,7 +131,7 @@ int main(int argc, char* argv[])
 
     // As we are only tracking for 200 turns we can choose to ignore the accelerating cavities
     // To do this we use the TreatTypeAsDrift() function, which takes an element type string as an argument, this can be done for any element
-    //~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
+    myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
 
@@ -465,6 +467,9 @@ delete hbunch_output;
     // As well as the standard output we will create a special LossMapDustbin, this will automatically sort and collate all losses
 	// into a single file that we can use to plot
 	LossMapDustbin* myLossMapDustbin = new LossMapDustbin;
+	bool beam2 = 0;
+	if (!beam1){beam2=1;}
+	myLossMapDustbin->Beam2(beam2);
 	myCollimateProcess->SetDustbin(myLossMapDustbin);   
 	
 	

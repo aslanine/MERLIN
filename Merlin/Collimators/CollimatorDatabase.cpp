@@ -916,9 +916,9 @@ void CollimatorDatabase::OutputFlukaDatabase(std::ostream* os)
 		(*os) << setw(20) << left << (*its)->name;
 		//~ (*os) << setw(20) << left << (*its)->position;
 		(*os) << setw(12) << left << (*its)->angle;
-		(*os) << setw(12) << left << (*its)->beta_x;
-		(*os) << setw(12) << left << (*its)->beta_y;
-		(*os) << setw(12) << left << (*its)->half_gap;
+		(*os) << setw(12) << setprecision(20) << left << (*its)->beta_x;
+		(*os) << setw(12) << setprecision(20) << left << (*its)->beta_y;
+		(*os) << setw(12) << setprecision(20) << left << (*its)->half_gap;
 		(*os) << setw(6) << left << (*its)->material;
 		(*os) << setw(12) << left << (*its)->length;
 		(*os) << setw(20) << left << (*its)->sig_x;
