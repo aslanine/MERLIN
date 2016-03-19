@@ -91,6 +91,17 @@ public:
 	
 	// Set to elliptical matching operation
 	virtual void SetEllipticalMatching(bool io);
+		
+	// Adjust HEL for elliptical operation
+	virtual void EllipticalAdjust();
+	// Overloaded to manually choose which point of the compass (core) to touch
+	virtual void EllipticalAdjust(int compass);
+	
+	// Set to hula elliptical matching operation
+	virtual void SetHulaElliptical(bool io);
+	
+	// Adjust HEL for Hula elliptical operation
+	virtual void HulaAdjust();
 	
 	// Output the HEL radial profile in x y phase space (assumes circular HEL)
 	virtual void OutputProfile(std::ostream* os, double E=7000, double min=0, double max=10);
@@ -137,6 +148,12 @@ private:
 	double g;				// Ratio of rmax/rmin
 	bool Elliptical;
 	bool EllipticalSet;
+	double Rmin_original;
+	double Rmax_original;
+	bool HulaElliptical;
+	bool HulaEllipticalSet;
+	int Compass;
+	int Last_Turn;
 	
 	int Turn;
 	int SkipTurn;

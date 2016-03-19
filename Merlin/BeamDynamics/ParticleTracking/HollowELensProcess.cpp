@@ -36,7 +36,7 @@ namespace ParticleTracking {
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity)
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
 	 ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1),\
-	 LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.)
+	 LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0), HulaEllipticalSet(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -48,7 +48,8 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double length_e)
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
 	EffectiveLength(length_e), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0),\
-	ElectronDirection(1),  LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.)
+	ElectronDirection(1),  LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0),\
+	HulaEllipticalSet(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -62,7 +63,7 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
  double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss)
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0),\
 	SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1), LHC_Radial(0),\
-	 YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.)
+	 YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0), HulaEllipticalSet(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -141,6 +142,7 @@ void HollowELensProcess::DoProcess (double ds)
 	
 	// Have to increment Turn as the process doesn't have access to the turn value from user code
 	++Turn;
+	if(HulaElliptical){HulaAdjust();}	
 
 	switch (OMode){
 		case DC:{
@@ -162,7 +164,7 @@ void HollowELensProcess::DoProcess (double ds)
 					if(!Elliptical){			
 						ParticleAngle = atan2((*p).y(), (*p).x());
 					}
-					else{
+					else{					
 						ParticleAngle = atan2( ((*p).y()-YShift) , ((*p).x()-XShift)  );
 					}
 					
@@ -226,7 +228,7 @@ void HollowELensProcess::DoProcess (double ds)
 						if(!Elliptical){			
 							ParticleAngle = atan2((*p).y(), (*p).x());
 						}
-						else{
+						else{				
 							ParticleAngle = atan2( ((*p).y()-YShift) , ((*p).x()-XShift)  );
 						}
 						
@@ -259,7 +261,7 @@ void HollowELensProcess::DoProcess (double ds)
 					if(!Elliptical){			
 						ParticleAngle = atan2((*p).y(), (*p).x());
 					}
-					else{
+					else{					
 						ParticleAngle = atan2( ((*p).y()-YShift) , ((*p).x()-XShift)  );
 					}
 						
@@ -292,7 +294,7 @@ void HollowELensProcess::DoProcess (double ds)
 					if(!Elliptical){			
 						ParticleAngle = atan2((*p).y(), (*p).x());
 					}
-					else{
+					else{					
 						ParticleAngle = atan2( ((*p).y()-YShift) , ((*p).x()-XShift)  );
 					}		
 	
@@ -608,6 +610,8 @@ void HollowELensProcess::SetRadii (double rmin, double rmax)
 	cout << "\n\tHEL warning: HEL radii not set using beam envelope, and not aligned to beam orbit" << endl;
 	Rmin = rmin;
 	Rmax = rmax;
+	Rmin_original = Rmin;
+	Rmax_original = Rmax;
 }
 
 void HollowELensProcess::SetRadiiSigma (double rmin, double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss)
@@ -703,6 +707,8 @@ void HollowELensProcess::SetRadiiSigma (double rmin, double rmax, AcceleratorMod
 	
 	Rmin = rmin * sigma_x;
 	Rmax = rmax * sigma_x;
+	Rmin_original = Rmin;
+	Rmax_original = Rmax;
 	Sigma_x = sigma_x;
 	Sigma_y = sigma_y;
 	
@@ -821,6 +827,8 @@ void HollowELensProcess::SetRadiiSigma (double rmin, double rmax, AcceleratorMod
 	
 	Rmin = rmin * sigma_x;
 	Rmax = rmax * sigma_x;
+	Rmin_original = Rmin;
+	Rmax_original = Rmax;
 	Sigma_x = sigma_x;
 	Sigma_y = sigma_y;
 	
@@ -897,13 +905,10 @@ void HollowELensProcess::SetElectronDirection(bool dir){
 void HollowELensProcess::SetEllipticalMatching(bool io){
 	
 	Elliptical = io;
-	
-	// Old Radii in metres
-	double Rmin_old = Rmin;
-	double Rmax_old = Rmax;
+
 	// Radii in sigma
-	double rmin = Rmin/Sigma_x;
-	double rmax = Rmax/Sigma_x;
+	double rmin = Rmin_original/Sigma_x;
+	double rmax = Rmax_original/Sigma_x;
 	
 	
 	// Need to set SemiMajor and SemiMinor axes for our ellipse - will be used to fnd HEL R_min
@@ -935,6 +940,109 @@ void HollowELensProcess::SetEllipticalMatching(bool io){
 	else{		
 		EllipticalSet = 0;
 	}	
+}
+
+void HollowELensProcess::EllipticalAdjust(){
+	
+	// Radii in sigma
+	double rmin = Rmin_original/Sigma_x;
+	double rmax = Rmax_original/Sigma_x;
+
+	// x larger than y, shift co-ordinates up in y
+	if(Sigma_x > Sigma_y){
+		SemiMinor = Sigma_y * rmin;
+		SemiMajor = Sigma_x * rmin;
+		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+		Rmax = g*Rmin;			
+		YShift = SemiMinor - Rmin;
+	}
+	// y larger than x, shift co-ordinates right in x (i.e. assuming beam1 for LHC)
+	else if(Sigma_x < Sigma_y){
+		SemiMinor = Sigma_x * rmin;
+		SemiMajor = Sigma_y * rmin;	
+		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+		Rmax = g*Rmin;	
+		XShift = SemiMinor - Rmin;			
+	}
+	
+}
+
+void HollowELensProcess::EllipticalAdjust(int compass){	
+
+	// Radii in sigma
+	double rmin = Rmin_original/Sigma_x;
+	double rmax = Rmax_original/Sigma_x;
+
+	// Radii in Sigma
+	if(Sigma_x > Sigma_y){
+		SemiMinor = Sigma_y * rmin;
+		SemiMajor = Sigma_x * rmin;	
+	}
+	else{
+		SemiMinor = Sigma_x * rmin;
+		SemiMajor = Sigma_y * rmin;	
+	}
+	
+	//shift co-ordinates up in y
+	if(compass == 1){
+		//~ cout << "\nCompass = North, Turn = " << Turn << endl;
+		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+		Rmax = g*Rmin;			
+		YShift = SemiMinor - Rmin;
+		XShift = 0;
+	}
+	//shift co-ordinates right in x (i.e. assuming beam1 for LHC)
+	else if(compass == 2){
+		//~ cout << "\nCompass = East, Turn = " << Turn << endl;
+		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+		Rmax = g*Rmin;	
+		XShift = SemiMajor - Rmin;	
+		YShift = 0;		
+	}
+	//shift co-ordinates down in y
+	else if(compass == 3){
+		//~ cout << "\nCompass = South, Turn = " << Turn << endl;
+		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+		Rmax = g*Rmin;			
+		YShift = Rmin - SemiMinor;
+		XShift = 0;
+	}	
+	//shift co-ordinates left in x (i.e. assuming beam1 for LHC)
+	else if(compass == 4){
+		//~ cout << "\nCompass = West, Turn = " << Turn << endl;
+		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+		Rmax = g*Rmin;	
+		XShift = Rmin - SemiMajor;
+		YShift = 0;		
+		Compass = 0;		
+	}
+}
+
+void HollowELensProcess::SetHulaElliptical(bool io){
+	if(io){	
+		SetEllipticalMatching(io);
+		
+		Compass = 1;
+		
+		HulaElliptical = 1;
+		HulaEllipticalSet = 1;
+	}
+}
+
+void HollowELensProcess::HulaAdjust(){	
+	// Compass: 1 = North, 2 = East, 3 = South, 4 = West
+	
+	// Perform the HEL adjust
+	EllipticalAdjust(Compass);
+	
+	// Increment compass point
+	++Compass;		
 }
 
 }; // end namespace ParticleTracking
