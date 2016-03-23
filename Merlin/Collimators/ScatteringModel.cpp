@@ -37,7 +37,15 @@ using namespace std;
 
 ScatteringModel::ScatteringModel()
 {
-	//~ ScatteringModelTurn = 1;	
+	useComposites = 1;	
+	ScatterPlot_on = 0;
+	JawImpact_on = 0;
+	JawInelastic_on = 0;
+}
+
+ScatteringModel::ScatteringModel(bool composites)
+{
+	useComposites = composites;
 	ScatterPlot_on = 0;
 	JawImpact_on = 0;
 	JawInelastic_on = 0;
@@ -45,72 +53,136 @@ ScatteringModel::ScatteringModel()
 
 double ScatteringModel::PathLength(Material* mat, double E0){ 
 	
+	// Note that this is called for every individual particle, each time it is outside a collimator aperture
+	// i.e. inside a collimator jaw, or each time it has travelled past the bin_size in said jaw
+	
 	//~ std::cout << "\nScatteringModel::PathLength: Start PathLength()" << std::endl;
+	
+	// Perform a dynamic cast to check if our material is a Composite
+	CompositeMaterial* aComposite = dynamic_cast<CompositeMaterial*>(mat);
+	bool composite = 0;
+	if(aComposite){composite = 1;}
+	bool composite_stored = 0;
+	bool not_at_end = 1;
 	
 	static double lambda; 
 	CrossSections* CurrentCS;
-	
-	//~ std::cout << "\nScatteringModel::PathLength: CrossSections object made" << std::endl;
-	//~ std::cout << "ScatteringModel::PathLength: map.size = " << stored_cross_sections.size()  << std::endl;
-	//~ std::cout << "ScatteringModel::PathLength: mat->GetSymbol() = " << mat->GetSymbol()  << std::endl;
-	
-	CS_iterator = stored_cross_sections.find(mat->GetSymbol());		
-	//~ std::cout << "ScatteringModel::PathLength: CS Iterator sent to find material" << std::endl;
-	
-	// If find gets to the end of the stored_cross_sections map, there is no value stored
-	if (CS_iterator == stored_cross_sections.end() ){
-		
-		//~ std::cout << "\nScatteringModel::PathLength: Stored cross sections not found " << endl;
-	
-		//No previously calculated CrossSections, start from scratch	
-		CurrentCS = new CrossSections(mat, E0, ScatteringPhysicsModel);
-		
-		//~ stored_cross_sections.insert(mat->GetSymbol(), NewCS);		
-		stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(mat->GetSymbol(), CurrentCS));
-		
-		//Set iterator to correct position
-		CS_iterator = stored_cross_sections.find(mat->GetSymbol());			
-		
-		//~ std::cout << "\nScatteringModel::PathLength: Calculating fractions " << endl;
-		//Find fractions of cross sections
-		double sigma = 0;
-		int i = 0;
-		vector<ScatteringProcess*>::iterator p;
-
-		std::cout << "ScatteringModel::PathLength: MATERIAL = " << mat->GetSymbol()  << std::endl;
-		for(p = Processes.begin(); p != Processes.end(); p++){
-			(*p)->Configure(mat, CurrentCS);
-			fraction[i] = (*p)->sigma;
-			cout << (*p)->GetProcessType() << "\t\t sigma = " << (*p)->sigma << " barns" << endl;
-			sigma+= fraction[i];
-			++i;
-		}
-
-		for(int j=0;j<fraction.size();j++){
-			cout << " Process " << j << " total sigma " << setw(10) << setprecision(4) << sigma << "barns";
-			fraction[j] /= sigma;
-			cout << " fraction " << setw(10) << setprecision(4) << fraction[j] << endl;
-		} 
-	}
-	else{		
-		
-		//~ std::cout << "\nScatteringModel::PathLength: Stored cross sections found " << endl;
-		//Should return a pointer to the CrossSections we require
-		CurrentCS = CS_iterator->second;
-		
-		//Make sure that the CrossSections are for the same case (scattering etc)
-		if (CurrentCS == CS_iterator->second){
-			//~ cout << "\n\tScatteringModel::PathLength: CurrentCS == NewCS"<< endl;
-		}	
-		else {
-			cout <<  "\n\tWarning: ScatteringModel::PathLength: CurrentCS != StoredCS, recalculating CrossSections" << endl;
-			CurrentCS = new CrossSections(mat, E0, ScatteringPhysicsModel);			
-			stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(mat->GetSymbol(), CurrentCS));		
 			
-			//Set iterator to correct position
-			CS_iterator = stored_cross_sections.find(mat->GetSymbol());				
-		}		
-		 		
+	// Pre-check to store the composite imaginary nucleus - this is a marker when using composites
+	// i.e. it simply indicates that the CrossSections for each constituent has been calculated and stored
+	if(composite && useComposites){		
+		// Check if the composite has already been stored
+		CS_iterator = stored_cross_sections.find(mat->GetSymbol());	
+		
+		// If it hasn't we must store the imaginary composite nucleus as a marker to indicate that the rest of the constituents have been stored
+		if (CS_iterator == stored_cross_sections.end() ){			
+			std::cout << "\tScatteringModel::PathLength: Composite stored cross section not found for : " << mat->GetSymbol() << endl;		
+			CurrentCS = new CrossSections(mat, E0, ScatteringPhysicsModel);		
+			stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(mat->GetSymbol(), CurrentCS));
+			CS_iterator = stored_cross_sections.find(mat->GetSymbol());	
+			std::cout << "\tScatteringModel::PathLength: Composite CrossSection stored for : " << mat->GetSymbol() << endl;		
+			
+			// Now we must configure the ScatteringProcesses for this element
+			ConfigureProcesses(CurrentCS, mat);			
+		}
+		else{composite_stored = 1;}				
+	}
+	
+	// If the composite hasn't already been stored, we have to add a CrossSection for each individual element
+	if(composite && useComposites && !composite_stored){		
+		std::cout << "\tScatteringModel::PathLength: Iterating through composite sub-elements for : " << mat->GetSymbol() << endl;		
+		// Iterate through composite list to see if the elements are stored in our stored cross sections
+		
+		//~ int map_size = aComposite->GetMapSize();
+		
+		//~ aComposite->StartMIT();
+		
+		//~ for (int i = 0; i<map_size; ++i){
+			//~ std::cout << "\tScatteringModel::PathLength: Iterator pass element : " << aComposite->MixtureMapIterator->first->GetSymbol();
+			//~ std::cout << ", in material : " << mat->GetSymbol() << endl;		
+			//~ CS_iterator = stored_cross_sections.find( aComposite->MixtureMapIterator->first->GetSymbol() );
+
+			//~ if (CS_iterator == stored_cross_sections.end() ){
+
+				//~ CurrentCS = new CrossSections(aComposite->MixtureMapIterator->first, E0, ScatteringPhysicsModel);
+				//~ stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(aComposite->MixtureMapIterator->first->GetSymbol(), CurrentCS));
+				
+				//~ std::cout << "\tScatteringModel::PathLength: Calculating fractions in composite sub-element: " << aComposite->MixtureMapIterator->first->GetSymbol();
+				//~ std::cout << ", in material : " << mat->GetSymbol() << endl;		
+				//~ ConfigureProcesses(CurrentCS, aComposite->MixtureMapIterator->first);				
+			//~ }	
+			//~ aComposite->IterateMIT();		
+		//~ }
+		
+		aComposite->MixtureMapIterator = aComposite->MixtureMap.begin();
+		
+		while(aComposite->MixtureMapIterator != aComposite->MixtureMap.end()){		
+					
+			std::cout << "\tScatteringModel::PathLength: Iterator pass element : " << aComposite->MixtureMapIterator->first->GetSymbol();
+			std::cout << ", in material : " << mat->GetSymbol() << endl;
+			CS_iterator = stored_cross_sections.find( aComposite->MixtureMapIterator->first->GetSymbol() );
+
+			// Constituent element of composite is not stored, have to create and store it
+			if (CS_iterator == stored_cross_sections.end() ){
+
+				CurrentCS = new CrossSections(aComposite->MixtureMapIterator->first, E0, ScatteringPhysicsModel);
+				stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(aComposite->MixtureMapIterator->first->GetSymbol(), CurrentCS));
+				
+				std::cout << "\tScatteringModel::PathLength: Calculating fractions in composite sub-element: " << aComposite->MixtureMapIterator->first->GetSymbol();
+				std::cout << ", in material : " << mat->GetSymbol() << endl;	
+				ConfigureProcesses(CurrentCS, aComposite->MixtureMapIterator->first);				
+			}
+			++aComposite->MixtureMapIterator;
+		}
+		
+		// Select a weighted random element		
+		string RandomElement = aComposite->GetRandomMaterialSymbol();
+		cout << "ScatteringModel::PathLength: Selected random element from composite : " << RandomElement << endl;
+		CS_iterator = stored_cross_sections.find(RandomElement);
+		if (CS_iterator == stored_cross_sections.end() ){
+			cout << "ERROR: ScatteringModel::PathLength: Composite Constituent not found" << endl;
+		}
+	}
+	
+	else{
+		// Check stored cross sections for a stored CrossSection for this symbol
+		CS_iterator = stored_cross_sections.find(mat->GetSymbol());				
+				
+		// If find gets to the end of the stored_cross_sections map, there is no value stored
+		if (CS_iterator == stored_cross_sections.end() ){	
+					
+			std::cout << "\nScatteringModel::PathLength: Stored CrossSection not found " << endl;
+		
+			// Create a CrossSections, store it, and set the iterator to the correct position
+			CurrentCS = new CrossSections(mat, E0, ScatteringPhysicsModel);
+			stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(mat->GetSymbol(), CurrentCS));
+			CS_iterator = stored_cross_sections.find(mat->GetSymbol());			
+			
+			std::cout << "\nScatteringModel::PathLength: Calculating fractions " << endl;
+			
+			// Now we must configure the ScatteringProcesses for this element
+			ConfigureProcesses(CurrentCS, mat);
+		}
+		// Otherwise we already have a stored value for that element
+		else{				
+			//~ std::cout << "\nScatteringModel::PathLength: Stored cross sections found " << endl;
+		
+			//Should return a pointer to the CrossSections we require
+			CurrentCS = CS_iterator->second;
+			
+			//Make sure that the CrossSections are for the same case (scattering etc)
+			if (CurrentCS == CS_iterator->second){
+				//~ cout << "\n\tScatteringModel::PathLength: CurrentCS == NewCS"<< endl;
+			}	
+			else {
+				cout <<  "\n\tWarning: ScatteringModel::PathLength: CurrentCS != StoredCS, recalculating CrossSections" << endl;
+				CurrentCS = new CrossSections(mat, E0, ScatteringPhysicsModel);			
+				stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(mat->GetSymbol(), CurrentCS));		
+				
+				//Set iterator to correct position
+				CS_iterator = stored_cross_sections.find(mat->GetSymbol());				
+			}	
+		}	
 	}
 	
 	//Calculate mean free path
@@ -118,6 +190,30 @@ double ScatteringModel::PathLength(Material* mat, double E0){
 	//~ std::cout << "ScatteringModel::PathLength: lambda = " << lambda << endl;
 	return -(lambda)*log(RandomNG::uniform(0,1));
 }             
+
+void ScatteringModel::ConfigureProcesses(CrossSections* CS, Material* mat){			
+			double sigma = 0;
+			int process_i = 0;
+			vector<ScatteringProcess*>::iterator p;
+
+			std::cout << "ScatteringModel::ConfigureProcesses: MATERIAL = " << mat->GetSymbol() <<", configuring ScatteringProcesses"  << std::endl;
+			for(p = Processes.begin(); p != Processes.end(); p++){
+				(*p)->Configure(mat, CS);
+				fraction[process_i] = (*p)->sigma;
+				cout << (*p)->GetProcessType() << "\t\t sigma = " << (*p)->sigma << " barns" << endl;
+				sigma+= fraction[process_i];
+				++process_i;
+			}
+
+			for(int j=0;j<fraction.size();j++){
+				cout << " Process " << j << " total sigma " << setw(10) << setprecision(4) << sigma << "barns";
+				fraction[j] /= sigma;
+				cout << " fraction " << setw(10) << setprecision(4) << fraction[j] << endl;
+			}
+			
+			stored_processes.insert(std::map< string, vector <Collimation::ScatteringProcess*> >::value_type(mat->GetSymbol(), Processes)); 
+			stored_fractions.insert(std::map< string, vector <double> >::value_type(mat->GetSymbol(), fraction)); 
+}
 
 //Simple energy loss
 void ScatteringModel::EnergyLoss(PSvector& p, double x, Material* mat, double E0, double E1){
@@ -215,7 +311,6 @@ void ScatteringModel::EnergyLoss(PSvector& p, double x, Material* mat, double E0
     p.type() = 0;
 }
 
-
 //HR 29Aug13
 void ScatteringModel::Straggle(PSvector& p, double x, Material* mat, double E1, double E2){
 
@@ -238,7 +333,6 @@ void ScatteringModel::Straggle(PSvector& p, double x, Material* mat, double E1, 
 	p.type() = 5;
 	
  }
-
 
 bool ScatteringModel::ParticleScatter(PSvector& p, Material* mat, double E){ 
 
@@ -265,6 +359,7 @@ void ScatteringModel::DeathReport(PSvector& p, double x, double position, vector
 void ScatteringModel::SetScatterType(int st){	
 	ScatteringPhysicsModel = st;	
 }
+
 
 void ScatteringModel::ScatterPlot(Particle& p, double z, int turn, string name){
 	
@@ -331,6 +426,7 @@ void ScatteringModel::SetJawInelastic(string name, int single_turn){
 	JawInelasticNames.push_back(name);
 	JawInelastic_on = 1;
 }
+
 
 //~ void ScatteringModel::OutputScatterPlot(std::ostream* os){
 void ScatteringModel::OutputScatterPlot(string directory, int seed){

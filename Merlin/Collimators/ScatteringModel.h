@@ -12,6 +12,7 @@
 #include "BeamDynamics/ParticleTracking/ParticleBunch.h"
 
 #include "Collimators/Material.h"
+#include "Collimators/CompositeMaterial.h"
 #include "Collimators/ScatteringProcess.h"
 
 #include "NumericalUtils/utils.h"
@@ -84,6 +85,7 @@ public:
 
 	// Constructor
 	ScatteringModel();
+	ScatteringModel(bool composites);
 
 // Collimation Functions	
 	// Set ScatterType
@@ -139,18 +141,29 @@ public:
 
 	// vector holding all scattering processes
 	vector <Collimation::ScatteringProcess*> Processes;
+	void ConfigureProcesses(CrossSections* CS, Material* mat);
+	std::map< string, vector <Collimation::ScatteringProcess*> > stored_processes;
+	std::map< string, vector <Collimation::ScatteringProcess*> >::iterator P_iterator;
+	
 	// vector with fractions of the total scattering cross section assigned to each ScatteringProcess
 	vector <double> fraction;
+	std::map< string, vector <double> > stored_fractions;
+	std::map< string, vector <double> >::iterator F_iterator;
 	
 	//Store calculated CrossSections data to save time
 	std::map< string, Collimation::CrossSections* > stored_cross_sections;
 	std::map< string, Collimation::CrossSections* >::iterator CS_iterator;	
 	
 	int GetScatteringPhysicsModel(){return ScatteringPhysicsModel;}
+	
+	void SetCompositesOn(){useComposites = 1; cout << "\nScatteringModel::Composites On" << endl;}
 		
 protected:
 
 private:
+
+	// Used to switch between composite elements and the composite imaginary nucleus
+	bool useComposites;
 
 	//0 = SixTrack, 1 = ST+Ad Ion, 2 = ST + Ad El, 3 = ST + Ad SD, 4 = MERLIN	
     int ScatteringPhysicsModel;

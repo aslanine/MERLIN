@@ -6,19 +6,27 @@
 #include <vector>
 
 #include "Collimators/Material.h"
+#include "Collimators/CrossSections.h"
 
 using namespace std;
 
 // A CompositeMaterial is a composite of assorted materials
-// and contains a map of constituent materials.
-// It is similar to a MaterialMixture however it uses bulk material
-// properties as well as mass fraction weighted values for atomic mass,
-// number, etc, and all cross sections.
+// and contains a map of constituent materials. It is similar to a 
+// MaterialMixture however it uses bulk material properties as well 
+// as mass fraction weighted values for atomic mass, number, etc, 
+// and all cross sections.
+
 // This makes the CompositeMaterial compatible with CrossSections.
-// Note that scattering will be performed from imaginary composite 
-// nuclei rather than the constituent nuclei of the composite, unless
-// this is taken into account by creating CrossSections for each 
-// constituent and using the SelectRandomMaterial() function.
+
+// CompositeMaterial may be used in two ways, the first is to
+// imitate SixTrack, where scattering will be performed from imaginary
+// composite nuclei rather than the constituent nuclei of the composite.
+
+// The second way is for CollimateProtonProcess to calculate a new 
+// CrossSection classes for each constitutent element, store them in 
+// the CompositeMaterial class, and select one by random weight using 
+// the GetRandomMaterialSymbol() function, which returns only the symbol
+// for that element.
 
 class CompositeMaterial : public Material
 {
@@ -109,8 +117,15 @@ public:
 	
 	// Return list of constitutent element symbols as strings
 	vector< pair<string,double> > GetConstituentElements();
-
-private:
+	
+	// Return a random Material symbol
+	string GetRandomMaterialSymbol();
+	
+	// Make an iterator to access the map	
+	std::map<Material*,std::pair<double,double> >::const_iterator MixtureMapIterator;
+	void StartMIT();
+	bool IterateMIT();	
+	int GetMapSize(){return MixtureMap.size();}
 	
 	// A map of number density fractions in the material, along with the material pointer.
 	// In the double pair:
@@ -118,7 +133,7 @@ private:
 	// second = mass fraction
 	std::map<Material*,std::pair<double,double> > MixtureMap;
 
-	
+private:
 	// Current element selected
 	Material* CurrentMaterial;
 
