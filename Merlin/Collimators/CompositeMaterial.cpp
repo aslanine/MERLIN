@@ -444,6 +444,23 @@ Material* CompositeMaterial::SelectRandomMaterial()
 	return CurrentMaterial;
 }
 
+
+string CompositeMaterial::GetRandomMaterialSymbol(){
+	
+	// Using the map and our mass fractions we simply return a random 
+	double x = RandomNG::uniform(0,1);
+	std::map<Material*,std::pair<double,double> >::const_iterator MaterialIt;
+	MaterialIt = MixtureMap.begin();
+	while(x > 0)
+	{
+		x-= MaterialIt->second.first;
+		if(x > 0)
+		MaterialIt++;
+	}
+	//std::cout << "x = " << x << "\t material first =" << MaterialIt->first->GetName() << "\t material second =" << MaterialIt->second.first << std::endl;
+	return MaterialIt->first->GetSymbol();	
+}
+
 Material* CompositeMaterial::GetCurrentMaterial()
 {
 	return CurrentMaterial;
@@ -505,22 +522,6 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 	SetSixtrackElasticNucleusCrossSection(wsig_E);
 	SetAtomicMass(wA);
 	SetAtomicNumber(wZ);		
-}
-
-string CompositeMaterial::GetRandomMaterialSymbol(){
-	
-	// Using the map and our mass fractions we simply return a random 
-	double x = RandomNG::uniform(0,1);
-	std::map<Material*,std::pair<double,double> >::const_iterator MaterialIt;
-	MaterialIt = MixtureMap.begin();
-	while(x > 0)
-	{
-		x-= MaterialIt->second.first;
-		if(x > 0)
-		MaterialIt++;
-	}
-	//std::cout << "x = " << x << "\t material first =" << MaterialIt->first->GetName() << "\t material second =" << MaterialIt->second.first << std::endl;
-	return MaterialIt->first->GetSymbol();	
 }
 
 void CompositeMaterial::StartMIT(){

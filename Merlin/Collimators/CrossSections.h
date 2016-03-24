@@ -99,6 +99,9 @@ public:
 	
 	void Set_scat_type(int a){scat_type = a;}
 	const int Get_scat_type(){return scat_type;}
+	
+	void Set_symbol(string a){symbol = a;}
+	const string Get_symbol(){return symbol;}
 		
 private:
 	double E0;
@@ -121,6 +124,7 @@ private:
 	double atomic_mass;
 	double atomic_no;
 	int scat_type;	
+	string symbol;
 };
 }
 

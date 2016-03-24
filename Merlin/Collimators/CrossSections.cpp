@@ -42,6 +42,7 @@ CrossSections::CrossSections(){
 	Set_atomic_no(0.);
 	ElasticScatter 		= NULL;
 	DiffractiveScatter 	= NULL;
+	symbol.clear();
 	Set_E0(0.);
 }
 				
@@ -76,11 +77,13 @@ CrossSections::CrossSections(Material* mat, double E, int scattertype){
 	ElasticScatter 		= NULL;
 	DiffractiveScatter 	= NULL;
 	Set_E0(E);
+	Set_symbol(mat->GetSymbol());
 	//~ std::cout << "ScatteringProcess::CrossSections: Calling" << endl;
 	ConfigureCrossSections(Get_E0());		
 	Set_lambda_tot(GetTotalMeanFreePath());		
 	
-	std::cout << "\nScatteringProcess::CrossSections: dEdx = " << mat->GetSixtrackdEdx() << endl;
+	std::cout << "\n\nScatteringProcess::CrossSections: SYMBOL = " << Get_symbol() << endl;
+	std::cout << "ScatteringProcess::CrossSections: dEdx = " << mat->GetSixtrackdEdx() << endl;
 	std::cout << "ScatteringProcess::CrossSections: rho = " << mat->GetDensity()/1000.0 << endl;
 	std::cout << "ScatteringProcess::CrossSections: A = " << mat->GetAtomicMass() << endl;
 	std::cout << "ScatteringProcess::CrossSections: Z = " << mat->GetAtomicNumber() << endl;

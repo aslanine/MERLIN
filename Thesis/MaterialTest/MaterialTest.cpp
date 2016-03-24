@@ -47,7 +47,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int ncorepart 	= 1E3;						// number of core particles to track
+    int ncorepart 	= 1;						// number of core particles to track
     int npart 		= 1E3;                     	// number of halo particles to track
     int nturns 		= 5;                      // number of turns to track
 
@@ -82,6 +82,7 @@ int main(int argc, char* argv[])
 	
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
+	
 	bool batch = 1;
 	if(batch){
 
@@ -165,7 +166,7 @@ int main(int argc, char* argv[])
 	// Collimator constructor:
 	// Collimator (const string& id, double len, Material* pp, double P0);
 	
-	Collimator* coll1=new Collimator("COLL1", 0.1*meter, matter->FindMaterial("Cu"), energy);
+	Collimator* coll1=new Collimator("COLL1", 0.1*meter, TEST, energy);
 	coll1->SetAperture(ap1);
 	coll1->SetComponentLatticePosition(0.);
 
@@ -173,7 +174,7 @@ int main(int argc, char* argv[])
 	coll2->SetAperture(ap1);
 	coll2->SetComponentLatticePosition(0.1);
 	
-	Collimator* coll3=new Collimator("COLL3", 0.1*meter,TEST, energy);
+	Collimator* coll3=new Collimator("COLL3", 0.1*meter, matter->FindMaterial("Cu") , energy);
 	coll3->SetAperture(ap1);
 	coll3->SetComponentLatticePosition(0.2);
 
@@ -184,6 +185,13 @@ int main(int argc, char* argv[])
 	myaccmodelctor->AppendComponent(coll2);
 	myaccmodelctor->AppendComponent(coll3);
 	//myaccmodelctor->AppendComponent(new Drift("DRIFT2",1.0*meter));
+	
+	myScatter->SetScatterPlot("COLL1");
+	myScatter->SetJawImpact("COLL1");
+	myScatter->SetScatterPlot("COLL2");
+	myScatter->SetJawImpact("COLL2");
+	myScatter->SetScatterPlot("COLL3");
+	myScatter->SetJawImpact("COLL3");
 	
 	AcceleratorModel *myAccModel = myaccmodelctor->GetModel();
 	
@@ -204,7 +212,8 @@ int main(int argc, char* argv[])
 		myBeam.alpha_y = 0.;
 		//this is 0.001 as coll jaw is 0.001, +0.000001 for 1um impact
 		//double offset= (1E-3 + 1E-6);
-	double offset= 1E-6;
+	//~ double offset= 1E-6;
+	double offset= 0;
 		myBeam.yp0=0.;
 		myBeam.xp0=0.;
 		myBeam.x0=0.;
@@ -278,6 +287,11 @@ int main(int argc, char* argv[])
  *******************/
  
 	myParticleTracker->Track(myBunch);
+	
+	myScatter->OutputJawImpact(full_output_dir);
+	myScatter->OutputScatterPlot(full_output_dir);
+	
+	myScatter->OutputScatteringProcesses(full_output_dir);
     
 /********************
  *  OUTPUT DUSTBIN	*

@@ -180,6 +180,7 @@ public:
 	* @param[in] S the ScatteringProcess.
 	*/
 	void AddProcess(Collimation::ScatteringProcess* S){ Processes.push_back(S); fraction.push_back(0); }
+	
 	/**
 	* Clears all stored ScatteringProcess.
 	*/
@@ -268,8 +269,6 @@ public:
 	bool JawInelastic_on;
 	vector <JawInelasticData*> StoredJawInelasticData;
 
-	/*** vector holding all scattering processes */
-	vector <Collimation::ScatteringProcess*> Processes;
 	/**
 	* Used to configure individual ScatteringProcesses for a given material.
 	* @param[in] CS CrossSection object containing required cross sections.
@@ -277,6 +276,9 @@ public:
 	*/
 	void ConfigureProcesses(CrossSections* CS, Material* mat);
 	
+	/*** vector holding all scattering processes as pointers*/
+	vector <Collimation::ScatteringProcess*> Processes;
+		
 	std::map< string, vector <Collimation::ScatteringProcess*> > stored_processes;
 	std::map< string, vector <Collimation::ScatteringProcess*> >::iterator P_iterator;
 	
@@ -303,6 +305,13 @@ public:
 	* constituent elements
 	*/	
 	void SetCompositesOn(){useComposites = 1; cout << "\nScatteringModel::Composites On" << endl;}
+	
+	/**
+	* Used to output the ScatteringProcess sigma and fractions for each
+	* material in stored_cross_sections.
+	* @param[in] directory the output directory.
+	*/
+	void OutputScatteringProcesses(string directory);
 		
 protected:
 

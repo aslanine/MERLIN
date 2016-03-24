@@ -78,7 +78,7 @@ double ScatteringModel::PathLength(Material* mat, double E0){
 		if (CS_iterator == stored_cross_sections.end() ){			
 			std::cout << "\tScatteringModel::PathLength: Composite stored cross section not found for : " << mat->GetSymbol() << endl;		
 			CurrentCS = new CrossSections(mat, E0, ScatteringPhysicsModel);		
-			stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(mat->GetSymbol(), CurrentCS));
+			stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type((mat->GetSymbol()), CurrentCS));
 			CS_iterator = stored_cross_sections.find(mat->GetSymbol());	
 			std::cout << "\tScatteringModel::PathLength: Composite CrossSection stored for : " << mat->GetSymbol() << endl;		
 			
@@ -92,28 +92,6 @@ double ScatteringModel::PathLength(Material* mat, double E0){
 	if(composite && useComposites && !composite_stored){		
 		std::cout << "\tScatteringModel::PathLength: Iterating through composite sub-elements for : " << mat->GetSymbol() << endl;		
 		// Iterate through composite list to see if the elements are stored in our stored cross sections
-		
-		//~ int map_size = aComposite->GetMapSize();
-		
-		//~ aComposite->StartMIT();
-		
-		//~ for (int i = 0; i<map_size; ++i){
-			//~ std::cout << "\tScatteringModel::PathLength: Iterator pass element : " << aComposite->MixtureMapIterator->first->GetSymbol();
-			//~ std::cout << ", in material : " << mat->GetSymbol() << endl;		
-			//~ CS_iterator = stored_cross_sections.find( aComposite->MixtureMapIterator->first->GetSymbol() );
-
-			//~ if (CS_iterator == stored_cross_sections.end() ){
-
-				//~ CurrentCS = new CrossSections(aComposite->MixtureMapIterator->first, E0, ScatteringPhysicsModel);
-				//~ stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(aComposite->MixtureMapIterator->first->GetSymbol(), CurrentCS));
-				
-				//~ std::cout << "\tScatteringModel::PathLength: Calculating fractions in composite sub-element: " << aComposite->MixtureMapIterator->first->GetSymbol();
-				//~ std::cout << ", in material : " << mat->GetSymbol() << endl;		
-				//~ ConfigureProcesses(CurrentCS, aComposite->MixtureMapIterator->first);				
-			//~ }	
-			//~ aComposite->IterateMIT();		
-		//~ }
-		
 		aComposite->MixtureMapIterator = aComposite->MixtureMap.begin();
 		
 		while(aComposite->MixtureMapIterator != aComposite->MixtureMap.end()){		
@@ -126,7 +104,7 @@ double ScatteringModel::PathLength(Material* mat, double E0){
 			if (CS_iterator == stored_cross_sections.end() ){
 
 				CurrentCS = new CrossSections(aComposite->MixtureMapIterator->first, E0, ScatteringPhysicsModel);
-				stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type(aComposite->MixtureMapIterator->first->GetSymbol(), CurrentCS));
+				stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type((aComposite->MixtureMapIterator->first->GetSymbol()), CurrentCS));
 				
 				std::cout << "\tScatteringModel::PathLength: Calculating fractions in composite sub-element: " << aComposite->MixtureMapIterator->first->GetSymbol();
 				std::cout << ", in material : " << mat->GetSymbol() << endl;	
@@ -194,10 +172,21 @@ double ScatteringModel::PathLength(Material* mat, double E0){
 void ScatteringModel::ConfigureProcesses(CrossSections* CS, Material* mat){			
 			double sigma = 0;
 			int process_i = 0;
+			
+			// We have to make a new vector of pointers to ScatteringProcess for every material
+			// otherwise we will always have the last configured materials when performing
+			// scattering processes
+			vector <Collimation::ScatteringProcess*> New_Processes;
+			New_Processes.clear();
 			vector<ScatteringProcess*>::iterator p;
-
+			
+			for(p = Processes.begin(); p != Processes.end(); ++p){
+				cout << "Creating new ScatteringProcess::" << (*p)->GetProcessType() << endl;				
+				New_Processes.push_back((*p)->getCopy());				
+			}
+			
 			std::cout << "ScatteringModel::ConfigureProcesses: MATERIAL = " << mat->GetSymbol() <<", configuring ScatteringProcesses"  << std::endl;
-			for(p = Processes.begin(); p != Processes.end(); p++){
+			for(p = New_Processes.begin(); p != New_Processes.end(); p++){
 				(*p)->Configure(mat, CS);
 				fraction[process_i] = (*p)->sigma;
 				cout << (*p)->GetProcessType() << "\t\t sigma = " << (*p)->sigma << " barns" << endl;
@@ -211,7 +200,7 @@ void ScatteringModel::ConfigureProcesses(CrossSections* CS, Material* mat){
 				cout << " fraction " << setw(10) << setprecision(4) << fraction[j] << endl;
 			}
 			
-			stored_processes.insert(std::map< string, vector <Collimation::ScatteringProcess*> >::value_type(mat->GetSymbol(), Processes)); 
+			stored_processes.insert(std::map< string, vector <Collimation::ScatteringProcess*> >::value_type(mat->GetSymbol(), New_Processes)); 
 			stored_fractions.insert(std::map< string, vector <double> >::value_type(mat->GetSymbol(), fraction)); 
 }
 
@@ -336,6 +325,55 @@ void ScatteringModel::Straggle(PSvector& p, double x, Material* mat, double E1, 
 
 bool ScatteringModel::ParticleScatter(PSvector& p, Material* mat, double E){ 
 
+	// First check if we have a composite
+	CompositeMaterial* aComposite = dynamic_cast<CompositeMaterial*>(mat);
+	bool composite = 0;
+	if(aComposite){composite = 1;}
+	
+	// string for the randomelement, and a material to hold it
+	string RandomElement;
+	Material* material;	
+		
+	// print the current processes and fractions, these should be the last configured
+	std::cout << "\n" << endl;
+	vector<ScatteringProcess*>::iterator pit;
+	int process_i = 0;	
+	for(pit = Processes.begin(); pit != Processes.end(); pit++){
+		cout << (*pit)->GetProcessType() << "\t sigma = " << (*pit)->sigma << " barns, fraction["<<process_i<<"] = " << fraction[process_i] << endl;
+		++process_i;
+	}
+	
+	// Set fraction and Processes to that of a weighted random composite element
+	// or that for the material
+	if(composite && useComposites){
+		RandomElement = aComposite->GetRandomMaterialSymbol();
+		P_iterator = stored_processes.find(RandomElement);
+		Processes = P_iterator->second;
+		F_iterator = stored_fractions.find(RandomElement);
+		fraction = F_iterator->second;
+	}
+	else{
+		material = mat;
+		P_iterator = stored_processes.find(material->GetSymbol());
+		Processes = P_iterator->second;
+		F_iterator = stored_fractions.find(material->GetSymbol());
+		fraction = F_iterator->second;
+	}
+
+	std::cout << "\nParticleScatter for input Material : " << mat->GetSymbol() << endl;
+	if(aComposite && useComposites)
+	std::cout << "ParticleScatter for actual Material : " << RandomElement << endl;
+	
+	std::cout << "\n" << endl;
+	
+	// print the updated processes and fractions
+	process_i = 0;	
+	for(pit = Processes.begin(); pit != Processes.end(); pit++){
+		cout << (*pit)->GetProcessType() << "\t sigma = " << (*pit)->sigma << " barns, fraction["<<process_i<<"] = " << fraction[process_i] << endl;
+		++process_i;
+	}
+	
+	// perform the scattering
 	double r = RandomNG::uniform(0,1);
 	for(int i = 0; i<fraction.size(); i++)  
 	{ 
@@ -345,6 +383,17 @@ bool ScatteringModel::ParticleScatter(PSvector& p, Material* mat, double E){
 	        return Processes[i]->Scatter(p, E);
 	    }
 	}
+	
+	// OLD method
+	//~ double r = RandomNG::uniform(0,1);
+	//~ for(int i = 0; i<fraction.size(); i++)  
+	//~ { 
+	    //~ r -= fraction[i]; 
+	    //~ if(r<0)
+	    //~ {
+	        //~ return Processes[i]->Scatter(p, E);
+	    //~ }
+	//~ }
 	
 	cout << " should never get this message : \n\tScatteringModel::ParticleScatter : scattering past r < 0, r = " << r << endl;
 
@@ -533,4 +582,55 @@ void ScatteringModel::OutputJawInelastic(string directory, int seed){
 	}	
 		
 	StoredJawInelasticData.clear();	
+}
+
+void ScatteringModel::OutputScatteringProcesses(string directory){
+	
+	std::ostringstream sp_file;
+	sp_file << directory << "ScatteringProcesses.txt";
+	ofstream* os = new ofstream(sp_file.str().c_str());	
+	if(!os->good())    {
+		std::cerr << "ScatteringModel::OutputScatteringProcesses: Could not open ScatteringProcesses file "<< std::endl;
+		exit(EXIT_FAILURE);
+	} 
+	int process_i = 0;
+	string current_element;
+	
+	// Iterate through each material		
+	for(CS_iterator = stored_cross_sections.begin(); CS_iterator != stored_cross_sections.end(); CS_iterator++){
+	
+		// For each material we have to print the ScatteringProcess type, its sigma, and fraction
+		// CS_iterator->second is a pointer to the CS object
+		// CS_iterator->first is string that corresponds to the material
+		current_element = CS_iterator->first;
+		
+		// element symbol
+		//~ (*os) << "Material:" << current_element_c << endl;
+		(*os) << "CS :" << CS_iterator->first << endl;
+		
+		P_iterator = stored_processes.begin();
+		P_iterator = stored_processes.find(current_element);
+		if(P_iterator == stored_processes.end()){cout <<"\n\tScatteringModel::OutputScatteringProcesses: did not find stored_process" << endl;}
+		Processes = P_iterator->second;
+		F_iterator = stored_fractions.find(current_element);
+		if(F_iterator == stored_fractions.end()){cout <<"\n\tScatteringModel::OutputScatteringProcesses: did not find stored_fractions" << endl;}
+		fraction = F_iterator->second;
+		
+		
+		(*os) << "Process:" << P_iterator->first << endl;
+		(*os) << "Fraction:" << F_iterator->first << endl;
+		
+		
+		process_i = 0;
+		vector<ScatteringProcess*>::iterator p;
+		
+		for(p = Processes.begin(); p != Processes.end(); p++){				
+			(*os) << setw(10) << left << setprecision(8) << (*p)->GetProcessType();
+			(*os) << setw(10) << left << setprecision(8) << "\t\t\tsigma = " ;				
+			(*os) << setw(10) << left << setprecision(8) << (*p)->sigma << " barns";
+			(*os) << setw(10) << left << setprecision(8) << "\tFraction = ";
+			(*os) << setw(10) << left << setprecision(8) << fraction[process_i] << endl;
+			++process_i;
+		}				
+	}			
 }
