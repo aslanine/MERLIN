@@ -178,7 +178,7 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 		//~ if(p.dp() < ((1/E0) - 1)){
 		if(E2 <=1.0){
 			p.ct() = z;
-			scattermodel->DeathReport(p, step_size, currentComponent->GetComponentLatticePosition(), lostparticles);
+			scattermodel->DeathReport(p, z, currentComponent->GetComponentLatticePosition(), lostparticles);
 			if(dustset){				
 				for(DustbinIterator = DustbinVector.begin(); DustbinIterator != DustbinVector.end(); ++DustbinIterator){					
 						(*DustbinIterator)->Dispose(*currentComponent, (z+zstep), p, ColParProTurn);
@@ -213,7 +213,7 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 		if(interacted){
 			if(!scattermodel->ParticleScatter(p, C->p, E2)){		
 				p.ct() = z;
-				scattermodel->DeathReport(p, step_size, currentComponent->GetComponentLatticePosition(), lostparticles);
+				scattermodel->DeathReport(p, z, currentComponent->GetComponentLatticePosition(), lostparticles);
 				if(dustset){					
 					for(DustbinIterator = DustbinVector.begin(); DustbinIterator != DustbinVector.end(); ++DustbinIterator){					
 						(*DustbinIterator)->Dispose(*currentComponent, z, p, ColParProTurn);
@@ -238,7 +238,7 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 // Energy cut
 		if( (p.dp() < -0.95) || (p.dp() < -1) ){
 			p.ct() = z;
-			scattermodel->DeathReport(p, step_size, currentComponent->GetComponentLatticePosition(), lostparticles);					
+			scattermodel->DeathReport(p, z, currentComponent->GetComponentLatticePosition(), lostparticles);					
 			if(dustset){					
 				for(DustbinIterator = DustbinVector.begin(); DustbinIterator != DustbinVector.end(); ++DustbinIterator){					
 					(*DustbinIterator)->Dispose(*currentComponent, z, p, ColParProTurn);
