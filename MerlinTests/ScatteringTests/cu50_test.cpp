@@ -167,9 +167,9 @@ int main(int argc, char* argv[])
 	{
 		ostringstream bunch_output_file;
 		if(Loss_Map)
-			bunch_output_file << "Bunch/LM_ST_initial.txt";
+			bunch_output_file << "MerlinTests/outputs/LM_ST_initial.txt";
 		else
-			bunch_output_file << "Bunch/HEL_ST_initial.txt";
+			bunch_output_file << "MerlinTests/outputs/HEL_ST_initial.txt";
 		
 
 		ofstream* bunch_output = new ofstream(bunch_output_file.str().c_str());
@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
 		myCollimateProcess->SetLogStream(NULL);
 
 		//Add Collimation process to the tracker.
-		myCollimateProcess->SetOutputBinSize(length);
+		myCollimateProcess->SetOutputBinSize(0.1);
 		tracker->AddProcess(myCollimateProcess);	
 	}
 	else{
@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
 		myCollimateProcess->SetLogStream(NULL);
 
 		//Add Collimation process to the tracker.
-		myCollimateProcess->SetOutputBinSize(length);
+		myCollimateProcess->SetOutputBinSize(0.1);
 		tracker->AddProcess(myCollimateProcess);
 	}
 
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
 
 	if (0){
 		ostringstream bunch_output_file_out;
-		bunch_output_file_out << "cu50_test_bunch_out.txt";
+		bunch_output_file_out << "MerlinTests/outputs/cu50_test_bunch_out.txt";
 		ofstream* bunch_output_out = new ofstream(bunch_output_file_out.str().c_str());
 		*bunch_output_out << "#T0 P0 x xp y yp ct dp" << endl;
 		myBunch->Output(*bunch_output_out);
@@ -249,11 +249,13 @@ int main(int argc, char* argv[])
 	if(output_final_bunch){
 		ostringstream bunch_output_file2;
 		if(Loss_Map)
-			bunch_output_file2 << "Bunch/LM_M_final.txt";
+			bunch_output_file2 << "MerlinTests/outputs/LM_M_final.txt";
 		else
-			bunch_output_file2 << "Bunch/HEL_M_final.txt";
+			bunch_output_file2 << "MerlinTests/outputs/HEL_M_final.txt";
 
 		ofstream* bunch_output2 = new ofstream(bunch_output_file2.str().c_str());
+		if(!bunch_output2->good()) { std::cerr << "Could not open bunch_output2"<< std::endl; exit(EXIT_FAILURE); }   
+			
 		myBunch->Output(*bunch_output2);
 		delete bunch_output2;
 	 }
@@ -289,13 +291,15 @@ int main(int argc, char* argv[])
 	**	Output Final Hist
 	*********************************************************************/
 	if(Loss_Map){
-		std::ofstream out2 ("Bunch/LM_M_hist.txt", std::ofstream::out); 
+		std::ofstream out2 ("MerlinTests/outputs/LM_M_hist.txt", std::ofstream::out); 
+		if(!out2.good()) { std::cerr << "Could not open out2"<< std::endl; exit(EXIT_FAILURE); }   
 		for (size_t i=0; i<nbins+2; i++){
 			out2 << i << " " << (double)hist_x[i]/npart << " " << (double)hist_xp[i]/npart <<" " << (double)hist_dp[i]/npart << endl;
 		}		
 	}
 	else{
-		std::ofstream out2 ("Bunch/HEL_M_hist.txt", std::ofstream::out);
+		std::ofstream out2 ("MerlinTests/outputs/HEL_M_hist.txt", std::ofstream::out);
+		if(!out2.good()) { std::cerr << "Could not open out2"<< std::endl; exit(EXIT_FAILURE); }   
 		for (size_t i=0; i<nbins+2; i++){
 			out2 << i << " " << (double)hist_x[i]/npart << " " << (double)hist_xp[i]/npart <<" " << (double)hist_dp[i]/npart << endl;
 		}		
