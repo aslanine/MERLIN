@@ -208,7 +208,7 @@ public:
 	* @param[in] directory the output directory.
 	* @param[in] seed used if running multiple jobs, the seed will create an output file per collimator per seed.
 	*/
-	void OutputScatterPlot(string directory, int seed = 0);
+	void OutputScatterPlot(string directory, int seed = -1);
 		
 	vector<string> ScatterPlotNames;
 	bool ScatterPlot_on;
@@ -235,7 +235,7 @@ public:
 	* @param[in] directory the output directory.
 	* @param[in] seed used if running multiple jobs, the seed will create an output file per collimator per seed.
 	*/
-	void OutputJawImpact(string directory, int seed = 0);
+	void OutputJawImpact(string directory, int seed = -1);
 	
 	vector<string> JawImpactNames;
 	bool JawImpact_on;
@@ -263,7 +263,7 @@ public:
 	* @param[in] directory the output directory.
 	* @param[in] seed used if running multiple jobs, the seed will create an output file per collimator per seed.
 	*/
-	void OutputJawInelastic(string directory, int seed = 0);
+	void OutputJawInelastic(string directory, int seed = -1);
 	
 	vector<string> JawInelasticNames;
 	bool JawInelastic_on;
@@ -310,8 +310,9 @@ public:
 	* Used to output the ScatteringProcess sigma and fractions for each
 	* material in stored_cross_sections.
 	* @param[in] directory the output directory.
+	* @param[in] seed used if running multiple jobs, the seed will create an output file per collimator per seed.
 	*/
-	void OutputScatteringProcesses(string directory);
+	void OutputScatteringProcesses(string directory, int seed = -1);
 		
 protected:
 

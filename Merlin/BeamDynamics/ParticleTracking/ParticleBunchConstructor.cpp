@@ -847,6 +847,29 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		}
 	}
 	break;
+	case pencilDistribution:
+	{
+		for(i=1; i<np;) {
+			p.y()	= 0.;
+			p.yp()	= 0.;
+			p.dp()	= 0.;
+			p.ct()	= 0.;
+			p.x() 	= 0.;
+			p.xp() 	= 0.;  
+
+			M.Apply(p);
+			p+=pbunch.front(); // add centroid
+			p.type() = -1.0;
+			p.location() = -1.0;
+			p.sd() = 0.0;
+			p.id() = i;
+			if(itsFilter==0 || itsFilter->Apply(p)) {
+				pbunch.push_back(p);
+				i++;
+			}
+		}
+	}
+	break;
     };
 
     //return new ParticleBunch(beamdat.p0,beamdat.charge,pbunch);

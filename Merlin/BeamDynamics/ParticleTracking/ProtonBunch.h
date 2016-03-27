@@ -53,6 +53,8 @@ public:
 	virtual double GetParticleMass() const;
 	virtual double GetParticleMassMeV() const;
 	virtual double GetParticleLifetime() const;
+	
+	virtual void OutputScattered (std::ostream& os) const;
 
 	int Scatter(Particle& pi, double x, const Aperture* ap);
 

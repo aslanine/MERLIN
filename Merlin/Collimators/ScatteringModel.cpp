@@ -76,11 +76,11 @@ double ScatteringModel::PathLength(Material* mat, double E0){
 		
 		// If it hasn't we must store the imaginary composite nucleus as a marker to indicate that the rest of the constituents have been stored
 		if (CS_iterator == stored_cross_sections.end() ){			
-			std::cout << "\tScatteringModel::PathLength: Composite stored cross section not found for : " << mat->GetSymbol() << endl;		
+			//~ std::cout << "\tScatteringModel::PathLength: Composite stored cross section not found for : " << mat->GetSymbol() << endl;		
 			CurrentCS = new CrossSections(mat, E0, ScatteringPhysicsModel);		
 			stored_cross_sections.insert(std::map< string, Collimation::CrossSections* >::value_type((mat->GetSymbol()), CurrentCS));
 			CS_iterator = stored_cross_sections.find(mat->GetSymbol());	
-			std::cout << "\tScatteringModel::PathLength: Composite CrossSection stored for : " << mat->GetSymbol() << endl;		
+			//~ std::cout << "\tScatteringModel::PathLength: Composite CrossSection stored for : " << mat->GetSymbol() << endl;		
 			
 			// Now we must configure the ScatteringProcesses for this element
 			ConfigureProcesses(CurrentCS, mat);			
@@ -115,7 +115,7 @@ double ScatteringModel::PathLength(Material* mat, double E0){
 		
 		// Select a weighted random element		
 		string RandomElement = aComposite->GetRandomMaterialSymbol();
-		cout << "ScatteringModel::PathLength: Selected random element from composite : " << RandomElement << endl;
+		//~ cout << "ScatteringModel::PathLength: Selected random element from composite : " << RandomElement << endl;
 		CS_iterator = stored_cross_sections.find(RandomElement);
 		if (CS_iterator == stored_cross_sections.end() ){
 			cout << "ERROR: ScatteringModel::PathLength: Composite Constituent not found" << endl;
@@ -335,13 +335,13 @@ bool ScatteringModel::ParticleScatter(PSvector& p, Material* mat, double E){
 	Material* material;	
 		
 	// print the current processes and fractions, these should be the last configured
-	std::cout << "\n" << endl;
-	vector<ScatteringProcess*>::iterator pit;
-	int process_i = 0;	
-	for(pit = Processes.begin(); pit != Processes.end(); pit++){
-		cout << (*pit)->GetProcessType() << "\t sigma = " << (*pit)->sigma << " barns, fraction["<<process_i<<"] = " << fraction[process_i] << endl;
-		++process_i;
-	}
+	//~ std::cout << "\n" << endl;
+	//~ vector<ScatteringProcess*>::iterator pit;
+	//~ int process_i = 0;	
+	//~ for(pit = Processes.begin(); pit != Processes.end(); pit++){
+		//~ cout << (*pit)->GetProcessType() << "\t sigma = " << (*pit)->sigma << " barns, fraction["<<process_i<<"] = " << fraction[process_i] << endl;
+		//~ ++process_i;
+	//~ }
 	
 	// Set fraction and Processes to that of a weighted random composite element
 	// or that for the material
@@ -360,21 +360,23 @@ bool ScatteringModel::ParticleScatter(PSvector& p, Material* mat, double E){
 		fraction = F_iterator->second;
 	}
 
-	std::cout << "\nParticleScatter for input Material : " << mat->GetSymbol() << endl;
-	if(aComposite && useComposites)
-	std::cout << "ParticleScatter for actual Material : " << RandomElement << endl;
+	//~ std::cout << "\nParticleScatter for input Material : " << mat->GetSymbol() << endl;
+	//~ if(aComposite && useComposites)
+	//~ std::cout << "ParticleScatter for actual Material : " << RandomElement << endl;
 	
-	std::cout << "\n" << endl;
+	//~ std::cout << "\n" << endl;
 	
 	// print the updated processes and fractions
-	process_i = 0;	
-	for(pit = Processes.begin(); pit != Processes.end(); pit++){
-		cout << (*pit)->GetProcessType() << "\t sigma = " << (*pit)->sigma << " barns, fraction["<<process_i<<"] = " << fraction[process_i] << endl;
-		++process_i;
-	}
+	//~ process_i = 0;	
+	//~ for(pit = Processes.begin(); pit != Processes.end(); pit++){
+		//~ cout << (*pit)->GetProcessType() << "\t sigma = " << (*pit)->sigma << " barns, fraction["<<process_i<<"] = " << fraction[process_i] << endl;
+		//~ ++process_i;
+	//~ }
 	
 	// perform the scattering
+	
 	double r = RandomNG::uniform(0,1);
+	
 	for(int i = 0; i<fraction.size(); i++)  
 	{ 
 	    r -= fraction[i]; 
@@ -483,7 +485,10 @@ void ScatteringModel::OutputScatterPlot(string directory, int seed){
 	for(vector<string>::iterator name = ScatterPlotNames.begin(); name != ScatterPlotNames.end(); ++name){
 		
 		std::ostringstream scatter_plot_file;
-		scatter_plot_file << directory << "scatter_plot_" << (*name) << "_" << seed << ".txt";
+		if(seed >= 0)
+			scatter_plot_file << directory << "scatter_plot_" << (*name) << "_" << seed << ".txt";
+		else
+			scatter_plot_file << directory << "scatter_plot_" << (*name) << ".txt";
 		//~ std::ostringstream scatter_plot_file = directory + "Scatter.txt";
 		std::ofstream* os = new std::ofstream(scatter_plot_file.str().c_str());	
 		if(!os->good())    {
@@ -521,7 +526,10 @@ void ScatteringModel::OutputJawImpact(string directory, int seed){
 	for(vector<string>::iterator name = JawImpactNames.begin(); name != JawImpactNames.end(); ++name){
 		//~ cout << "vector<string>::iterator = " << *name << endl;
 		std::ostringstream jaw_impact_file;
-		jaw_impact_file << directory << "jaw_impact_" << (*name) << "_" << seed << ".txt";
+		if(seed >= 0)
+			jaw_impact_file << directory << "jaw_impact_" << (*name) << "_" << seed << ".txt";
+		else
+			jaw_impact_file << directory << "jaw_impact_" << (*name) << ".txt";
 		ofstream* os = new ofstream(jaw_impact_file.str().c_str());	
 		if(!os->good())    {
 			std::cerr << "ScatteringModel::OutputJawImpact: Could not open JawImpact file for collimator " << (*name) << std::endl;
@@ -555,7 +563,10 @@ void ScatteringModel::OutputJawInelastic(string directory, int seed){
 	for(vector<string>::iterator name = JawInelasticNames.begin(); name != JawInelasticNames.end(); ++name){
 		//~ cout << "vector<string>::iterator = " << *name << endl;
 		std::ostringstream jaw_inelastic_file;
-		jaw_inelastic_file << directory << "jaw_inelastic_" << (*name) << "_" << seed << ".txt";
+		if(seed >= 0)
+			jaw_inelastic_file << directory << "jaw_inelastic_" << (*name) << "_" << seed << ".txt";
+		else
+			jaw_inelastic_file << directory << "jaw_inelastic_" << (*name) << ".txt";
 		ofstream* os = new ofstream(jaw_inelastic_file.str().c_str());	
 		if(!os->good())    {
 			std::cerr << "ScatteringModel::OutputJawInelastic: Could not open JawInelastic file for collimator " << (*name) << std::endl;
@@ -584,10 +595,13 @@ void ScatteringModel::OutputJawInelastic(string directory, int seed){
 	StoredJawInelasticData.clear();	
 }
 
-void ScatteringModel::OutputScatteringProcesses(string directory){
+void ScatteringModel::OutputScatteringProcesses(string directory, int seed){
 	
 	std::ostringstream sp_file;
-	sp_file << directory << "ScatteringProcesses.txt";
+	if(seed >= 0)
+		sp_file << directory << "ScatteringProcesses_" << seed << ".txt";
+	else
+		sp_file << directory << "ScatteringProcesses.txt";
 	ofstream* os = new ofstream(sp_file.str().c_str());	
 	if(!os->good())    {
 		std::cerr << "ScatteringModel::OutputScatteringProcesses: Could not open ScatteringProcesses file "<< std::endl;

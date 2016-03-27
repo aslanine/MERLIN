@@ -47,13 +47,9 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int ncorepart 	= 1;						// number of core particles to track
-    int npart 		= 1E3;                     	// number of halo particles to track
-    int nturns 		= 5;                      // number of turns to track
-
+    int npart 			= 1E6;                     	// number of halo particles to track
        
     if (argc >=2){npart = atoi(argv[1]);}
-
     if (argc >=3){seed = atoi(argv[2]);}
 
     RandomNG::init(seed);
@@ -62,20 +58,17 @@ int main(int argc, char* argv[])
     double beam_energy = 7000.0;
     double energy = beam_energy;
     double beam_charge = 1.1e11;
-    double normalized_emittance = 3.5e-6;
-    double gamma = beam_energy/PhysicalConstants::ProtonMassMeV/PhysicalUnits::MeV;
-	double beta = sqrt(1.0-(1.0/pow(gamma,2)));
-	double emittance = normalized_emittance/(gamma*beta);
-    cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;
+    //~ double normalized_emittance = 3.5e-6;
+    //~ double gamma = beam_energy/PhysicalConstants::ProtonMassMeV/PhysicalUnits::MeV;
+	//~ double beta = sqrt(1.0-(1.0/pow(gamma,2)));
+	//~ double emittance = normalized_emittance/(gamma*beta);
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
 	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
 	
-	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, dustbin_dir;			
-	string core_string =  "Core/";
-	string halo_string =  "Halo/";
+	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, dustbin_dir;
 		
 	string input_dir = "/Thesis/data/HELFullBeam/";	
 	string output_dir = "/Build/Thesis/outputs/MaterialTest/";
@@ -86,7 +79,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "21Mar16_test/";
+		case_dir = "26Mar16_multi_mat/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -112,8 +105,65 @@ int main(int argc, char* argv[])
 			output_final_bunch	= 1;
 		}
 	bool symplectic = 1;
+	
+/************************
+*	HISTOGRAM STUFF		*
+************************/		
+	const size_t nbins = 200;
+	
+	// bin width = bin_max - bin_min / nbin
+	const double bin_min_x = -100e-6, bin_max_x = 100e-6;
+	const double x_bw = (bin_max_x - bin_min_x) / nbins;
+	const double bin_min_xp = -100e-6, bin_max_xp = 100e-6;
+	const double xp_bw = (bin_max_xp - bin_min_xp) / nbins;
+	const double bin_min_y = -100e-6, bin_max_y = 100e-6;
+	const double y_bw = (bin_max_y - bin_min_y) / nbins;
+	const double bin_min_yp = -100e-6, bin_max_yp = 100e-6;
+	const double yp_bw = (bin_max_yp - bin_min_yp) / nbins;
+	const double bin_min_dp = 1e-3, bin_max_dp = 1;
+	const double dp_bw = (bin_max_dp - bin_min_dp) / nbins;
 
+	int hist_x[nbins+2] = {0};
+	int hist_xp[nbins+2] = {0};
+	int hist_y[nbins+2] = {0};
+	int hist_yp[nbins+2] = {0};
+	int hist_dp[nbins+2] = {0};
+
+/************************
+*	BEAM  SETTINGS	*
+************************/
+	BeamData myBeam;
+		myBeam.charge= 1.31e11;
+		myBeam.beta_x = 0.000001;
+		myBeam.beta_y = 0.000001;
+		myBeam.emit_x = 0.;
+		myBeam.emit_y = 0.;
+		myBeam.sig_z = 75.5*millimeter;
+		myBeam.sig_dp = 0.;
+		myBeam.p0 = 7000*GeV;
+		myBeam.alpha_x = 0.;
+		myBeam.alpha_y = 0.;
+	double offset= 0;
+		myBeam.yp0=0.;
+		myBeam.xp0=0.;
+		myBeam.x0=0.;
+		myBeam.y0=offset;
+
+/****************************
+*	Collimation Process		*
+****************************/
+
+
+	cout << "Collimation on" << endl;
+	CollimateProtonProcess* myCollimateProcess = new CollimateProtonProcess(2, 4);
+	myCollimateProcess->ScatterAtCollimator(true);
 		
+	LossMapDustbin* myDustbin = new LossMapDustbin;
+	myCollimateProcess->SetDustbin(myDustbin);     
+
+	myCollimateProcess->SetLossThreshold(200.0);
+	myCollimateProcess->SetOutputBinSize(0.1);
+			
 /************************************
 *	ACCELERATORMODEL CONSTRUCTION	*
 ************************************/
@@ -139,12 +189,6 @@ int main(int argc, char* argv[])
 	TEST->SetElectronDensity(TEST->CalculateElectronDensity());
 	TEST->SetPlasmaEnergy(TEST->CalculatePlasmaEnergy());
 	
-	ScatteringModel* myScatter = new ScatteringModel;
-	// 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,    3: ST + Adv. SD,     4: MERLIN
-	if(use_sixtrack_like_scattering){	myScatter->SetScatterType(0);	}
-	else{								myScatter->SetScatterType(4);	}
-	myScatter->SetCompositesOn();
-
 	cout << "Collimator Aperture" << endl;
 	
 	// CollimatorAperture constructor contains a material - this is depreciated and can be set to null
@@ -152,183 +196,265 @@ int main(int argc, char* argv[])
 	//Aperture* ap = new CollimatorAperture(x, y, tilt, material, length, x_offset_entry, y_offset_entry);
 	//jaw closed
 	Aperture* ap1 = new CollimatorAperture(10.0, 0., 0., NULL, 0.5, 0., 0.);
+	double length = 0.5*meter;
+
+	//~ Material* material1 = TEST;
+	//~ Material* material2 = matter->FindMaterial("GCOP");
+	//~ Material* material3 = matter->FindMaterial("Cu");
 	
-	//Aperture* ap1 = new CollimatorAperture(10.0, 1E-3, 0., 0.5, 0., 0.);
-	//Aperture* ap1 = new CollimatorAperture(0., 0., 0., 0.5, 0., 0.);
-	//Aperture* ap1 = new OneSidedUnalignedCollimatorAperture(10.0, 0., 0., 0.5, 0., 0.);
-
-	/*
-	Aperture* ap = new CollimatorAperture(10.0,0.1E-3,0.,0.1,0.,0.);
-	Aperture* apdrift = new CircularAperture(1.);
-	*/
-
-	//0.5m coll
-	// Collimator constructor:
-	// Collimator (const string& id, double len, Material* pp, double P0);
+	// List of material names
+	vector<string> material_names;
+	material_names.push_back("Cu");
+	material_names.push_back("W");
+	material_names.push_back("C");
 	
-	Collimator* coll1=new Collimator("COLL1", 0.1*meter, TEST, energy);
-	coll1->SetAperture(ap1);
-	coll1->SetComponentLatticePosition(0.);
-
-	Collimator* coll2=new Collimator("COLL2", 0.1*meter, matter->FindMaterial("GCOP"), energy);
-	coll2->SetAperture(ap1);
-	coll2->SetComponentLatticePosition(0.1);
+	int ii = 0;
 	
-	Collimator* coll3=new Collimator("COLL3", 0.1*meter, matter->FindMaterial("Cu") , energy);
-	coll3->SetAperture(ap1);
-	coll3->SetComponentLatticePosition(0.2);
+	// Iterate for size of material names
+	vector<string>::iterator pit;
+	for(pit = material_names.begin(); pit != material_names.end(); ++pit){
+		cout << "Started loop for material: " << *pit << endl;
+		
+		// Create a collimator for the given material, set aperture and position
+		Collimator* coll = new Collimator(*pit, length, matter->FindMaterial(*pit), energy);
+		coll->SetAperture(ap1);
+		coll->SetComponentLatticePosition(0.);
+		
+		// AccModelConstructor etc
+		AcceleratorModelConstructor* myaccmodelctor = new AcceleratorModelConstructor();
+		myaccmodelctor->NewModel();
+		myaccmodelctor->AppendComponent(coll);
+		AcceleratorModel *myAccModel = myaccmodelctor->GetModel();		
+		
+		// Scattering Model
+		ScatteringModel* myScatter = new ScatteringModel;
+		// 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,    3: ST + Adv. SD,     4: MERLIN
+		if(use_sixtrack_like_scattering){	myScatter->SetScatterType(0);	}
+		else{								myScatter->SetScatterType(4);	}
+		myScatter->SetCompositesOn();
+		myScatter->SetScatterPlot(*pit);
+		myScatter->SetJawImpact(*pit);
+		
+		// Create bunch
+		ProtonBunch* myBunch;
+		ParticleBunchConstructor* myBunchCtor;
+		myBunchCtor = new ParticleBunchConstructor(myBeam, npart, pencilDistribution);	
+		myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
+		
+		if(output_initial_bunch){	
+			ostringstream initial_bunch_file;
+			initial_bunch_file << bunch_dir << "initial_bunch_" << *pit << "_.txt";
+			ofstream* bunch_initial = new ofstream(initial_bunch_file.str().c_str());
+			if(!bunch_initial->good()) { std::cerr << "Could not open initial bunch output for material"<< *pit << std::endl; exit(EXIT_FAILURE); }   
+			myBunch->Output(*bunch_initial);			
+			delete bunch_initial;	   
+		}
+		
+		// Create the tracker
+		ParticleTracker* myParticleTracker;
 
-	AcceleratorModelConstructor* myaccmodelctor = new AcceleratorModelConstructor();
-	myaccmodelctor->NewModel();
+		AcceleratorModel::Beamline myBeamline = myAccModel->GetBeamline();
+		myParticleTracker = new ParticleTracker(myBeamline, myBunch);
+		if(symplectic){	myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());}
+		else{			myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());}
+		
+		// Add the collimation process
+		myCollimateProcess->SetScatteringModel(myScatter);
+		myParticleTracker->AddProcess(myCollimateProcess);		
+	
+		// Track
+		myParticleTracker->Track(myBunch);
+		
+		
+		cout << "Material 	: " << *pit << endl;
+		cout << "Particles 	: " << npart << endl;
+		cout << "Absorbed	: " << npart - myBunch->size() << endl;	
+		cout << "Remaining 	: " << myBunch->size() << endl;
+	
+		// Output
+		myScatter->OutputJawImpact(full_output_dir);
+		myScatter->OutputScatterPlot(full_output_dir);	
+		myScatter->OutputScatteringProcesses(full_output_dir, ii);
+		
+		if(output_final_bunch){
+			ostringstream fin_output_file;
+			fin_output_file << bunch_dir << "final_bunch_" << *pit <<"_.txt";
+			ofstream* bunch_final = new ofstream(fin_output_file.str().c_str());
+			if(!bunch_final->good()){ std::cerr << "Could not open finalbunch output file for material " << *pit << std::endl; exit(EXIT_FAILURE); }  
+			//~ myBunch->Output(*hbunch_output2);
+			myBunch->OutputScattered(*bunch_final);
+			delete bunch_final;
+
+		 }
+		 
+		 // Histogramming
+		for (PSvectorArray::iterator ip=myBunch->begin(); ip!=myBunch->end(); ip++){
+
+			int bin_x = ((ip->x() - bin_min_x) / (bin_max_x-bin_min_x) * (nbins)) +1; // +1 because bin zero for outliers
+			// so handle end bins, by check against x, not bin
+			if (ip->x() < bin_min_x) bin_x = 0;
+			if (ip->x() > bin_max_x) bin_x = nbins+1;
+			hist_x[bin_x] += 1;
+
+			int bin_xp = ((ip->xp() - bin_min_xp) / (bin_max_xp-bin_min_xp) * (nbins)) +1; // +1 because bin zero for outliers
+			if (ip->xp() < bin_min_xp) bin_xp = 0;
+			if (ip->xp() > bin_max_xp) bin_xp = nbins+1;
+			hist_xp[bin_xp] += 1;
+
+			int bin_y = ((ip->y() - bin_min_y) / (bin_max_y-bin_min_y) * (nbins)) +1; // +1 because bin zero for outliers
+			if (ip->y() < bin_min_y) bin_y = 0;
+			if (ip->y() > bin_max_y) bin_y = nbins+1;
+			hist_y[bin_y] += 1;
+
+			int bin_yp = ((ip->yp() - bin_min_yp) / (bin_max_yp-bin_min_yp) * (nbins)) +1; // +1 because bin zero for outliers
+			if (ip->yp() < bin_min_yp) bin_yp = 0;
+			if (ip->yp() > bin_max_yp) bin_yp = nbins+1;
+			hist_yp[bin_yp] += 1;
+
+			int bin_dp = ((-ip->dp() - bin_min_dp) / (bin_max_dp-bin_min_dp) * (nbins)) +1; // +1 because bin zero for outliers
+			if (-ip->dp() < bin_min_dp) bin_dp = 0;
+			if (-ip->dp() > bin_max_dp) bin_dp = nbins+1;
+			hist_dp[bin_dp] += 1;
+		}
+
+		
+		/*********************************************************************
+		**	Output Final Hist
+		*********************************************************************/		
+		ostringstream hist_output_file;
+		hist_output_file << bunch_dir << "hist_" << *pit <<"_.txt";
+		ofstream* out2 = new ofstream(hist_output_file.str().c_str());
+		if(!out2->good()){ std::cerr << "Could not open finalbunch output file for material " << *pit << std::endl; exit(EXIT_FAILURE); }  
+		for (size_t i=0; i<nbins+2; i++){
+			(*out2) << bin_min_x + (x_bw*i) << "\t";
+			(*out2) << (double)hist_x[i]/npart << "\t";
+			(*out2) << bin_min_xp + (xp_bw*i) << "\t";
+			(*out2) << (double)hist_xp[i]/npart <<"\t";
+			(*out2) << bin_min_y + (y_bw*i) << "\t";
+			(*out2) << (double)hist_y[i]/npart << "\t";
+			(*out2) << bin_min_yp + (yp_bw*i) << "\t";
+			(*out2) << (double)hist_yp[i]/npart <<"\t";
+			(*out2) << bin_min_dp + (dp_bw*i) << "\t";
+			(*out2) << (double)hist_dp[i]/npart << endl;
+		}				
+			
+		cout << "Deleting stuff" << endl;
+		//~ delete coll;
+		delete myaccmodelctor;
+		delete myAccModel;
+		delete myBunch;
+		delete myBunchCtor;	
+		delete myScatter;
+		delete out2;
+		//~ delete myBeamline;
+		
+		ii++;		
+		cout << "Ended loop for material: " << *pit << endl;
+	}
+	
+	
+	
+	//~ Collimator* coll1=new Collimator("COLL1", length, material1, energy);
+	//~ coll1->SetAperture(ap1);
+	//~ coll1->SetComponentLatticePosition(0.);
+
+	//~ Collimator* coll2=new Collimator("COLL2", length, material2, energy);
+	//~ coll2->SetAperture(ap1);
+	//~ coll2->SetComponentLatticePosition(length);
+	
+	//~ Collimator* coll3=new Collimator("COLL3", length, material3, energy);
+	//~ coll3->SetAperture(ap1);
+	//~ coll3->SetComponentLatticePosition(2*length);
+
+	//~ AcceleratorModelConstructor* myaccmodelctor = new AcceleratorModelConstructor();
+	//~ myaccmodelctor->NewModel();
 	//~ myaccmodelctor->AppendComponent(new Drift("DRIFT1",1.0*meter));
-	myaccmodelctor->AppendComponent(coll1);
-	myaccmodelctor->AppendComponent(coll2);
-	myaccmodelctor->AppendComponent(coll3);
+	//~ myaccmodelctor->AppendComponent(coll1);
+	//~ myaccmodelctor->AppendComponent(coll2);
+	//~ myaccmodelctor->AppendComponent(coll3);
 	//myaccmodelctor->AppendComponent(new Drift("DRIFT2",1.0*meter));
 	
-	myScatter->SetScatterPlot("COLL1");
-	myScatter->SetJawImpact("COLL1");
-	myScatter->SetScatterPlot("COLL2");
-	myScatter->SetJawImpact("COLL2");
-	myScatter->SetScatterPlot("COLL3");
-	myScatter->SetJawImpact("COLL3");
+	//~ myScatter->SetScatterPlot("COLL2");
+	//~ myScatter->SetJawImpact("COLL2");
+	//~ myScatter->SetScatterPlot("COLL3");
+	//~ myScatter->SetJawImpact("COLL3");
 	
-	AcceleratorModel *myAccModel = myaccmodelctor->GetModel();
 	
-/************************
-*	BEAM  SETTINGS	*
-************************/
+	
+	//~ AcceleratorModel *myAccModel = myaccmodelctor->GetModel();
 
-	BeamData myBeam;
-		myBeam.charge= 1.31e11;
-		myBeam.beta_x = 0.000001;
-		myBeam.beta_y = 0.000001;
-		myBeam.emit_x = 0.;
-		myBeam.emit_y = 0.;
-		myBeam.sig_z = 75.5*millimeter;
-		myBeam.sig_dp = 0.;
-		myBeam.p0 = 7000*GeV;
-		myBeam.alpha_x = 0.;
-		myBeam.alpha_y = 0.;
-		//this is 0.001 as coll jaw is 0.001, +0.000001 for 1um impact
-		//double offset= (1E-3 + 1E-6);
-	//~ double offset= 1E-6;
-	double offset= 0;
-		myBeam.yp0=0.;
-		myBeam.xp0=0.;
-		myBeam.x0=0.;
-		myBeam.y0=offset;
 
 /************
 *	BUNCH	*
 ************/
-
-    int node_particles = npart;
     
-    ProtonBunch* myBunch;
-    ParticleBunchConstructor* myBunchCtor;
-
-	// pencil distribution
-	myBunchCtor = new ParticleBunchConstructor(myBeam, node_particles, HELHaloDistribution);
-	
-	myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
-    delete myBunchCtor;
+    //~ ProtonBunch* myBunch;
+    //~ ParticleBunchConstructor* myBunchCtor;
+	//~ myBunchCtor = new ParticleBunchConstructor(myBeam, npart, pencilDistribution);	
+	//~ myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
+    //~ delete myBunchCtor;
    
-    myBunch->SetMacroParticleCharge(myBeam.charge);   
+    //~ myBunch->SetMacroParticleCharge(myBeam.charge);   
     
-   if(output_initial_bunch){
-	
-		ostringstream hbunch_output_file;
-		hbunch_output_file << bunch_dir << "initial_bunch.txt";
-		ofstream* hbunch_output = new ofstream(hbunch_output_file.str().c_str());
-		if(!hbunch_output->good()) { std::cerr << "Could not open initial bunch output" << std::endl; exit(EXIT_FAILURE); }   
-		myBunch->Output(*hbunch_output);			
-		delete hbunch_output;	   
-	}
+  
 
 /************************
 *	ParticleTracker		*
 ************************/
 
-    ParticleTracker* myParticleTracker;
+    //~ ParticleTracker* myParticleTracker;
 
-		AcceleratorModel::Beamline beamline1 = myAccModel->GetBeamline();
+		//~ AcceleratorModel::Beamline beamline1 = myAccModel->GetBeamline();
 		
-		myParticleTracker = new ParticleTracker(beamline1, myBunch);
+		//~ myParticleTracker = new ParticleTracker(beamline1, myBunch);
 
-		if(symplectic){
-			myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());	
-		}
-		else{	
-			myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());	
-		}
+		//~ if(symplectic){
+			//~ myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());	
+		//~ }
+		//~ else{	
+			//~ myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());	
+		//~ }
 	
 
-/****************************
-*	Collimation Process		*
-****************************/
 
-
-	cout << "Collimation on" << endl;
-	CollimateProtonProcess* myCollimateProcess = new CollimateProtonProcess(2, 4);
-	myCollimateProcess->ScatterAtCollimator(true);
-		
-	LossMapDustbin* myDustbin = new LossMapDustbin;
-	myCollimateProcess->SetDustbin(myDustbin);     
-
-	myCollimateProcess->SetScatteringModel(myScatter);
-	myCollimateProcess->SetLossThreshold(200.0);
-	myCollimateProcess->SetOutputBinSize(0.1);
-
-	myParticleTracker->AddProcess(myCollimateProcess);
+	//~ myParticleTracker->AddProcess(myCollimateProcess);
 		
 /********************
  *  TRACKING RUN	*
  *******************/
  
-	myParticleTracker->Track(myBunch);
+	//~ myParticleTracker->Track(myBunch);
 	
-	myScatter->OutputJawImpact(full_output_dir);
-	myScatter->OutputScatterPlot(full_output_dir);
+	//~ myScatter->OutputJawImpact(full_output_dir);
+	//~ myScatter->OutputScatterPlot(full_output_dir);
 	
-	myScatter->OutputScatteringProcesses(full_output_dir);
+	//~ myScatter->OutputScatteringProcesses(full_output_dir);
     
 /********************
  *  OUTPUT DUSTBIN	*
  *******************/
-	if(collimation_on){
-		ostringstream hdustbin_file;
-		hdustbin_file << (dustbin_dir + "dustbin_losses.txt");	
-		ofstream* hdustbin_output = new ofstream(hdustbin_file.str().c_str());	
-		if(!hdustbin_output->good()){ std::cerr << "Could not open halo dustbin loss file" << std::endl; exit(EXIT_FAILURE); }   
-		myDustbin->Finalise(); 
-		myDustbin->Output(hdustbin_output); 
-		delete hdustbin_output;
-	}
+	//~ if(collimation_on){
+		//~ ostringstream hdustbin_file;
+		//~ hdustbin_file << (dustbin_dir + "dustbin_losses.txt");	
+		//~ ofstream* hdustbin_output = new ofstream(hdustbin_file.str().c_str());	
+		//~ if(!hdustbin_output->good()){ std::cerr << "Could not open halo dustbin loss file" << std::endl; exit(EXIT_FAILURE); }   
+		//~ myDustbin->Finalise(); 
+		//~ myDustbin->Output(hdustbin_output); 
+		//~ delete hdustbin_output;
+	//~ }
 	
 /********************
  *  OUTPUT BUNCH	*
  *******************/
-	if(output_final_bunch){
-		ostringstream hbunch_output_file2;
-		hbunch_output_file2 << bunch_dir << "final_bunch.txt";
-		ofstream* hbunch_output2 = new ofstream(hbunch_output_file2.str().c_str());
-		if(!hbunch_output2->good()){ std::cerr << "Could not open final halo bunch output file" << std::endl; exit(EXIT_FAILURE); }  
-		myBunch->Output(*hbunch_output2);
-		delete hbunch_output2;
 
-	 }
 	 
 /************
  *  CLEANUP	*
  ***********/	
-	cout << "particles: " << npart << endl;
-	cout << "particles remaining: " << myBunch->size() << endl;
-	cout << "absorbed: " << npart - myBunch->size() << endl;	
 	
 	// Cleanup our pointers on the stack for completeness
-	delete myBunch;
-	delete myAccModel;
+	//~ delete myBunch;
+	//~ delete myAccModel;
 	
 	// Need to fix destructors for:
 	//~ delete myDustbin;
