@@ -48,9 +48,12 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
     int npart 			= 1E6;                     	// number of halo particles to track
+    int nleft = npart;
        
     if (argc >=2){npart = atoi(argv[1]);}
     if (argc >=3){seed = atoi(argv[2]);}
+    
+    seed = 13;
 
     RandomNG::init(seed);
     
@@ -79,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "26Mar16_multi_mat/";
+		case_dir = "28Mar16_NonComposite/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -105,11 +108,12 @@ int main(int argc, char* argv[])
 			output_final_bunch	= 1;
 		}
 	bool symplectic = 1;
+	bool composite = 0;
 	
 /************************
 *	HISTOGRAM STUFF		*
 ************************/		
-	const size_t nbins = 200;
+	const size_t nbins = 500;
 	
 	// bin width = bin_max - bin_min / nbin
 	const double bin_min_x = -100e-6, bin_max_x = 100e-6;
@@ -135,17 +139,17 @@ int main(int argc, char* argv[])
 	
 	// List of material names
 	vector<string> material_names;
-	material_names.push_back("Be");
+	//~ material_names.push_back("Be");
 	//~ material_names.push_back("B");
 	material_names.push_back("C");
 	//~ material_names.push_back("O");
-	material_names.push_back("Al");
-	material_names.push_back("Fe");
-	material_names.push_back("Ni");
+	//~ material_names.push_back("Al");
+	//~ material_names.push_back("Fe");
+	//~ material_names.push_back("Ni");
 	material_names.push_back("Cu");
 	material_names.push_back("Mo");
 	material_names.push_back("W");
-	material_names.push_back("Pb");
+	//~ material_names.push_back("Pb");
 	material_names.push_back("AC150K");
 	material_names.push_back("IT180");
 	material_names.push_back("GCOP");
@@ -248,7 +252,8 @@ int main(int argc, char* argv[])
 		// 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,    3: ST + Adv. SD,     4: MERLIN
 		if(use_sixtrack_like_scattering){	myScatter->SetScatterType(0);	}
 		else{								myScatter->SetScatterType(4);	}
-		myScatter->SetComposites(1);
+		if(composite){		myScatter->SetComposites(1);}
+		else{		myScatter->SetComposites(0);}
 		myScatter->SetScatterPlot(*pit);
 		myScatter->SetJawImpact(*pit);
 		
@@ -289,8 +294,8 @@ int main(int argc, char* argv[])
 		cout << "Remaining 	: " << myBunch->size() << endl;
 	
 		// Output
-		myScatter->OutputJawImpact(full_output_dir);
-		myScatter->OutputScatterPlot(full_output_dir);	
+		//~ myScatter->OutputJawImpact(full_output_dir);
+		//~ myScatter->OutputScatterPlot(full_output_dir);	
 		myScatter->OutputScatteringProcesses(full_output_dir, ii);
 		
 		if(output_final_bunch){
@@ -342,7 +347,26 @@ int main(int argc, char* argv[])
 		hist_output_file << bunch_dir << "hist_" << *pit <<"_.txt";
 		ofstream* out2 = new ofstream(hist_output_file.str().c_str());
 		if(!out2->good()){ std::cerr << "Could not open finalbunch output file for material " << *pit << std::endl; exit(EXIT_FAILURE); }  
+		nleft = myBunch->size();
 		for (size_t i=0; i<nbins+2; i++){
+			
+			/*** This output should be normalised by the original particle
+			* number npart in order to compare the number of lost particles
+			* It may also need to be normalised to the bin width */
+			
+			// Normalised by bin_width * npart, centre bin			
+			//~ (*out2) << bin_min_x + (x_bw/2) + (x_bw*i) << "\t";
+			//~ (*out2) << (double)hist_x[i]/(x_bw *npart) << "\t";
+			//~ (*out2) << bin_min_xp + (xp_bw/2) + (xp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_xp[i]/(xp_bw *npart) <<"\t";
+			//~ (*out2) << bin_min_y + (y_bw/2) + (y_bw*i) << "\t";
+			//~ (*out2) << (double)hist_y[i]/(y_bw *npart) << "\t";
+			//~ (*out2) << bin_min_yp + (yp_bw/2) + (yp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_yp[i]/(yp_bw *npart) <<"\t";
+			//~ (*out2) << bin_min_dp + (dp_bw/2) + (dp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_dp[i]/(dp_bw *npart) << endl;
+			
+			// Normalised by npart, start bin
 			(*out2) << bin_min_x + (x_bw*i) << "\t";
 			(*out2) << (double)hist_x[i]/npart << "\t";
 			(*out2) << bin_min_xp + (xp_bw*i) << "\t";
@@ -353,6 +377,66 @@ int main(int argc, char* argv[])
 			(*out2) << (double)hist_yp[i]/npart <<"\t";
 			(*out2) << bin_min_dp + (dp_bw*i) << "\t";
 			(*out2) << (double)hist_dp[i]/npart << endl;
+			
+			// Normalised by bin_width * nleft, centre bin			
+			//~ (*out2) << bin_min_x + (x_bw/2) + (x_bw*i) << "\t";
+			//~ (*out2) << (double)hist_x[i]/(x_bw *nleft) << "\t";
+			//~ (*out2) << bin_min_xp + (xp_bw/2) + (xp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_xp[i]/(xp_bw *nleft) <<"\t";
+			//~ (*out2) << bin_min_y + (y_bw/2) + (y_bw*i) << "\t";
+			//~ (*out2) << (double)hist_y[i]/(y_bw *nleft) << "\t";
+			//~ (*out2) << bin_min_yp + (yp_bw/2) + (yp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_yp[i]/(yp_bw *nleft) <<"\t";
+			//~ (*out2) << bin_min_dp + (dp_bw/2) + (dp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_dp[i]/(dp_bw *nleft) << endl;
+			
+			// Normalised by bin_width * nleft, start bin		
+			//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
+			//~ (*out2) << (double)hist_x[i]/(x_bw *nleft) << "\t";
+			//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_xp[i]/(xp_bw *nleft) <<"\t";
+			//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
+			//~ (*out2) << (double)hist_y[i]/(y_bw *nleft) << "\t";
+			//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_yp[i]/(yp_bw *nleft) <<"\t";
+			//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_dp[i]/(dp_bw *nleft) << endl;
+			
+			// Normalised by bin_width, start bin		
+			//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
+			//~ (*out2) << (double)hist_x[i]/(x_bw) << "\t";
+			//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_xp[i]/(xp_bw) <<"\t";
+			//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
+			//~ (*out2) << (double)hist_y[i]/(y_bw) << "\t";
+			//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_yp[i]/(yp_bw) <<"\t";
+			//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_dp[i]/(dp_bw) << endl;
+			
+			// Normalised by nleft, start bin		
+			//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
+			//~ (*out2) << (double)hist_x[i]/(nleft) << "\t";
+			//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_xp[i]/(nleft) <<"\t";
+			//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
+			//~ (*out2) << (double)hist_y[i]/(nleft) << "\t";
+			//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_yp[i]/(nleft) <<"\t";
+			//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_dp[i]/(dp_bw *nleft) << endl;
+			
+			// Not normalised, start bin		
+			//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
+			//~ (*out2) << (double)hist_x[i] << "\t";
+			//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_xp[i] <<"\t";
+			//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
+			//~ (*out2) << (double)hist_y[i] << "\t";
+			//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_yp[i] <<"\t";
+			//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
+			//~ (*out2) << (double)hist_dp[i] << endl;
 		}				
 			
 		cout << "Deleting stuff" << endl;

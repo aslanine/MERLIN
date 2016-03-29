@@ -305,7 +305,7 @@ public:
 	* constituent elements
 	* @param[in] in boolean to set useComposites to TRUE or FALSE.
 	*/	
-	void SetComposites(bool in){useComposites = in; cout << "\nScatteringModel::Composites set to" << useComposites << endl;}
+	void SetComposites(bool in){useComposites = in; cout << "\nScatteringModel::Composites set to " << useComposites << endl;}
 	
 	/**
 	* Used to output the ScatteringProcess sigma and fractions for each
