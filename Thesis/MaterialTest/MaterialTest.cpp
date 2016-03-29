@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
 		// 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,    3: ST + Adv. SD,     4: MERLIN
 		if(use_sixtrack_like_scattering){	myScatter->SetScatterType(0);	}
 		else{								myScatter->SetScatterType(4);	}
-		myScatter->SetCompositesOn();
+		myScatter->SetComposites(1);
 		myScatter->SetScatterPlot(*pit);
 		myScatter->SetJawImpact(*pit);
 		

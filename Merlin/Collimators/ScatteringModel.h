@@ -303,8 +303,9 @@ public:
 	* individual elements, when off this treats composites as a single
 	* imaginary atom with properties that are a weighted average of all 
 	* constituent elements
+	* @param[in] in boolean to set useComposites to TRUE or FALSE.
 	*/	
-	void SetCompositesOn(){useComposites = 1; cout << "\nScatteringModel::Composites On" << endl;}
+	void SetComposites(bool in){useComposites = in; cout << "\nScatteringModel::Composites set to" << useComposites << endl;}
 	
 	/**
 	* Used to output the ScatteringProcess sigma and fractions for each
