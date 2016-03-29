@@ -22,7 +22,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 
 //ALL CROSS SECTIONS IN BARNS!
 
-	//new Material(Name, A, AN, SE, SI, SR, dE, X, rho, sig);
+	//new Material(Name, symbol, A, Z, SE, SI, SR, dE, X, rho, sig);
 	//Beryllium - using constructor rather than addinf each variable
 	Material* Be = new Material("Beryllium", "Be", 9.012182, 4, 0.069, 0.199, 0.000035, 0.55, 651900, 1848, 3.08E7);	
 	Be->SetSixtrackTotalNucleusCrossSection(0.268);
@@ -46,10 +46,25 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	Be->SetDensity(1848);
 */
 	
-//	Be->rho=1.848;
-//	Be->SetRadiationLength(Be->CalculateRadiationLength());	
-//	Be->SetElectronCriticalEnergy(113.70*MeV);
-	
+	//Boron
+	Material* B = new Material();
+	B->SetAtomicNumber(5);
+	B->SetAtomicMass(10.811);
+	B->SetName("Boron");
+	B->SetSymbol("B");
+	B->SetSixtrackTotalNucleusCrossSection(B->CalculateSixtrackTotalNucleusCrossSection());
+	B->SetSixtrackInelasticNucleusCrossSection(B->CalculateSixtrackInelasticNucleusCrossSection());
+	B->SetSixtrackRutherfordCrossSection(B->CalculateSixtrackRutherfordCrossSection());
+	B->SetSixtrackdEdx(B->CalculateSixtrackdEdx());
+	B->SetConductivity(-1);
+	B->SetRadiationLength(B->CalculateRadiationLength());
+	B->SetDensity(2370);
+	B->SetSixtrackNuclearSlope(-1);
+	B->SetMeanExcitationEnergy(76.0*eV);
+	B->SetElectronDensity(B->CalculateElectronDensity());
+	B->SetPlasmaEnergy(B->CalculatePlasmaEnergy());
+	db.insert(pair<string,Material*>(B->GetSymbol(),B));
+
 
 	//Carbon (graphite)
 	Material* C = new Material();
@@ -83,8 +98,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	O->SetSymbol("O");
 	O->SetSixtrackTotalNucleusCrossSection(O->CalculateSixtrackTotalNucleusCrossSection());
 	O->SetSixtrackInelasticNucleusCrossSection(O->CalculateSixtrackInelasticNucleusCrossSection());
-	//~ O->SetSixtrackRutherfordCrossSection(O->CalculateSixtrackRutherfordCrossSection());
-	O->SetSixtrackRutherfordCrossSection(0.0133766);
+	O->SetSixtrackRutherfordCrossSection(O->CalculateSixtrackRutherfordCrossSection());
 	O->SetSixtrackdEdx(O->CalculateSixtrackdEdx());
 	O->SetConductivity(1);	//See here
 	O->SetRadiationLength(O->CalculateRadiationLength());
@@ -235,7 +249,6 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	Pb->SetSixtrackInelasticNucleusCrossSection(1.77);
 	Pb->SetSixtrackRutherfordCrossSection(0.00907);
 	Pb->SetSixtrackdEdx(3.40);
-//	Pb->rho=11.35;
 	Pb->SetConductivity(4.8077E6);
 //	Pb->SetRadiationLength(0.005612);
 	Pb->SetRadiationLength(Pb->CalculateRadiationLength());
@@ -279,11 +292,11 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	AC150K->SetPlasmaEnergy(AC150K->CalculatePlasmaEnergy());
 	db.insert(pair<string,Material*>(AC150K->GetSymbol(),AC150K));
 
-	/*
-	* INERMET 180
-	* LHC TCLA/TCT material
+	/**
+	* INERMET 180: LHC TCLA/TCT material
 	* Tungsten alloy with Nickel and Copper
-	*/
+	* Updated using N. Mariani PhD thesis CERN-THESIS-2014-363
+	**/
 	//~ MaterialMixture* IT180 = new MaterialMixture();
 	CompositeMaterial* IT180 = new CompositeMaterial();
 	IT180->SetName("INERMET180");
@@ -294,12 +307,8 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	IT180->Assemble();
 
 	IT180->SetDensity(18060);
-	IT180->SetConductivity(1.77E3);	//Set to the same as Tungsten for now
-	IT180->SetSixtrackdEdx(IT180->CalculateSixtrackdEdx());
-	IT180->SetRadiationLength(IT180->CalculateRadiationLength());
-	IT180->SetMeanExcitationEnergy(IT180->CalculateMeanExcitationEnergy());
-	IT180->SetElectronDensity(IT180->CalculateElectronDensity());
-	IT180->SetPlasmaEnergy(IT180->CalculatePlasmaEnergy());
+	IT180->SetConductivity(8.6E6);
+	IT180->Assemble();
 	db.insert(pair<string,Material*>(IT180->GetSymbol(),IT180));
 
 	/*
@@ -318,18 +327,12 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	Glidcop->AddMaterialByMassFraction(O,0.0028 * O_M / (Al_M + O_M));
 
 	Glidcop->SetDensity(8930);
-	Glidcop->SetConductivity(5.38E7);	//CERN-ATS-2011-224
-	
+	Glidcop->SetConductivity(5.38E7);	//CERN-ATS-2011-224	
 	Glidcop->Assemble();
+	db.insert(pair<string,Material*>(Glidcop->GetSymbol(),Glidcop));
 
 	//~ Glidcop->VerifyMaterial();
 
-// not needed for composite
-	//~ Glidcop->SetMeanExcitationEnergy(Glidcop->CalculateMeanExcitationEnergy());
-	//~ Glidcop->SetRadiationLength(Glidcop->CalculateRadiationLength());
-	//~ Glidcop->SetElectronDensity(Glidcop->CalculateElectronDensity());
-	//~ Glidcop->SetPlasmaEnergy(Glidcop->CalculatePlasmaEnergy());
-	//~ Glidcop->SetSixtrackdEdx(Glidcop->CalculateSixtrackdEdx());
 	
 	// Test Mixture function
 	vector< pair<string,double> > els = Glidcop->GetConstituentElements();
@@ -338,9 +341,27 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 		std::cout << "MaterialDatabase::Mixture::Glidcop: Element Symbol = " << el_it->first << ", mass fraction = " << el_it->second << endl;
 	}
 	
+	/**
+	* New LHC TCS material
+	* Mo-Graphite mix, density 2.6
+	* Mo 21%, C 79%, by Mass
+	* Source: Elena Quaranta - elena.quaranta@cern.ch
+	* Updated using N. Mariani PhD thesis CERN-THESIS-2014-363
+	**/
+	CompositeMaterial* MoGr = new CompositeMaterial();
+	MoGr->SetName("MoGr");
+	MoGr->SetSymbol("MoGr");
+	MoGr->AddMaterialByMassFraction(Mo,0.21);
+	MoGr->AddMaterialByMassFraction(C,0.79);
+	MoGr->Assemble();
+
+	MoGr->SetDensity(2690);
+	MoGr->SetConductivity(1E6);
+	MoGr->Assemble();
+	db.insert(pair<string,Material*>(MoGr->GetSymbol(),MoGr));
+	
 	//~ DumpMaterialProperties();
 	
-	db.insert(pair<string,Material*>(Glidcop->GetSymbol(),Glidcop));
 }
 
 //Try and find the material we want

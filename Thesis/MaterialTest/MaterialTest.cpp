@@ -128,6 +128,28 @@ int main(int argc, char* argv[])
 	int hist_y[nbins+2] = {0};
 	int hist_yp[nbins+2] = {0};
 	int hist_dp[nbins+2] = {0};
+	
+/************************
+*	MATERIALS			*
+************************/	
+	
+	// List of material names
+	vector<string> material_names;
+	material_names.push_back("Be");
+	//~ material_names.push_back("B");
+	material_names.push_back("C");
+	//~ material_names.push_back("O");
+	material_names.push_back("Al");
+	material_names.push_back("Fe");
+	material_names.push_back("Ni");
+	material_names.push_back("Cu");
+	material_names.push_back("Mo");
+	material_names.push_back("W");
+	material_names.push_back("Pb");
+	material_names.push_back("AC150K");
+	material_names.push_back("IT180");
+	material_names.push_back("GCOP");
+	material_names.push_back("MoGr");
 
 /************************
 *	BEAM  SETTINGS	*
@@ -202,11 +224,6 @@ int main(int argc, char* argv[])
 	//~ Material* material2 = matter->FindMaterial("GCOP");
 	//~ Material* material3 = matter->FindMaterial("Cu");
 	
-	// List of material names
-	vector<string> material_names;
-	material_names.push_back("Cu");
-	material_names.push_back("W");
-	material_names.push_back("C");
 	
 	int ii = 0;
 	
