@@ -1,5 +1,5 @@
 %% Script to plot material scattered final distribution histogram etc
-% Plots a single plot for each x, xp, dp for each material found
+% Made to compare composites with non composites
 clear all;
 % matlab.graphics.internal.setPrintPreferences('DefaultPaperPositionMode','manual');
 set(groot,'defaultFigurePaperPositionMode','manual');
@@ -30,11 +30,12 @@ for ii = 1:length(final_list)
     element = split_final_name(2);
     
     materials{ii} = [element];    
+    Names(ii,:) = element;
     
 % end
 
 %% Import final distribution
-directory = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/MaterialTest/26Mar16_multi_mat/Bunch_Distn/';
+directory = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/MaterialTest/28Mar16_Composite/Bunch_Distn/';
 filename = strcat(directory, final_list(ii).name);
 delimiter = '\t';
 formatSpec = '%f%f%f%f%f%f%f%f%f%f%[^\n\r]';
@@ -54,12 +55,12 @@ fclose(fileID);
 
 % element data [ bin, x, xp, y, yp, dp]
 element_data{ii}=[dataArray(:,1) dataArray(:,2) dataArray(:,3) dataArray(:,4) dataArray{:, 5} dataArray(:,6) dataArray(:,7) dataArray(:,8) dataArray(:,9) dataArray(:,10)];
-% end
+end
 
 %% Open Figure
-f_x = 'Material_x_';
-f_xp = 'Material_xp_';
-f_dp = 'Material_dp_';
+f_x = 'Material_comparison_x';
+f_xp = 'Material_comparison_xp';
+f_dp = 'Material_comparison_dp';
 file_end = '.png';
 % output_file{ii} = strcat(file_start,element,file_end); 
 % of = strcat(file_start,element,file_end);
@@ -73,16 +74,21 @@ nbins = 100;
 % h = histogram( element_data{ii}{1}, nbins), hold on;
 % [n, xout] = hist( element_data{ii}{1}, nbins), hold on;
 % bar(element_data{ii}{2}, element_data{ii}{1}, 'barwidth', 1, 'basevalue', 1), hold on;
-plot(element_data{ii}{1}, element_data{ii}{2}), hold on;
-set(gca,'YScale','log');
+for ii = 1:length(final_list)
+    plot(element_data{ii}{1}, element_data{ii}{2}), hold on;
+%     legend_info{ii} = [materials{ii}];
+    set(gca,'YScale','log');
+    xlim([-50E-6 50E-6]);
+end
+
+legend(Names);
 
 % title('HL-LHC Diffusive HEL for Round (blue), Non-Round (red), NR Elliptical (yellow), NR Elliptical2 (green)')
 xlabel('x [m]');
 ylabel('N');
-xlim([-50E-6 50E-6]);
 
 % ofx = char(strcat(f_x,element,file_end));
-print(gcf, '-dpng', char(strcat(f_x,element,file_end))), hold on;
+print(gcf, '-dpng', char(strcat(f_x,file_end))), hold on;
 
 %% Plot xp
 clear figure;
@@ -92,16 +98,21 @@ figure('units','pixels','Position',[100 100 800 2400]);
 % h = histogram( element_data{ii}{3}, nbins), hold on;
 % [n, xout] = hist( element_data{ii}{3}, nbins), hold on;
 % bar(element_data{ii}{3}, element_data{ii}{1}, 'barwidth', 1, 'basevalue', 1), hold on;
-plot(element_data{ii}{3}, element_data{ii}{4}), hold on;
-set(gca,'YScale','log');
+for ii = 1:length(final_list)
+    plot(element_data{ii}{3}, element_data{ii}{4}), hold on;
+%     legend_info{ii} = [materials{ii}];
+    set(gca,'YScale','log');
+    xlim([-100E-6 100E-6]);
+end
+
+legend(Names);
 
 % title('HL-LHC Diffusive HEL for Round (blue), Non-Round (red), NR Elliptical (yellow), NR Elliptical2 (green)')
 xlabel('xp [rad]');
 ylabel('N');
-xlim([-100E-6 100E-6]);
 
 % ofxp = char(strcat(f_x,element,file_end));
-print(gcf, '-dpng',char(strcat(f_xp,element,file_end))), hold on;
+print(gcf, '-dpng',char(strcat(f_xp,file_end))), hold on;
 
 %% Plot dp
 clear figure;
@@ -112,14 +123,19 @@ figure('units','pixels','Position',[100 100 800 2400]);
 % [n, xout] = hist( element_data{ii}{5}, nbins), hold on;
 % bar(element_data{ii}{6}, element_data{ii}{1}, 'barwidth', 1, 'basevalue', 1), hold on;
 plot(element_data{ii}{9}, element_data{ii}{10}), hold on;
-set(gca,'YScale','log');
-set(gca,'XScale','log');
+for ii = 1:length(final_list)
+    plot(element_data{ii}{9}, element_data{ii}{10}), hold on;
+    set(gca,'YScale','log');
+    set(gca,'XScale','log');
+%     xlim([0.001 0.1]);
+end
+
+legend(Names);
 
 xlabel('dp [-]');
 ylabel('N');
-xlim([0.001 0.1]);
 
-print(gcf, '-dpng',char(strcat(f_dp,element,file_end))), hold on;
+print(gcf, '-dpng',char(strcat(f_dp,file_end))), hold on;
 
 % hold off;
 % saveas(figure, 'test.png');
@@ -130,4 +146,4 @@ print(gcf, '-dpng',char(strcat(f_dp,element,file_end))), hold on;
 % print(gcf, '-dpng','test.png')
 hold off;
 clearvars filename formatSpec fileID dataArray ans file_start file_end element split_final_name str h figure subplot;
-end
+% end

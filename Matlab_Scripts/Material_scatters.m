@@ -4,7 +4,7 @@ clear all;
 % matlab.graphics.internal.setPrintPreferences('DefaultPaperPositionMode','manual');
 set(groot,'defaultFigurePaperPositionMode','manual');
 %% Iterate through all files in a directory
-cd('/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/MaterialTest/26Mar16_multi_mat/Bunch_Distn/');
+cd('/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/MaterialTest/28Mar16_Composite/Bunch_Distn/');
 
 % creates a list of all final_bunch files
 final_list = dir('final_bunch*'); 
@@ -78,7 +78,7 @@ set(gca,'YScale','log');
 % title('HL-LHC Diffusive HEL for Round (blue), Non-Round (red), NR Elliptical (yellow), NR Elliptical2 (green)')
 xlabel('x [m]');
 ylabel('N');
-xlim([-100E-6 100E-6]);
+xlim([-50E-6 50E-6]);
 
 % ofx = char(strcat(f_x,element,file_end));
 print(gcf, '-dpng', char(strcat(f_x,element,file_end))), hold on;
