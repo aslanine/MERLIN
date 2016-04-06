@@ -8,7 +8,7 @@ turns = turns + 1;
 
 %% Round beam
 
-cd('/home/HR/Downloads/IIAA1_data/11Mar_R_Diff/ParticleNo/Halo/');
+cd('/home/HR/Downloads/HEL_Runs/R/');
 list = dir('*.txt'); 
 
 R = zeros(turns, 2);
@@ -31,7 +31,7 @@ clear A list;
 
 %% Non-Round beam
 
-cd('/home/HR/Downloads/IIAA1_data/11Mar_NR_Diff/ParticleNo/Halo/');
+cd('/home/HR/Downloads/HEL_Runs/NR/');
 list = dir('*.txt'); 
 
 NR = zeros(turns, 2);
@@ -52,7 +52,7 @@ clear A list;
 
 %% Non-Round beam Elliptical scaled
 
-cd('/home/HR/Downloads/IIAA1_data/11Mar_NR_El_Diff/ParticleNo/Halo/');
+cd('/home/HR/Downloads/HEL_Runs/NR_EL/');
 list = dir('*.txt'); 
 
 NREl = zeros(turns, 2);
@@ -73,7 +73,7 @@ clear A list;
 
 %% Non-Round beam Elliptical nonscaled
 
-cd('/home/HR/Downloads/IIAA1_data/11Mar_NR_El2_Diff/ParticleNo/Halo/');
+cd('/home/HR/Downloads/HEL_Runs/NR_El2/');
 list = dir('*.txt'); 
 
 NREl2 = zeros(turns, 2);
@@ -91,6 +91,26 @@ for ii = 1:length(list)
 end
 
 clear A list;
+%% Non-Round beam Elliptical nonscaled
+
+cd('/home/HR/Downloads/HEL_Runs/Hula/');
+list = dir('*.txt'); 
+
+Hula = zeros(turns, 2);
+A = zeros(turns, 2);
+
+for ii = 1:length(list)
+    clear A;
+    A = importdata(list(ii).name);
+    if(ii==1)
+        Hula(:,1) = A(:,1);
+        Hula(:,2) = A(:,2);
+    else    
+        Hula(:,2) = Hula(:,2) + A(:,2);
+    end
+end
+
+clear A list;
 
 %% Plot
 
@@ -100,10 +120,11 @@ plot(R(:,1), R(:,2)/npart, '-', 'Color', 'k', 'LineWidth', 4), hold on
 plot(NR(:,1), NR(:,2)/npart, '-', 'Color', 'c', 'LineWidth', 4), hold on
 plot(NREl(:,1), NREl(:,2)/npart, '-', 'Color', 'm', 'LineWidth', 4), hold on
 plot(NREl2(:,1), NREl2(:,2)/npart, '--', 'Color', 'g', 'LineWidth', 4), hold on
-legend('Round', 'Non-Round', 'Non-Round Elliptical', 'Non-Round Elliptical Unscaled')
+plot(Hula(:,1), Hula(:,2)/npart, '-.', 'Color', 'r', 'LineWidth', 4), hold on
+legend('Round', 'Non-Round', 'Non-Round Elliptical', 'Non-Round Elliptical Unscaled', 'Non-Round Hula')
 
 % title('HL-LHC Diffusive HEL for Round (blue), Non-Round (red), NR Elliptical (yellow), NR Elliptical2 (green)')
 xlabel('Turn [-]')
-ylabel('N/N_0')
+ylabel('N/N_0 [-]')
 
 hold off
