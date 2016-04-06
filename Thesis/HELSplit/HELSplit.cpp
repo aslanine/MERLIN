@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     int iseed = (int)time(NULL);                 // seed for random number generators
     int ncorepart 	= 1;						// number of core particles to track
     int npart 		= 1E3;                     	// number of halo particles to track
-    int nturns 		= 1E3;                      // number of turns to track
+    int nturns 		= 1E5;                      // number of turns to track
        
     //~ if (argc >=2){npart = atoi(argv[1]);}
 
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "06April_119_test/";
+		case_dir = "06April_119_NR_Diff_El";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 	
 
 	bool hel_on 				= 1; 		// Hollow electron lens process?
-	bool elliptical_HEL			= 0;		// Use elliptical operation
+	bool elliptical_HEL			= 1;		// Use elliptical operation
 
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 1;		// true = -30m, false = -88.6m
+	bool round_beams			= 0;		// true = -30m, false = -88.6m
 	bool super_non_round  = 1;		// true = -119m
 		if(super_non_round){round_beams = 0;}
 
