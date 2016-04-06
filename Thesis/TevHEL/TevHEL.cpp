@@ -47,17 +47,18 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);     // seed for random number generators
+    int seedi = (int)time(NULL);     // seed for random number generators
     int ncorepart 	= 1;			// number of core particles to track
-    int npart 		= 20;           // number of halo particles to track
-    int nturns 		= 10;			// number of turns to track
+    int npart 		= 1E3;           // number of halo particles to track
+    int nturns 		= 1E2;			// number of turns to track
  
-    if (argc >=2){npart = atoi(argv[1]);}
+    //~ if (argc >=2){npart = atoi(argv[1]);}
 
     if (argc >=3){seed = atoi(argv[2]);}
     
-    seed = 13;
+    //~ seed = 13;
 
-    RandomNG::init(seed);
+    RandomNG::init(seedi);
     
     // Define useful variables
     double beam_energy = 7000.0;
@@ -66,6 +67,7 @@ int main(int argc, char* argv[])
     double gamma = beam_energy/PhysicalConstants::ProtonMassMeV/PhysicalUnits::MeV;
 	double beta = sqrt(1.0-(1.0/pow(gamma,2)));
 	double emittance = normalized_emittance/(gamma*beta);
+	
     cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
@@ -75,8 +77,7 @@ int main(int argc, char* argv[])
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir, fluka_dir;			
 	string core_string =  "Core/";
-	string halo_string =  "Halo/";
-	
+	string halo_string =  "Halo/";	
 	string input_dir = "/Thesis/data/TevHEL/";	
 	string output_dir = "/Build/Thesis/outputs/TevHEL/";	
 
@@ -84,7 +85,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "25_Feb_Fluka_Test/";
+		case_dir = "06AprilTest/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -109,12 +110,13 @@ int main(int argc, char* argv[])
 	
 	bool hel_on 				= 1; 		// Hollow electron lens process?
 
-	bool LHC_HEL				= 1;		// LHC or Tevatron Hardware
-	bool elliptical_HEL			= 1;		// Use elliptical operation
-		bool DCon				= 1;
+	bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
+	bool elliptical_HEL			= 0;		// Use elliptical operation
+	
+		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
-		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
+		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 1;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 1;
@@ -134,7 +136,7 @@ int main(int argc, char* argv[])
 	
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
-	bool start_at_ip1			= 1;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
+	bool start_at_ip1			= 0;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
 										// False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 																	
@@ -205,10 +207,10 @@ int main(int argc, char* argv[])
     myTwiss->AddFunction(2,6,3);
     myTwiss->AddFunction(3,6,3);
     myTwiss->AddFunction(4,6,3);
-    myTwiss->AddFunction(6,6,3); 
-    //~ myTwiss->AddFunction(0,0,1);
-    //~ myTwiss->AddFunction(0,0,2);
-    //~ myTwiss->AddFunction(0,0,3);
+    myTwiss->AddFunction(6,6,3);
+    myTwiss->AddFunction(0,0,1);
+    myTwiss->AddFunction(0,0,2);
+    myTwiss->AddFunction(0,0,3);
 
     double bscale1 = 1e-22;    
   
@@ -247,7 +249,6 @@ int main(int argc, char* argv[])
 	cout << "Collimator Setup" << endl;   
    
     MaterialDatabase* myMaterialDatabase = new MaterialDatabase();
-    //~ CollimatorDatabase* collimator_db = new CollimatorDatabase( directory+input_dir+"collimator.hel.7.0.sigma", myMaterialDatabase,  true);
     CollimatorDatabase* collimator_db = new CollimatorDatabase( directory+input_dir+"collimator.7.0.sigma", myMaterialDatabase,  true);
    
     collimator_db->MatchBeamEnvelope(true);
@@ -256,8 +257,11 @@ int main(int argc, char* argv[])
     collimator_db->SetJawAngleError(0.0 * microradian);
     
     //LHC v6.503  1 sigma = 267E-6 m
+    //LHC v6.503  0.1 sigma = 267E-5 m
  
-	collimator_db->SelectImpactFactor(tcp_element, 1.0e-6);
+	//~ collimator_db->SelectImpactFactor(tcp_element, 1.0e-6);
+	//~ collimator_db->SelectImpactFactor(tcp_element, -267E-5);
+	collimator_db->SelectImpactFactor(tcp_element, 0);
 
     double impact = 6;
     
@@ -283,7 +287,7 @@ int main(int argc, char* argv[])
 	vector<Collimator*> TCP;
 	int siz = myAccModel->ExtractTypedElements(TCP, tcp_element);
 
-	cout << "\n\t Found " << TCP.size() << " Collimators when extracting" << endl;
+	if(seed ==1){cout << "\n\t Found " << TCP.size() << " Collimators when extracting" << endl;}
 
 	Aperture *ap = (TCP[0])->GetAperture();
 	if(!ap){cout << "Could not get tcp ap" << endl;	abort();}
@@ -303,14 +307,14 @@ int main(int argc, char* argv[])
 /****************************
 *	Collimator Survey	*
 ****************************/
-	CollimatorSurvey* CollSurvey = new CollimatorSurvey(myAccModel, emittance, emittance, myTwiss); 
+	//~ CollimatorSurvey* CollSurvey = new CollimatorSurvey(myAccModel, emittance, emittance, myTwiss); 
 	
-		ostringstream cs_output_file;
-		cs_output_file << bunch_dir << "coll_survey.txt";
-		ofstream* cs_output = new ofstream(cs_output_file.str().c_str());
-		if(!cs_output->good()) { std::cerr << "Could not open collimator survey output" << std::endl; exit(EXIT_FAILURE); }   
-		CollSurvey->Output(cs_output, 20);			
-		delete cs_output;	
+		//~ ostringstream cs_output_file;
+		//~ cs_output_file << bunch_dir << "coll_survey.txt";
+		//~ ofstream* cs_output = new ofstream(cs_output_file.str().c_str());
+		//~ if(!cs_output->good()) { std::cerr << "Could not open collimator survey output" << std::endl; exit(EXIT_FAILURE); }   
+		//~ CollSurvey->Output(cs_output, 20);			
+		//~ delete cs_output;	
 	
 /************************
 *	BEAM HALO SETTINGS	*
@@ -363,15 +367,10 @@ int main(int argc, char* argv[])
     myHaloBeam.c_xpyp=0.0;
     
     // Minimum and maximum sigma for HEL Halo Distribution
-
-    myHaloBeam.min_sig_x = 6;
-    myHaloBeam.max_sig_x = 8;
-    myHaloBeam.min_sig_y = 6;
-    myHaloBeam.max_sig_y = 8;
-    //~ myHaloBeam.min_sig_x = 5.5;
-    //~ myHaloBeam.max_sig_x = 5.54;
-    //~ myHaloBeam.min_sig_y = 0;
-    //~ myHaloBeam.max_sig_y = 3;
+    myHaloBeam.min_sig_x = 4;
+    myHaloBeam.max_sig_x = 5.8;
+    myHaloBeam.min_sig_y = 4;
+    myHaloBeam.max_sig_y = 5.8;
  
  /***********************
 *	BEAM CORE SETTINGS	*
@@ -451,22 +450,19 @@ int main(int argc, char* argv[])
 		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, horizontalHaloDistribution2);
 		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
 		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
-		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HorizontalHaloDistributionWithLimits);
-		//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HorizontalHaloDistributionWithLimits);
 	}
     else{
-    	myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
-    	myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, node_particles, tuneTestDistribution);
-		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
-		//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
+    	//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
+    	//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, tuneTestDistribution);
+		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
+		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
 	}
     
-    // Cut distn only on halo
 	if(collimation_on && cut_distn){ 
 		double h_offset = myTwiss->Value(1,0,0,start_element_number);
 		double JawPosition = (CollimatorJaw->GetFullWidth() / 2.0);
-		cout << "h_offset: " << h_offset << endl;	
-		cout << "Jaw position: " << JawPosition << endl;
+		if(seed ==1){cout << "h_offset: " << h_offset << endl;	
+		cout << "Jaw position: " << JawPosition << endl;}
 
 		HorizontalHaloParticleBunchFilter* hFilter = new HorizontalHaloParticleBunchFilter();
 		//~ double tcpsig = 0.000273539;
@@ -486,21 +482,21 @@ int main(int argc, char* argv[])
     myHaloBunch->SetMacroParticleCharge(myHaloBeam.charge);
     myCoreBunch->SetMacroParticleCharge(myCoreBeam.charge);    
     
-   if(output_initial_bunch){	   		
+   if(output_initial_bunch){
 	
 		ostringstream hbunch_output_file;
-		hbunch_output_file << hbunch_dir << "initial_bunch.txt";
+		hbunch_output_file << hbunch_dir << "initial_bunch_" << seed << ".txt";
 		ofstream* hbunch_output = new ofstream(hbunch_output_file.str().c_str());
 		if(!hbunch_output->good()) { std::cerr << "Could not open initial halo bunch output" << std::endl; exit(EXIT_FAILURE); }   
 		myHaloBunch->Output(*hbunch_output);			
 		delete hbunch_output;	   
 
 		ostringstream cbunch_output_file;
-		cbunch_output_file << cbunch_dir << "initial_bunch.txt";
+		cbunch_output_file << cbunch_dir << "initial_bunch_" << seed << ".txt";
 		ofstream* cbunch_output = new ofstream(cbunch_output_file.str().c_str());
 		if(!cbunch_output->good()) { std::cerr << "Could not open initial core bunch output" << std::endl; exit(EXIT_FAILURE); }   
 		myCoreBunch->Output(*cbunch_output);			
-		delete cbunch_output;			
+		delete cbunch_output;	
 	}
 
 /************************
@@ -558,17 +554,17 @@ int main(int argc, char* argv[])
 	
 	LossMapDustbin* myHaloDustbin = new LossMapDustbin;
 	LossMapDustbin* myCoreDustbin = new LossMapDustbin;
-	FlukaLosses* myNormalFlukaLosses = new FlukaLosses;
-	FlukaLosses* myFullFlukaLosses = new FlukaLosses(1,0,0,0,0,0,0);
+	//~ FlukaLosses* myNormalFlukaLosses = new FlukaLosses;
+	//~ FlukaLosses* myFullFlukaLosses = new FlukaLosses(1,0,0,0,0,0,0);
 
 	if(collimation_on){
 		cout << "Collimation on" << endl;
 		CollimateProtonProcess* myCollimateProcess = new CollimateProtonProcess(2, 4);
 			
 		myCollimateProcess->SetDustbin(myHaloDustbin);       
-		myCollimateProcess->SetDustbin(myCoreDustbin);       
-		myCollimateProcess->SetFlukaLosses(myNormalFlukaLosses);       
-		myCollimateProcess->SetFlukaLosses(myFullFlukaLosses);       
+		//~ myCollimateProcess->SetDustbin(myCoreDustbin);       
+		//~ myCollimateProcess->SetFlukaLosses(myNormalFlukaLosses);       
+		//~ myCollimateProcess->SetFlukaLosses(myFullFlukaLosses);       
 
 		myCollimateProcess->ScatterAtCollimator(true);
 		//~ myCollimateProcess->ScatterAtCollimator(false);
@@ -600,7 +596,7 @@ int main(int argc, char* argv[])
 *	HEL Process		*
 ********************/
 	if(hel_on){
-		cout << "HEL on" << endl;
+		if(seed ==1){cout << "HEL on" << endl;}
 				
 		// HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double length_e);
 		HollowELensProcess* myHELProcess;
@@ -622,7 +618,7 @@ int main(int argc, char* argv[])
 		//~ myHELProcess->SetPerfectProfile();	
 		
 		// 1 = opposite to protons (focussing)
-		myHELProcess->SetElectronDirection(1);			
+		//~ myHELProcess->SetElectronDirection(1);			
 		
 		if(ACon){
 			//Set AC variables
@@ -681,43 +677,43 @@ int main(int argc, char* argv[])
  ****************************/
 	 // No of particles per turn
 	ostringstream hparticle_no_file;
-	hparticle_no_file << hpn_dir << "No.txt";
+	hparticle_no_file << hpn_dir << "No_" << seed << ".txt";
 	ofstream* hparticle_no_output = new ofstream(hparticle_no_file.str().c_str());	
 	if(!hparticle_no_output->good())	{	std::cerr << "Could not open halo particle_no_output file" << std::endl;	exit(EXIT_FAILURE);	}
 	
 	ostringstream cparticle_no_file;
-	cparticle_no_file << cpn_dir << "No.txt";
+	cparticle_no_file << cpn_dir << "No_" << seed << ".txt";
 	ofstream* cparticle_no_output = new ofstream(cparticle_no_file.str().c_str());	
 	if(!cparticle_no_output->good())	{	std::cerr << "Could not open core particle_no_output file" << std::endl;	exit(EXIT_FAILURE);	}
 
-	// Total bunch at a given s every turn
-	// Output bunch every turn @HEL in one file
-	ostringstream cbo_file;
-	cbo_file << cbunch_dir << "HEL_bunch.txt";
-	ostringstream hbo_file;
-	hbo_file << hbunch_dir << "HEL_bunch.txt";
+	//~ // Total bunch at a given s every turn
+	//~ // Output bunch every turn @HEL in one file
+	//~ ostringstream cbo_file;
+	//~ cbo_file << cbunch_dir << "HEL_bunch.txt";
+	//~ ostringstream hbo_file;
+	//~ hbo_file << hbunch_dir << "HEL_bunch.txt";
+	
+	//~ //truncate (clear) the file first to prevent appending to last run
+	//~ ofstream* cboclean = new ofstream(cbo_file.str().c_str(), ios::trunc);
+	//~ ofstream* hboclean = new ofstream(hbo_file.str().c_str(), ios::trunc);	
+	//~ ofstream* cbo = new ofstream(cbo_file.str().c_str(), ios::app);	
+	//~ ofstream* hbo = new ofstream(hbo_file.str().c_str(), ios::app);	
+	//~ if(!cbo->good())	{ std::cerr << "Could not open every bunch HEL core output file" << std::endl; exit(EXIT_FAILURE); }
+	//~ if(!hbo->good())	{ std::cerr << "Could not open every bunch HEL halo output file" << std::endl; exit(EXIT_FAILURE); }
+	
+	//~ // Output bunch every turn @TCP in one file
+	//~ ostringstream cbot_file;
+	//~ cbot_file << cbunch_dir << "TCP_bunch.txt";
+	//~ ostringstream hbot_file;
+	//~ hbot_file << hbunch_dir << "TCP_bunch.txt";
 	
 	//truncate (clear) the file first to prevent appending to last run
-	ofstream* cboclean = new ofstream(cbo_file.str().c_str(), ios::trunc);
-	ofstream* hboclean = new ofstream(hbo_file.str().c_str(), ios::trunc);	
-	ofstream* cbo = new ofstream(cbo_file.str().c_str(), ios::app);	
-	ofstream* hbo = new ofstream(hbo_file.str().c_str(), ios::app);	
-	if(!cbo->good())	{ std::cerr << "Could not open every bunch HEL core output file" << std::endl; exit(EXIT_FAILURE); }
-	if(!hbo->good())	{ std::cerr << "Could not open every bunch HEL halo output file" << std::endl; exit(EXIT_FAILURE); }
-	
-	// Output bunch every turn @TCP in one file
-	ostringstream cbot_file;
-	cbot_file << cbunch_dir << "TCP_bunch.txt";
-	ostringstream hbot_file;
-	hbot_file << hbunch_dir << "TCP_bunch.txt";
-	
-	//truncate (clear) the file first to prevent appending to last run
-	ofstream* cbotclean = new ofstream(cbot_file.str().c_str(), ios::trunc);
-	ofstream* hbotclean = new ofstream(hbot_file.str().c_str(), ios::trunc);
-	ofstream* cbot = new ofstream(cbot_file.str().c_str(), ios::app);	
-	ofstream* hbot = new ofstream(hbot_file.str().c_str(), ios::app);	
-	if(!cbot->good()){ std::cerr << "Could not open every bunch TCP core output file" << std::endl; exit(EXIT_FAILURE); }
-	if(!hbot->good()){ std::cerr << "Could not open every bunch TCP halo output file" << std::endl; exit(EXIT_FAILURE); }
+	//~ ofstream* cbotclean = new ofstream(cbot_file.str().c_str(), ios::trunc);
+	//~ ofstream* hbotclean = new ofstream(hbot_file.str().c_str(), ios::trunc);
+	//~ ofstream* cbot = new ofstream(cbot_file.str().c_str(), ios::app);	
+	//~ ofstream* hbot = new ofstream(hbot_file.str().c_str(), ios::app);	
+	//~ if(!cbot->good()){ std::cerr << "Could not open every bunch TCP core output file" << std::endl; exit(EXIT_FAILURE); }
+	//~ if(!hbot->good()){ std::cerr << "Could not open every bunch TCP halo output file" << std::endl; exit(EXIT_FAILURE); }
 
 		
 /********************
@@ -731,18 +727,24 @@ int main(int argc, char* argv[])
         cout << "Turn " << turn <<"\tHalo particle number: " << myHaloBunch->size() << endl;
         cout << "Turn " << turn <<"\tCore particle number: " << myCoreBunch->size() << endl;
 
-		if(start_at_ip1){	myParticleTracker1->Track(myHaloBunch); myParticleTracker1->Track(myCoreBunch);}
+		if(start_at_ip1){								myParticleTracker1->Track(myHaloBunch); 
+							if(myCoreBunch->size()>2){	myParticleTracker1->Track(myCoreBunch);}}
 							
-			if(every_bunch){myHaloBunch->Output(*hbo); myCoreBunch->Output(*cbo);} //Split the tracker to output at HEL
+			//~ if(every_bunch){myHaloBunch->Output(*hbo); myCoreBunch->Output(*cbo);} //Split the tracker to output at HEL
         
-        if(start_at_ip1){	myParticleTracker2->Track(myHaloBunch); myParticleTracker2->Track(myCoreBunch);}
-		else{				myParticleTracker1->Track(myHaloBunch); myParticleTracker1->Track(myCoreBunch);}	
+        if(start_at_ip1){								myParticleTracker2->Track(myHaloBunch); 
+							if(myCoreBunch->size()>2){	myParticleTracker2->Track(myCoreBunch);}}
+		else{											myParticleTracker1->Track(myHaloBunch); 
+							if(myCoreBunch->size()>2){	myParticleTracker1->Track(myCoreBunch);}}	
 		
-			if(every_bunch){myHaloBunch->Output(*hbot); myCoreBunch->Output(*cbot);} //Split the tracker to output at TCP
+			//~ if(every_bunch){myHaloBunch->Output(*hbot); myCoreBunch->Output(*cbot);} //Split the tracker to output at TCP
 		
-		if(start_at_ip1){	myParticleTracker3->Track(myHaloBunch); myParticleTracker3->Track(myCoreBunch);}	
-		else{				myParticleTracker2->Track(myHaloBunch); myParticleTracker2->Track(myCoreBunch);
-							myParticleTracker3->Track(myHaloBunch); myParticleTracker3->Track(myCoreBunch);}
+		if(start_at_ip1){								myParticleTracker3->Track(myHaloBunch); 
+							if(myCoreBunch->size()>2){	myParticleTracker3->Track(myCoreBunch);}}
+		else{											myParticleTracker2->Track(myHaloBunch); 
+							if(myCoreBunch->size()>2){	myParticleTracker2->Track(myCoreBunch);}
+														myParticleTracker3->Track(myHaloBunch); 
+							if(myCoreBunch->size()>2){	myParticleTracker3->Track(myCoreBunch);}}
 		
 			if(output_turn_bunch){	(*hparticle_no_output) << turn <<"\t" << myHaloBunch->size() << endl; 	
 									(*cparticle_no_output) << turn <<"\t" << myCoreBunch->size() << endl;}
@@ -762,29 +764,29 @@ int main(int argc, char* argv[])
 		myHaloDustbin->Output(hdustbin_output); 
 		delete hdustbin_output;
 		
-		ostringstream cdustbin_file;
-		cdustbin_file << (cdustbin_dir + "dustbin_losses.txt");	
-		ofstream* cdustbin_output = new ofstream(cdustbin_file.str().c_str());	
-		if(!cdustbin_output->good()){ std::cerr << "Could not open core dustbin loss file" << std::endl; exit(EXIT_FAILURE); }   
-		myCoreDustbin->Finalise(); 
-		myCoreDustbin->Output(cdustbin_output); 
-		delete cdustbin_output;
+		//~ ostringstream cdustbin_file;
+		//~ cdustbin_file << (cdustbin_dir + "dustbin_losses.txt");	
+		//~ ofstream* cdustbin_output = new ofstream(cdustbin_file.str().c_str());	
+		//~ if(!cdustbin_output->good()){ std::cerr << "Could not open core dustbin loss file" << std::endl; exit(EXIT_FAILURE); }   
+		//~ myCoreDustbin->Finalise(); 
+		//~ myCoreDustbin->Output(cdustbin_output); 
+		//~ delete cdustbin_output;
 
-		ostringstream fluka_norm_file;
-		fluka_norm_file << (fluka_dir + "fluka_norm_losses.txt");	
-		ofstream* fluka_output1 = new ofstream(fluka_norm_file.str().c_str());	
-		if(!fluka_output1->good()){ std::cerr << "Could not open fluka loss file 1" << std::endl; exit(EXIT_FAILURE); }   
-		myNormalFlukaLosses->Finalise(); 
-		myNormalFlukaLosses->Output(fluka_output1); 
-		delete fluka_output1;
+		//~ ostringstream fluka_norm_file;
+		//~ fluka_norm_file << (fluka_dir + "fluka_norm_losses.txt");	
+		//~ ofstream* fluka_output1 = new ofstream(fluka_norm_file.str().c_str());	
+		//~ if(!fluka_output1->good()){ std::cerr << "Could not open fluka loss file 1" << std::endl; exit(EXIT_FAILURE); }   
+		//~ myNormalFlukaLosses->Finalise(); 
+		//~ myNormalFlukaLosses->Output(fluka_output1); 
+		//~ delete fluka_output1;
 		
-		ostringstream fluka_full_file;
-		fluka_full_file << (fluka_dir + "fluka_full_losses.txt");	
-		ofstream* fluka_output2 = new ofstream(fluka_full_file.str().c_str());	
-		if(!fluka_output2->good()){ std::cerr << "Could not open fluka loss file 2" << std::endl; exit(EXIT_FAILURE); }   
-		myFullFlukaLosses->Finalise(); 
-		myFullFlukaLosses->Output(fluka_output2); 
-		delete fluka_output2;
+		//~ ostringstream fluka_full_file;
+		//~ fluka_full_file << (fluka_dir + "fluka_full_losses.txt");	
+		//~ ofstream* fluka_output2 = new ofstream(fluka_full_file.str().c_str());	
+		//~ if(!fluka_output2->good()){ std::cerr << "Could not open fluka loss file 2" << std::endl; exit(EXIT_FAILURE); }   
+		//~ myFullFlukaLosses->Finalise(); 
+		//~ myFullFlukaLosses->Output(fluka_output2); 
+		//~ delete fluka_output2;
 	}
 	
 /********************
@@ -792,14 +794,14 @@ int main(int argc, char* argv[])
  *******************/
 	if(output_final_bunch){
 		ostringstream hbunch_output_file2;
-		hbunch_output_file2 << hbunch_dir << "final_bunch.txt";
+		hbunch_output_file2 << hbunch_dir << "final_bunch_" << seed << ".txt";
 		ofstream* hbunch_output2 = new ofstream(hbunch_output_file2.str().c_str());
 		if(!hbunch_output2->good()){ std::cerr << "Could not open final halo bunch output file" << std::endl; exit(EXIT_FAILURE); }  
 		myHaloBunch->Output(*hbunch_output2);
 		delete hbunch_output2;
 		
 		ostringstream cbunch_output_file2;
-		cbunch_output_file2 << cbunch_dir << "final_bunch.txt";
+		cbunch_output_file2 << cbunch_dir << "final_bunch_" << seed << ".txt";
 		ofstream* cbunch_output2 = new ofstream(cbunch_output_file2.str().c_str());
 		if(!cbunch_output2->good()){ std::cerr << "Could not open final core bunch output file" << std::endl; exit(EXIT_FAILURE); }  
 		myHaloBunch->Output(*cbunch_output2);
@@ -826,14 +828,14 @@ int main(int argc, char* argv[])
 	delete myMADinterface;
 	delete CollimatorJaw;
 		
-	delete hbo;
-	delete cbo;
-	delete hboclean;
-	delete cboclean;
-	delete hbot;
-	delete cbot;
-	delete hbotclean;
-	delete cbotclean;
+	//~ delete hbo;
+	//~ delete cbo;
+	//~ delete hboclean;
+	//~ delete cboclean;
+	//~ delete hbot;
+	//~ delete cbot;
+	//~ delete hbotclean;
+	//~ delete cbotclean;
 	delete cparticle_no_output;
 	delete hparticle_no_output;
 	
