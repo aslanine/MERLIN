@@ -45,15 +45,16 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
+    int iseed = (int)time(NULL);                 // seed for random number generators
     int ncorepart 	= 1;						// number of core particles to track
     int npart 		= 1E3;                     	// number of halo particles to track
-    int nturns 		= 1E5;                      // number of turns to track
+    int nturns 		= 1E3;                      // number of turns to track
        
     //~ if (argc >=2){npart = atoi(argv[1]);}
 
     if (argc >=3){seed = atoi(argv[2]);}
 
-    RandomNG::init(seed);
+    RandomNG::init(iseed);
     
     // Define useful variables
     double beam_energy = 7000.0;
@@ -81,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "11Mar_R_Diff/";
+		case_dir = "06April_119_test/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -124,6 +125,8 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 	
 	bool round_beams			= 1;		// true = -30m, false = -88.6m
+	bool super_non_round  = 1;		// true = -119m
+		if(super_non_round){round_beams = 0;}
 
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
@@ -154,7 +157,11 @@ int main(int argc, char* argv[])
 	MADInterface* myMADinterface;
 
 	if(thin){
-		if(round_beams)	{
+		
+		if(super_non_round){
+				myMADinterface = new MADInterface( directory+input_dir+"HL1.2.1_Collision_nonflat_-119m_thin_RF.tfs", beam_energy );	//HL v1.2 nonflat collision 			
+		}		
+		else if(round_beams)	{
 			if(collision){
 				myMADinterface = new MADInterface( directory+input_dir+"HL1.2.1_Collision_nonflat_-30m_thin_RF.tfs", beam_energy );	//HL v1.2 nonflat collision 
 			}
@@ -180,7 +187,7 @@ int main(int argc, char* argv[])
 			myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_C+S_RF_-90mHEL.tfs", beam_energy );
 	}
 	
-    myMADinterface->TreatTypeAsDrift("RFCAVITY");
+    //~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
 
@@ -200,7 +207,11 @@ int main(int argc, char* argv[])
 	int hel_element_number = 0;
 	string hel_element;
     if(thin){
-		if(round_beams){
+		if(super_non_round){
+			hel_element = "HEL-119m";
+			hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());			
+		}		
+		else if(round_beams){
 			hel_element = "HEL-30m";
 			hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());
 		}
