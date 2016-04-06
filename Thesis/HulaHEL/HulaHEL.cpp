@@ -46,9 +46,9 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
     int iseed = (int)time(NULL);                 // seed for random number generators
-    int ncorepart 	= 1;						// number of core particles to track
+    int ncorepart 	= 1E3;						// number of core particles to track
     int npart 		= 1E3;                     	// number of halo particles to track
-    int nturns 		= 1E5;                      // number of turns to track
+    int nturns 		= 5;                      // number of turns to track
 
        
     if (argc >=2){npart = atoi(argv[1]);}
@@ -66,10 +66,10 @@ int main(int argc, char* argv[])
 	double emittance = normalized_emittance/(gamma*beta);
     cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;
 	
-	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
-	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
-	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";			//lxplus harafiqu
+	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";				//M11x	
+	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";		//lxplus avalloni
+	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";					//iiaa1
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
 	string core_string =  "Core/";
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "21Mar16_NR_Diff/";
+		case_dir = "06_April_SuperNonRound_Test/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 			cpn_dir = pn_dir + core_string;					mkdir(cpn_dir.c_str(), S_IRWXU);
 			hpn_dir = pn_dir + halo_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
 		}	
-	bool every_bunch			= 0;		// output whole bunch every turn in a single file
+	bool every_bunch			= 1;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 1;		
 		if (output_initial_bunch || output_final_bunch || every_bunch){
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 	
 	bool round_beams			= 0;		// true = -30m, false = -88.6m
-	bool super_non_round  = 1;		// true = -119m
+	bool super_non_round  		= 1;		// true = -119m
 		if(super_non_round){round_beams = 0;}
 		
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
@@ -753,7 +753,7 @@ int main(int argc, char* argv[])
 	if(output_turn_bunch){ 	(*hparticle_no_output) << "0\t" << myHaloBunch->size() << endl; 
 							(*cparticle_no_output) << "0\t" << myCoreBunch->size() << endl; }
    
-    //~ ostringstream hel_footprint_file;
+    ostringstream hel_footprint_file;
     for (int turn=1; turn<=nturns; turn++)
     {
         cout << "Turn " << turn <<"\tHalo particle number: " << myHaloBunch->size() << endl;
@@ -778,13 +778,13 @@ int main(int argc, char* argv[])
 			if(output_turn_bunch){	(*hparticle_no_output) << turn <<"\t" << myHaloBunch->size() << endl; 	
 									(*cparticle_no_output) << turn <<"\t" << myCoreBunch->size() << endl;}
 			
-			//~ hel_footprint_file.str("");
-			//~ hel_footprint_file.clear();			
-			//~ hel_footprint_file << hel_dir << "footprint_" << turn << ".txt";
-			//~ ofstream* helf_os = new ofstream(hel_footprint_file.str().c_str());
-			//~ if(!helf_os->good()){ std::cerr << "Could not open HEL footprint file" << std::endl; exit(EXIT_FAILURE); }  
-			//~ myHELProcess->OutputFootprint(helf_os, 1E4);
-			//~ delete helf_os;			
+			hel_footprint_file.str("");
+			hel_footprint_file.clear();			
+			hel_footprint_file << hel_dir << "footprint_" << turn << ".txt";
+			ofstream* helf_os = new ofstream(hel_footprint_file.str().c_str());
+			if(!helf_os->good()){ std::cerr << "Could not open HEL footprint file" << std::endl; exit(EXIT_FAILURE); }  
+			myHELProcess->OutputFootprint(helf_os, 1E4);
+			delete helf_os;			
 			
         if( myHaloBunch->size() <= 1 ) break;
     }
