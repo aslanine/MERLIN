@@ -103,6 +103,12 @@ public:
 	// Adjust HEL for Hula elliptical operation
 	virtual void HulaAdjust();
 	
+	// Set to pogo elliptical matching operation
+	virtual void SetPogoElliptical(bool io);
+	
+	// Adjust HEL for pogo elliptical operation
+	virtual void PogoAdjust();
+	
 	// Output the HEL radial profile in x y phase space (assumes circular HEL)
 	virtual void OutputProfile(std::ostream* os, double E=7000, double min=0, double max=10);
 	
@@ -152,7 +158,10 @@ private:
 	double Rmax_original;
 	bool HulaElliptical;
 	bool HulaEllipticalSet;
+	bool PogoElliptical;
+	bool PogoEllipticalSet;
 	int Compass;
+	int NorthSouth;
 	int Last_Turn;
 	
 	int Turn;

@@ -36,7 +36,8 @@ namespace ParticleTracking {
 HollowELensProcess::HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity)
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
 	 ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1),\
-	 LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0), HulaEllipticalSet(0)
+	 LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0), HulaEllipticalSet(0),\
+	 PogoElliptical(0), PogoEllipticalSet(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -49,7 +50,7 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
 	EffectiveLength(length_e), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0),\
 	ElectronDirection(1),  LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0),\
-	HulaEllipticalSet(0)
+	HulaEllipticalSet(0), PogoElliptical(0), PogoEllipticalSet(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -63,7 +64,8 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
  double rmax, AcceleratorModel* model, double emittance_x, double emittance_y, LatticeFunctionTable* twiss)
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0),\
 	SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1), LHC_Radial(0),\
-	 YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0), HulaEllipticalSet(0)
+	 YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0), HulaEllipticalSet(0), PogoElliptical(0),\
+	  PogoEllipticalSet(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -142,7 +144,8 @@ void HollowELensProcess::DoProcess (double ds)
 	
 	// Have to increment Turn as the process doesn't have access to the turn value from user code
 	++Turn;
-	if(HulaElliptical){HulaAdjust();}	
+	if(HulaElliptical){HulaAdjust();}
+	else if(PogoElliptical){PogoAdjust();}	
 
 	switch (OMode){
 		case DC:{
@@ -974,64 +977,117 @@ void HollowELensProcess::EllipticalAdjust(int compass){
 	// Radii in sigma
 	double rmin = Rmin_original/Sigma_x;
 	double rmax = Rmax_original/Sigma_x;
+	bool horizontal = 0;
 
 	// Radii in Sigma
 	if(Sigma_x > Sigma_y){
 		SemiMinor = Sigma_y * rmin;
 		SemiMajor = Sigma_x * rmin;	
+		horizontal = 0;
 	}
 	else{
 		SemiMinor = Sigma_x * rmin;
 		SemiMajor = Sigma_y * rmin;	
+		horizontal = 1;
 	}
 	
-	//shift co-ordinates up in y
-	if(compass == 1){
-		//~ cout << "\nCompass = North, Turn = " << Turn << endl;
-		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
-		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
-		Rmax = g*Rmin;			
-		YShift = SemiMinor - Rmin;
-		XShift = 0;
+	if(HulaElliptical){		
+		//shift co-ordinates up in y
+		if(compass == 1){
+			//~ cout << "\nCompass = North, Turn = " << Turn << endl;
+			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			Rmax = g*Rmin;			
+			YShift = SemiMinor - Rmin;
+			XShift = 0;
+		}
+		//shift co-ordinates right in x (i.e. assuming beam1 for LHC)
+		else if(compass == 2){
+			//~ cout << "\nCompass = East, Turn = " << Turn << endl;
+			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+			Rmax = g*Rmin;	
+			XShift = SemiMajor - Rmin;	
+			YShift = 0;		
+		}
+		//shift co-ordinates down in y
+		else if(compass == 3){
+			//~ cout << "\nCompass = South, Turn = " << Turn << endl;
+			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			Rmax = g*Rmin;			
+			YShift = Rmin - SemiMinor;
+			XShift = 0;
+		}	
+		//shift co-ordinates left in x (i.e. assuming beam1 for LHC)
+		else if(compass == 4){
+			//~ cout << "\nCompass = West, Turn = " << Turn << endl;
+			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+			Rmax = g*Rmin;	
+			XShift = Rmin - SemiMajor;
+			YShift = 0;		
+			Compass = 0;		
+		}
 	}
-	//shift co-ordinates right in x (i.e. assuming beam1 for LHC)
-	else if(compass == 2){
-		//~ cout << "\nCompass = East, Turn = " << Turn << endl;
-		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
-		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
-		Rmax = g*Rmin;	
-		XShift = SemiMajor - Rmin;	
-		YShift = 0;		
-	}
-	//shift co-ordinates down in y
-	else if(compass == 3){
-		//~ cout << "\nCompass = South, Turn = " << Turn << endl;
-		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
-		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
-		Rmax = g*Rmin;			
-		YShift = Rmin - SemiMinor;
-		XShift = 0;
-	}	
-	//shift co-ordinates left in x (i.e. assuming beam1 for LHC)
-	else if(compass == 4){
-		//~ cout << "\nCompass = West, Turn = " << Turn << endl;
-		Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
-		//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
-		Rmax = g*Rmin;	
-		XShift = Rmin - SemiMajor;
-		YShift = 0;		
-		Compass = 0;		
+	else if(PogoElliptical){
+		// Decide whether we are going North-South or East-West
+		if(horizontal){
+			//shift co-ordinates up in y
+			if(NorthSouth == 1){
+				cout << "\nCompass = North, Turn = " << Turn << endl;
+				Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+				//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+				Rmax = g*Rmin;			
+				YShift = SemiMinor - Rmin;
+				XShift = 0;
+			}
+			//shift co-ordinates down in y
+			else if(NorthSouth == 2){
+				cout << "\nCompass = South, Turn = " << Turn << endl;
+				Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+				//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+				Rmax = g*Rmin;			
+				YShift = Rmin - SemiMinor;
+				XShift = 0;
+				NorthSouth = 0;		
+			}
+		}
+		else{
+			//shift co-ordinates right in x (i.e. assuming beam1 for LHC)
+			if(NorthSouth == 1){
+				cout << "\nCompass = East, Turn = " << Turn << endl;
+				Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+				//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+				Rmax = g*Rmin;	
+				XShift = SemiMajor - Rmin;	
+				YShift = 0;		
+			}
+			//shift co-ordinates left in x (i.e. assuming beam1 for LHC)
+			else if(NorthSouth == 2){
+				cout << "\nCompass = West, Turn = " << Turn << endl;
+				Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+				//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
+				Rmax = g*Rmin;	
+				XShift = Rmin - SemiMajor;
+				YShift = 0;		
+				NorthSouth = 0;		
+			}
+		}
 	}
 }
 
 void HollowELensProcess::SetHulaElliptical(bool io){
-	if(io){	
+	if(io){			
+		HulaElliptical = 1;
+		HulaEllipticalSet = 1;
+		PogoElliptical = 0;
+		PogoEllipticalSet = 0;
+		Elliptical = 0;
+		
 		SetEllipticalMatching(io);
 		
 		Compass = 1;
-		
-		HulaElliptical = 1;
-		HulaEllipticalSet = 1;
 	}
 }
 
@@ -1043,6 +1099,30 @@ void HollowELensProcess::HulaAdjust(){
 	
 	// Increment compass point
 	++Compass;		
+}
+
+void HollowELensProcess::SetPogoElliptical(bool io){
+	if(io){			
+		PogoElliptical = 1;
+		PogoEllipticalSet = 1;
+		HulaElliptical = 0;
+		HulaEllipticalSet = 0;
+		Elliptical = 0;
+		
+		SetEllipticalMatching(io);
+		
+		NorthSouth = 1;
+	}
+}
+
+void HollowELensProcess::PogoAdjust(){	
+	// NorthSouth: 1 = North, 2 = South
+	
+	// Perform the HEL adjust
+	EllipticalAdjust(NorthSouth);
+	
+	// Increment compass point
+	++NorthSouth;		
 }
 
 }; // end namespace ParticleTracking
