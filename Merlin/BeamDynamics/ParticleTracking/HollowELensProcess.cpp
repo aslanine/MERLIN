@@ -1032,7 +1032,7 @@ void HollowELensProcess::EllipticalAdjust(int compass){
 	}
 	else if(PogoElliptical){
 		// Decide whether we are going North-South or East-West
-		if(horizontal){
+		if(!horizontal){
 			//shift co-ordinates up in y
 			if(NorthSouth == 1){
 				cout << "\nCompass = North, Turn = " << Turn << endl;
