@@ -670,10 +670,10 @@ int main(int argc, char* argv[])
 		if(elliptical_HEL){
 			myHELProcess->SetEllipticalMatching(1);
 		}
-		if(hula_HEL){
+		else if(hula_HEL){
 			myHELProcess->SetHulaElliptical(1);
 		}
-		if(pogo_HEL){
+		else if(pogo_HEL){
 			myHELProcess->SetPogoElliptical(1);
 		}
 		
