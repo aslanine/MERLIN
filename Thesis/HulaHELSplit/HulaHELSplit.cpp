@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "09April_119_NR_Diff_Pogo/";
+		case_dir = "09April_88_Diff_Pogo/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 	
 	bool round_beams			= 0;		// true = -30m, false = -88.6m
-	bool super_non_round  = 1;		// true = -119m
+	bool super_non_round  = 0;		// true = -119m
 		if(super_non_round){round_beams = 0;}
 
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
