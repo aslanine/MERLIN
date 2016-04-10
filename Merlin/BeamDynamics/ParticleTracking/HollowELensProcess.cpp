@@ -37,7 +37,7 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
 	 ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1),\
 	 LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0), HulaEllipticalSet(0),\
-	 PogoElliptical(0), PogoEllipticalSet(0)
+	 PogoElliptical(0), PogoEllipticalSet(0), CloseHulaElliptical(0), CloseHulaEllipticalSet(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -50,7 +50,7 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity),\
 	EffectiveLength(length_e), ACSet(0), SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0),\
 	ElectronDirection(1),  LHC_Radial(0), YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0),\
-	HulaEllipticalSet(0), PogoElliptical(0), PogoEllipticalSet(0)
+	HulaEllipticalSet(0), PogoElliptical(0), PogoEllipticalSet(0), CloseHulaElliptical(0), CloseHulaEllipticalSet(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -65,7 +65,7 @@ HollowELensProcess::HollowELensProcess (int priority, int mode, double current, 
 	: ParticleBunchProcess("HOLLOW ELECTRON LENS", priority), Current(current), ElectronBeta(beta_e), Rigidity(rigidity), ACSet(0),\
 	SimpleProfile(1), AlignedToOrbit(0), XOffset(0), YOffset(0), Turn(0), SkipTurn(0), ElectronDirection(1), LHC_Radial(0),\
 	 YShift(0.), XShift(0.), Elliptical(0), EllipticalSet(0), g(0.), HulaElliptical(0), HulaEllipticalSet(0), PogoElliptical(0),\
-	  PogoEllipticalSet(0)
+	  PogoEllipticalSet(0), CloseHulaElliptical(0), CloseHulaEllipticalSet(0)
 {
 	if (mode == 0){OMode = DC;}
 	else if (mode == 1){OMode = AC;}
@@ -146,6 +146,7 @@ void HollowELensProcess::DoProcess (double ds)
 	++Turn;
 	if(HulaElliptical){HulaAdjust();}
 	else if(PogoElliptical){PogoAdjust();}	
+	else if(CloseHulaElliptical){CloseHulaAdjust();}	
 
 	switch (OMode){
 		case DC:{
@@ -993,62 +994,127 @@ void HollowELensProcess::EllipticalAdjust(int compass){
 	}
 	
 	if(HulaElliptical){		
+			
 		//shift co-ordinates up in y
 		if(compass == 1){
-			//~ cout << "\nCompass = North, Turn = " << Turn << endl;
 			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
 			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
 			Rmax = g*Rmin;			
+			cout << "\nCompass = North, Turn = " << Turn << endl;
+			cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+			cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
 			YShift = SemiMinor - Rmin;
 			XShift = 0;
 		}
 		//shift co-ordinates right in x (i.e. assuming beam1 for LHC)
 		else if(compass == 2){
-			//~ cout << "\nCompass = East, Turn = " << Turn << endl;
 			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
 			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
 			Rmax = g*Rmin;	
+			cout << "\nCompass = East, Turn = " << Turn << endl;
+			cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+			cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
 			XShift = SemiMajor - Rmin;	
 			YShift = 0;		
 		}
 		//shift co-ordinates down in y
 		else if(compass == 3){
-			//~ cout << "\nCompass = South, Turn = " << Turn << endl;
 			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
 			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
-			Rmax = g*Rmin;			
+			Rmax = g*Rmin;		
+			cout << "\nCompass = South, Turn = " << Turn << endl;
+			cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+			cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
 			YShift = Rmin - SemiMinor;
 			XShift = 0;
 		}	
 		//shift co-ordinates left in x (i.e. assuming beam1 for LHC)
 		else if(compass == 4){
-			//~ cout << "\nCompass = West, Turn = " << Turn << endl;
 			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
 			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
 			Rmax = g*Rmin;	
+			cout << "\nCompass = West, Turn = " << Turn << endl;
+			cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+			cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
 			XShift = Rmin - SemiMajor;
 			YShift = 0;		
 			Compass = 0;		
 		}
+	
+	}
+	else if(CloseHulaElliptical){		
+		
+		// Only take into account beta_x > beta_y
+		// need to add the other case later
+		
+		// shift co-ordinates up in y
+		if(compass == 1){
+			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			Rmax = g*Rmin;			
+			cout << "\nCompass = North, Turn = " << Turn << endl;
+			cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+			cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
+			YShift = SemiMinor - Rmin;
+			XShift = 0;
+		}
+		// normal settings
+		else if(compass == 2){
+			Rmin = Rmin_original;		
+			Rmax = Rmax_original;	
+			cout << "\nCompass = East, Turn = " << Turn << endl;
+			cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+			cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
+			XShift = SemiMajor - Rmin;	
+			YShift = 0;		
+		}
+		// shift co-ordinates down in y
+		else if(compass == 3){
+			Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
+			Rmax = g*Rmin;		
+			cout << "\nCompass = South, Turn = " << Turn << endl;
+			cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+			cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
+			YShift = Rmin - SemiMinor;
+			XShift = 0;
+		}	
+		// normal settings
+		else if(compass == 4){
+			Rmin = Rmin_original;		
+			Rmax = Rmax_original;	
+			cout << "\nCompass = West, Turn = " << Turn << endl;
+			cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+			cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
+			XShift = Rmin - SemiMajor;
+			YShift = 0;		
+			Compass = 0;		
+		}
+	
 	}
 	else if(PogoElliptical){
+		
 		// Decide whether we are going North-South or East-West
 		if(!horizontal){
 			//shift co-ordinates up in y
 			if(NorthSouth == 1){
-				cout << "\nCompass = North, Turn = " << Turn << endl;
 				Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
 				//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
 				Rmax = g*Rmin;			
+				cout << "\nCompass = North, Turn = " << Turn << endl;
+				cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+				cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
 				YShift = SemiMinor - Rmin;
 				XShift = 0;
 			}
 			//shift co-ordinates down in y
 			else if(NorthSouth == 2){
-				cout << "\nCompass = South, Turn = " << Turn << endl;
 				Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
 				//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor); 
-				Rmax = g*Rmin;			
+				Rmax = g*Rmin;		
+				cout << "\nCompass = South, Turn = " << Turn << endl;
+				cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+				cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
 				YShift = Rmin - SemiMinor;
 				XShift = 0;
 				NorthSouth = 0;		
@@ -1057,24 +1123,29 @@ void HollowELensProcess::EllipticalAdjust(int compass){
 		else{
 			//shift co-ordinates right in x (i.e. assuming beam1 for LHC)
 			if(NorthSouth == 1){
-				cout << "\nCompass = East, Turn = " << Turn << endl;
 				Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
 				//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
 				Rmax = g*Rmin;	
+				cout << "\nCompass = East, Turn = " << Turn << endl;
+				cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+				cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
 				XShift = SemiMajor - Rmin;	
 				YShift = 0;		
 			}
 			//shift co-ordinates left in x (i.e. assuming beam1 for LHC)
 			else if(NorthSouth == 2){
-				cout << "\nCompass = West, Turn = " << Turn << endl;
 				Rmin = sqrt(SemiMajor/SemiMinor)*( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
 				//~ Rmin = ( pow(SemiMajor,2) + pow(SemiMinor,2) ) / (2 * SemiMinor);	
 				Rmax = g*Rmin;	
+				cout << "\nCompass = West, Turn = " << Turn << endl;
+				cout << " Rmin = " << Rmin << ", = " << Rmin/Sigma_x << " sigma" << endl;
+				cout << " Rmax = " << Rmax << ", = " << Rmax/Sigma_x << " sigma" << endl;
 				XShift = Rmin - SemiMajor;
 				YShift = 0;		
 				NorthSouth = 0;		
 			}
 		}
+	
 	}
 }
 
@@ -1084,6 +1155,8 @@ void HollowELensProcess::SetHulaElliptical(bool io){
 		HulaEllipticalSet = 1;
 		PogoElliptical = 0;
 		PogoEllipticalSet = 0;
+		CloseHulaElliptical = 0;
+		CloseHulaEllipticalSet = 0;
 		Elliptical = 0;
 		
 		SetEllipticalMatching(io);
@@ -1104,10 +1177,40 @@ void HollowELensProcess::HulaAdjust(){
 	++Compass;		
 }
 
-void HollowELensProcess::SetPogoElliptical(bool io){
+void HollowELensProcess::SetCloseHulaElliptical(bool io){
 	if(io){			
+		CloseHulaElliptical = 1;
+		CloseHulaEllipticalSet = 1;
+		HulaElliptical = 0;
+		HulaEllipticalSet = 0;
+		PogoElliptical = 0;
+		PogoEllipticalSet = 0;
+		Elliptical = 0;
+		
+		SetEllipticalMatching(io);
+		
+		Compass = 1;
+		
+		cout << "\n\t HELProcess : Using Close Hula Elliptical Operation" << endl;
+	}
+}
+
+void HollowELensProcess::CloseHulaAdjust(){	
+	// Compass: 1 = North, 2 = East, 3 = South, 4 = West
+	
+	// Perform the HEL adjust
+	EllipticalAdjust(Compass);
+	
+	// Increment compass point
+	++Compass;		
+}
+
+void HollowELensProcess::SetPogoElliptical(bool io){
+	if(io){					
 		PogoElliptical = 1;
 		PogoEllipticalSet = 1;
+		CloseHulaElliptical = 0;
+		CloseHulaEllipticalSet = 0;
 		HulaElliptical = 0;
 		HulaEllipticalSet = 0;
 		Elliptical = 0;

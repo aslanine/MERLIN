@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "10_April_Round_footprints/";
+		case_dir = "10_April_CloseHulaTest/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -109,10 +109,12 @@ int main(int argc, char* argv[])
 
 	bool hel_on 				= 1; 		// Hollow electron lens process?
 	bool elliptical_HEL			= 0;		// Use elliptical operation
-	bool hula_HEL				= 1;		// Use hula elliptical operation
-		if(hula_HEL){elliptical_HEL = 0;}
+	bool hula_HEL				= 0;		// Use hula elliptical operation
+											if(hula_HEL){elliptical_HEL = 0;}
 	bool pogo_HEL				= 0;		// Use pogo elliptical operation
-		if(pogo_HEL){hula_HEL = 0; elliptical_HEL = 0;}
+											if(pogo_HEL){hula_HEL = 0; elliptical_HEL = 0;}
+	bool closehula_HEL			= 1;		// Use close hula elliptical operation
+											if(closehula_HEL){pogo_HEL = 0; hula_HEL = 0; elliptical_HEL = 0;}
 
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
@@ -129,8 +131,8 @@ int main(int argc, char* argv[])
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 1;		// true = -30m, false = -88.6m
-	bool super_non_round  		= 0;		// true = -119m
+	bool round_beams			= 0;		// true = -30m, false = -88.6m
+	bool super_non_round  		= 1;		// true = -119m
 		if(super_non_round){round_beams = 0;}
 		
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
@@ -672,6 +674,9 @@ int main(int argc, char* argv[])
 		}
 		else if(hula_HEL){
 			myHELProcess->SetHulaElliptical(1);
+		}
+		else if(closehula_HEL){
+			myHELProcess->SetCloseHulaElliptical(1);
 		}
 		else if(pogo_HEL){
 			myHELProcess->SetPogoElliptical(1);
