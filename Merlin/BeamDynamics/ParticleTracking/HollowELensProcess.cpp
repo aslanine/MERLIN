@@ -913,6 +913,7 @@ void HollowELensProcess::SetEllipticalMatching(bool io){
 	double rmin = Rmin_original/Sigma_x;
 	double rmax = Rmax_original/Sigma_x;
 	
+	cout << "\n\t HELProcess : Using Elliptical Operation" << endl;
 	
 	// Need to set SemiMajor and SemiMinor axes for our ellipse - will be used to fnd HEL R_min
 	// The ratio of Rmin to Max is set by hardware and is 2 for the LHC, and shoulf be set in SetRadiiSigma or SetRadii
@@ -1088,6 +1089,8 @@ void HollowELensProcess::SetHulaElliptical(bool io){
 		SetEllipticalMatching(io);
 		
 		Compass = 1;
+		
+		cout << "\n\t HELProcess : Using Hula Elliptical Operation" << endl;
 	}
 }
 
@@ -1112,6 +1115,8 @@ void HollowELensProcess::SetPogoElliptical(bool io){
 		SetEllipticalMatching(io);
 		
 		NorthSouth = 1;
+		
+		cout << "\n\t HELProcess : Using Pogo Elliptical Operation" << endl;
 	}
 }
 
