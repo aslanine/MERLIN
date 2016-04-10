@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     int iseed = (int)time(NULL);                 // seed for random number generators
     int ncorepart 	= 1E3;						// number of core particles to track
     int npart 		= 1E3;                     	// number of halo particles to track
-    int nturns 		= 5;                      // number of turns to track
+    int nturns 		= 2;                      // number of turns to track
 
        
     if (argc >=2){npart = atoi(argv[1]);}
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 	
 	bool round_beams			= 0;		// true = -30m, false = -88.6m
-	bool super_non_round  		= 1;		// true = -119m
+	bool super_non_round  		= 0;		// true = -119m
 		if(super_non_round){round_beams = 0;}
 		
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
