@@ -279,6 +279,26 @@ for ii = 1:length(list)
 end
 
 clear A list;
+%% Oval beam Pogo
+
+cd('/home/HR/Downloads/HEL_Runs/119/119_CloseHula/');
+list = dir('*.txt'); 
+
+OCloseHula = zeros(turns, 2);
+A = zeros(turns, 2);
+
+for ii = 1:length(list)
+    clear A;
+    A = importdata(list(ii).name);
+    if(ii==1)
+        OCloseHula(:,1) = A(:,1);
+        OCloseHula(:,2) = A(:,2);
+    else    
+        OCloseHula(:,2) = OCloseHula(:,2) + A(:,2);
+    end
+end
+
+clear A list;
 %% Plot
 
 figure;
@@ -335,19 +355,21 @@ c_gray = [112 112 112] ./ 255;
 % plot(OPogo(:,1), OPogo(:,2)/npart, ':', 'Color', c_dodger, 'LineWidth', 3), hold on
 
 % OCloseHula  Close hula (TODO)
+% plot(OCloseHula(:,1), OCloseHula(:,2)/npart, ':', 'Color', c_dodger, 'LineWidth', 3), hold on
 
 %% Plots
 
-%% Check O Hula vs O Hula2
+%% All O
 
-% plot(R(:,1), R(:,2)/npart, '-', 'Color', c_gray, 'LineWidth', 3), hold on;
-% plot(NR(:,1), NR(:,2)/npart, '-', 'Color', 'Black', 'LineWidth', 3), hold on;
-% plot(O(:,1), O(:,2)/npart, '-', 'Color', c_dodger, 'LineWidth', 3), hold on;
-% plot(OHula2(:,1), OHula2(:,2)/npart, '-.', 'Color', c_dodger, 'LineWidth', 3), hold on;
-% plot(OEl(:,1), OEl(:,2)/npart, '--', 'Color', c_dodger, 'LineWidth', 3), hold on
-% plot(OPogo(:,1), OPogo(:,2)/npart, ':', 'Color', c_dodger, 'LineWidth', 3), hold on;
-% 
-% legend('Round', 'Non-Round', 'Oval', 'O Hula', 'O Elliptical', 'O Pogo');
+plot(R(:,1), R(:,2)/npart, '-', 'Color', c_gray, 'LineWidth', 3), hold on;
+plot(NR(:,1), NR(:,2)/npart, '-', 'Color', 'Black', 'LineWidth', 3), hold on;
+plot(O(:,1), O(:,2)/npart, '-', 'Color', c_dodger, 'LineWidth', 3), hold on;
+plot(OHula2(:,1), OHula2(:,2)/npart, '-.', 'Color', c_dodger, 'LineWidth', 3), hold on;
+plot(OEl(:,1), OEl(:,2)/npart, '--', 'Color', c_dodger, 'LineWidth', 3), hold on
+plot(OPogo(:,1), OPogo(:,2)/npart, ':', 'Color', c_dodger, 'LineWidth', 3), hold on;
+plot(OCloseHula(:,1), OCloseHula(:,2)/npart, ':', 'Color', 'r', 'LineWidth', 3), hold on;
+
+legend('Round', 'Non-Round', 'Oval', 'O Hula', 'O Elliptical', 'O Pogo', 'O Close Hula');
 
 %% Basic O NR R
 
@@ -388,8 +410,10 @@ c_gray = [112 112 112] ./ 255;
 % plot(R(:,1), R(:,2)/npart, '-', 'Color', c_gray, 'LineWidth', 3), hold on;
 % plot(NR(:,1), NR(:,2)/npart, '-', 'Color', 'Black', 'LineWidth', 3), hold on;
 % plot(O(:,1), O(:,2)/npart, '-', 'Color', c_dodger, 'LineWidth', 3), hold on;
+% plot(OHula2(:,1), OHula2(:,2)/npart, '-.', 'Color', c_dodger, 'LineWidth', 3), hold on;
+% plot(OCloseHula(:,1), OCloseHula(:,2)/npart, ':', 'Color', c_dodger, 'LineWidth', 3), hold on;
 % 
-% legend('Round', 'Non-Round', 'Oval');
+% legend('Round', 'Non-Round', 'Oval', 'O Hula', 'O CloseHula');
 
 
 
