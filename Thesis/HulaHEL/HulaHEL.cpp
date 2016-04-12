@@ -45,6 +45,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
+    int iseed = (int)time(NULL);                 // seed for random number generators
     int ncorepart 	= 1E3;						// number of core particles to track
     int npart 		= 1E3;                     	// number of halo particles to track
     int nturns 		= 5;                      // number of turns to track
@@ -54,7 +55,7 @@ int main(int argc, char* argv[])
 
     if (argc >=3){seed = atoi(argv[2]);}
 
-    RandomNG::init(seed);
+    RandomNG::init(iseed);
     
     // Define useful variables
     double beam_energy = 7000.0;
@@ -65,10 +66,10 @@ int main(int argc, char* argv[])
 	double emittance = normalized_emittance/(gamma*beta);
     cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;
 	
-	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
-	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
-	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";			//lxplus harafiqu
+	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";				//M11x	
+	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";		//lxplus avalloni
+	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";					//iiaa1
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
 	string core_string =  "Core/";
@@ -82,7 +83,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "19Mar16_DIFF_NR_Hula_test/";
+		case_dir = "10_April_CloseHulaTest/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -93,7 +94,7 @@ int main(int argc, char* argv[])
 			cpn_dir = pn_dir + core_string;					mkdir(cpn_dir.c_str(), S_IRWXU);
 			hpn_dir = pn_dir + halo_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
 		}	
-	bool every_bunch			= 0;		// output whole bunch every turn in a single file
+	bool every_bunch			= 1;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 1;		
 		if (output_initial_bunch || output_final_bunch || every_bunch){
@@ -108,8 +109,12 @@ int main(int argc, char* argv[])
 
 	bool hel_on 				= 1; 		// Hollow electron lens process?
 	bool elliptical_HEL			= 0;		// Use elliptical operation
-	bool hula_HEL				= 1;		// Use hula elliptical operation
-		if(hula_HEL){elliptical_HEL = 0;}
+	bool hula_HEL				= 0;		// Use hula elliptical operation
+											if(hula_HEL){elliptical_HEL = 0;}
+	bool pogo_HEL				= 0;		// Use pogo elliptical operation
+											if(pogo_HEL){hula_HEL = 0; elliptical_HEL = 0;}
+	bool closehula_HEL			= 1;		// Use close hula elliptical operation
+											if(closehula_HEL){pogo_HEL = 0; hula_HEL = 0; elliptical_HEL = 0;}
 
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
@@ -127,7 +132,9 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 	
 	bool round_beams			= 0;		// true = -30m, false = -88.6m
-
+	bool super_non_round  		= 1;		// true = -119m
+		if(super_non_round){round_beams = 0;}
+		
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
 	bool start_at_ip1			= 0;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
@@ -157,7 +164,10 @@ int main(int argc, char* argv[])
 	MADInterface* myMADinterface;
 
 	if(thin){
-		if(round_beams)	{
+		if(super_non_round){
+				myMADinterface = new MADInterface( directory+input_dir+"HL1.2.1_Collision_nonflat_-119m_thin_RF.tfs", beam_energy );	//HL v1.2 nonflat collision 			
+		}		
+		else if(round_beams)	{
 			if(collision){
 				myMADinterface = new MADInterface( directory+input_dir+"HL1.2.1_Collision_nonflat_-30m_thin_RF.tfs", beam_energy );	//HL v1.2 nonflat collision 
 			}
@@ -203,7 +213,11 @@ int main(int argc, char* argv[])
 	int hel_element_number = 0;
 	string hel_element;
     if(thin){
-		if(round_beams){
+		if(super_non_round){
+			hel_element = "HEL-119m";
+			hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());			
+		}		
+		else if(round_beams){
 			hel_element = "HEL-30m";
 			hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());
 		}
@@ -658,8 +672,14 @@ int main(int argc, char* argv[])
 		if(elliptical_HEL){
 			myHELProcess->SetEllipticalMatching(1);
 		}
-		if(hula_HEL){
+		else if(hula_HEL){
 			myHELProcess->SetHulaElliptical(1);
+		}
+		else if(closehula_HEL){
+			myHELProcess->SetCloseHulaElliptical(1);
+		}
+		else if(pogo_HEL){
+			myHELProcess->SetPogoElliptical(1);
 		}
 		
 		if(start_at_ip1){
@@ -743,7 +763,7 @@ int main(int argc, char* argv[])
 	if(output_turn_bunch){ 	(*hparticle_no_output) << "0\t" << myHaloBunch->size() << endl; 
 							(*cparticle_no_output) << "0\t" << myCoreBunch->size() << endl; }
    
-    //~ ostringstream hel_footprint_file;
+    ostringstream hel_footprint_file;
     for (int turn=1; turn<=nturns; turn++)
     {
         cout << "Turn " << turn <<"\tHalo particle number: " << myHaloBunch->size() << endl;
@@ -768,13 +788,13 @@ int main(int argc, char* argv[])
 			if(output_turn_bunch){	(*hparticle_no_output) << turn <<"\t" << myHaloBunch->size() << endl; 	
 									(*cparticle_no_output) << turn <<"\t" << myCoreBunch->size() << endl;}
 			
-			//~ hel_footprint_file.str("");
-			//~ hel_footprint_file.clear();			
-			//~ hel_footprint_file << hel_dir << "footprint_" << turn << ".txt";
-			//~ ofstream* helf_os = new ofstream(hel_footprint_file.str().c_str());
-			//~ if(!helf_os->good()){ std::cerr << "Could not open HEL footprint file" << std::endl; exit(EXIT_FAILURE); }  
-			//~ myHELProcess->OutputFootprint(helf_os, 1E4);
-			//~ delete helf_os;			
+			hel_footprint_file.str("");
+			hel_footprint_file.clear();			
+			hel_footprint_file << hel_dir << "footprint_" << turn << ".txt";
+			ofstream* helf_os = new ofstream(hel_footprint_file.str().c_str());
+			if(!helf_os->good()){ std::cerr << "Could not open HEL footprint file" << std::endl; exit(EXIT_FAILURE); }  
+			myHELProcess->OutputFootprint(helf_os, 1E4);
+			delete helf_os;			
 			
         if( myHaloBunch->size() <= 1 ) break;
     }

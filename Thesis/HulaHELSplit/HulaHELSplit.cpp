@@ -45,15 +45,16 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
+    int iseed = (int)time(NULL);                 // seed for random number generators
     int ncorepart 	= 1;						// number of core particles to track
     int npart 		= 1E3;                     	// number of halo particles to track
-    int nturns 		= 5;                      // number of turns to track
+    int nturns 		= 1E5;                      // number of turns to track
        
     //~ if (argc >=2){npart = atoi(argv[1]);}
 
     if (argc >=3){seed = atoi(argv[2]);}
 
-    RandomNG::init(seed);
+    RandomNG::init(iseed);
     
     // Define useful variables
     double beam_energy = 7000.0;
@@ -65,9 +66,9 @@ int main(int argc, char* argv[])
     if(seed ==1){cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;}
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
-	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
 	string core_string =  "Core/";
@@ -81,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "19Mar_test/";
+		case_dir = "11April_88_Diff_CloseHula/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -107,8 +108,12 @@ int main(int argc, char* argv[])
 
 	bool hel_on 				= 1; 		// Hollow electron lens process?
 	bool elliptical_HEL			= 0;		// Use elliptical operation
-	bool hula_HEL				= 1;		// Use hula elliptical operation
-		if(hula_HEL){elliptical_HEL = 0;}
+	bool hula_HEL				= 0;		// Use hula elliptical operation
+											if(hula_HEL){elliptical_HEL = 0;}
+	bool pogo_HEL				= 0;		// Use pogo elliptical operation
+											if(pogo_HEL){hula_HEL = 0; elliptical_HEL = 0;}
+	bool closehula_HEL			= 1;		// Use close hula elliptical operation
+											if(closehula_HEL){pogo_HEL = 0; hula_HEL = 0; elliptical_HEL = 0;}
 		
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
@@ -125,7 +130,9 @@ int main(int argc, char* argv[])
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 1;		// true = -30m, false = -88.6m
+	bool round_beams			= 0;		// true = -30m, false = -88.6m
+	bool super_non_round  		= 0;		// true = -119m
+		if(super_non_round){round_beams = 0;}
 
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
@@ -156,7 +163,10 @@ int main(int argc, char* argv[])
 	MADInterface* myMADinterface;
 
 	if(thin){
-		if(round_beams)	{
+		if(super_non_round){
+				myMADinterface = new MADInterface( directory+input_dir+"HL1.2.1_Collision_nonflat_-119m_thin_RF.tfs", beam_energy );	//HL v1.2 nonflat collision 			
+		}		
+		else if(round_beams)	{
 			if(collision){
 				myMADinterface = new MADInterface( directory+input_dir+"HL1.2.1_Collision_nonflat_-30m_thin_RF.tfs", beam_energy );	//HL v1.2 nonflat collision 
 			}
@@ -182,7 +192,7 @@ int main(int argc, char* argv[])
 			myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_C+S_RF_-90mHEL.tfs", beam_energy );
 	}
 	
-    myMADinterface->TreatTypeAsDrift("RFCAVITY");
+    //~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
 
@@ -202,7 +212,11 @@ int main(int argc, char* argv[])
 	int hel_element_number = 0;
 	string hel_element;
     if(thin){
-		if(round_beams){
+		if(super_non_round){
+			hel_element = "HEL-119m";
+			hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());			
+		}		
+		else if(round_beams){
 			hel_element = "HEL-30m";
 			hel_element_number = myAccModel->FindElementLatticePosition(hel_element.c_str());
 		}
@@ -660,8 +674,14 @@ int main(int argc, char* argv[])
 		if(elliptical_HEL){
 			myHELProcess->SetEllipticalMatching(1);
 		}
-		if(hula_HEL){
+		else if(hula_HEL){
 			myHELProcess->SetHulaElliptical(1);
+		}
+		else if(closehula_HEL){
+			myHELProcess->SetCloseHulaElliptical(1);
+		}
+		else if(pogo_HEL){
+			myHELProcess->SetPogoElliptical(1);
 		}
 		
 		if(start_at_ip1){
@@ -773,13 +793,13 @@ int main(int argc, char* argv[])
 			if(output_turn_bunch){	(*hparticle_no_output) << turn <<"\t" << myHaloBunch->size() << endl; 	
 									(*cparticle_no_output) << turn <<"\t" << myCoreBunch->size() << endl;}
 
-		hel_footprint_file.str("");
-		hel_footprint_file.clear();			
-		hel_footprint_file << hel_dir << "footprint_" << turn << ".txt";
-		ofstream* helf_os = new ofstream(hel_footprint_file.str().c_str());
-		if(!helf_os->good()){ std::cerr << "Could not open HEL footprint file" << std::endl; exit(EXIT_FAILURE); }  
-		myHELProcess->OutputFootprint(helf_os, 1E4);
-		delete helf_os;	
+		//~ hel_footprint_file.str("");
+		//~ hel_footprint_file.clear();			
+		//~ hel_footprint_file << hel_dir << "footprint_" << turn << ".txt";
+		//~ ofstream* helf_os = new ofstream(hel_footprint_file.str().c_str());
+		//~ if(!helf_os->good()){ std::cerr << "Could not open HEL footprint file" << std::endl; exit(EXIT_FAILURE); }  
+		//~ myHELProcess->OutputFootprint(helf_os, 1E4);
+		//~ delete helf_os;	
 			
         if( myHaloBunch->size() <= 1 ) break;
     }
