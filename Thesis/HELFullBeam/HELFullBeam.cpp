@@ -66,9 +66,9 @@ int main(int argc, char* argv[])
     cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
-	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
 	string core_string =  "Core/";
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
 			myMADinterface = new MADInterface( directory+input_dir+"HL_v1.2.1_C+S_RF_-90mHEL.tfs", beam_energy );
 	}
 	
-    //~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
+    myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
 
