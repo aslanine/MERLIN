@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     int seedi = (int)time(NULL);     // seed for random number generators
     int ncorepart 	= 1;			// number of core particles to track
     int npart 		= 1E3;           // number of halo particles to track
-    int nturns 		= 1E2;			// number of turns to track
+    int nturns 		= 1E5;			// number of turns to track
  
     //~ if (argc >=2){npart = atoi(argv[1]);}
 
@@ -71,8 +71,8 @@ int main(int argc, char* argv[])
     cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	//~ string directory = "/home/haroon/git/Merlin";				//iiaa1
-	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir, fluka_dir;			
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "12AprilTest/";
+		case_dir = "12April_NHB/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 	bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
 	bool elliptical_HEL			= 0;		// Use elliptical operation
 	
-		bool DCon				= 1;
+		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
 		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
@@ -251,7 +251,12 @@ int main(int argc, char* argv[])
 	cout << "Collimator Setup" << endl;   
    
     MaterialDatabase* myMaterialDatabase = new MaterialDatabase();
-    CollimatorDatabase* collimator_db = new CollimatorDatabase( directory+input_dir+"collimator.7.0.sigma", myMaterialDatabase,  true);
+    CollimatorDatabase* collimator_db;
+    
+    if(black_absorber){
+    collimator_db = new CollimatorDatabase( directory+input_dir+"collimator.hel.7.0.sigma", myMaterialDatabase,  true);}
+    else{
+    collimator_db = new CollimatorDatabase( directory+input_dir+"collimator.7.0.sigma", myMaterialDatabase,  true);}
    
     collimator_db->MatchBeamEnvelope(true);
     collimator_db->EnableJawAlignmentErrors(false);
