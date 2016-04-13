@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "12April_NHB/";
+		case_dir = "13April_NHB/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -109,10 +109,11 @@ int main(int argc, char* argv[])
 	bool output_fluka_database 	= 1;
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
+	bool black_absorber 		= 1;
 	bool hel_on 				= 0; 		// Hollow electron lens process?
 
-	bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
-	bool elliptical_HEL			= 0;		// Use elliptical operation
+		bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
+		bool elliptical_HEL			= 0;		// Use elliptical operation
 	
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
@@ -128,7 +129,7 @@ int main(int argc, char* argv[])
 				
 			fluka_dir = full_output_dir + "Fluka/"; 	mkdir(fluka_dir.c_str(), S_IRWXU);	
 		}
-	bool black_absorber 		= 1;
+
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
@@ -563,7 +564,7 @@ int main(int argc, char* argv[])
 	LossMapDustbin* myCoreDustbin = new LossMapDustbin;
 	//~ FlukaLosses* myNormalFlukaLosses = new FlukaLosses;
 	//~ FlukaLosses* myFullFlukaLosses = new FlukaLosses(1,0,0,0,0,0,0);
-
+	ScatteringModel* myScatter = new ScatteringModel;
 	if(collimation_on){
 		cout << "Collimation on" << endl;
 		CollimateProtonProcess* myCollimateProcess = new CollimateProtonProcess(2, 4);
@@ -574,10 +575,11 @@ int main(int argc, char* argv[])
 		//~ myCollimateProcess->SetFlukaLosses(myFullFlukaLosses);       
 
 		if(black_absorber)	{	myCollimateProcess->ScatterAtCollimator(false);	}
-		else 				{	myCollimateProcess->ScatterAtCollimator(true); 	}
-	   
-		ScatteringModel* myScatter = new ScatteringModel;
-
+		else {	
+			myCollimateProcess->ScatterAtCollimator(true); 	
+			myScatter->SetJawImpact("TCP.C6L7.B1");
+		}
+		
 		// 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,    3: ST + Adv. SD,     4: MERLIN
 		if(use_sixtrack_like_scattering){	myScatter->SetScatterType(0);	}
 		else{								myScatter->SetScatterType(4);	}
@@ -796,6 +798,11 @@ int main(int argc, char* argv[])
 		//~ delete fluka_output2;
 	}
 	
+/***********************
+ *  OUTPUT JAWIMPACT	*
+ ***********************/	
+		myScatter->OutputJawImpact(full_output_dir,seed);
+		
 /********************
  *  OUTPUT BUNCH	*
  *******************/
