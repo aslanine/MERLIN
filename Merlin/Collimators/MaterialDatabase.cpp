@@ -304,7 +304,6 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	IT180->AddMaterialByMassFraction(W,0.95);
 	IT180->AddMaterialByMassFraction(Ni,0.035);
 	IT180->AddMaterialByMassFraction(Cu,0.015);
-	IT180->Assemble();
 
 	IT180->SetDensity(18060);
 	IT180->SetConductivity(8.6E6);
@@ -348,16 +347,41 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	* Source: Elena Quaranta - elena.quaranta@cern.ch
 	* Updated using N. Mariani PhD thesis CERN-THESIS-2014-363
 	**/
+	//~ CompositeMaterial* MoGr = new CompositeMaterial();
+	//~ MoGr->SetName("MoGr");
+	//~ MoGr->SetSymbol("MoGr");
+	//~ MoGr->AddMaterialByMassFraction(Mo,0.21);
+	//~ MoGr->AddMaterialByMassFraction(C,0.79);
+	//~ MoGr->Assemble();
+	
 	CompositeMaterial* MoGr = new CompositeMaterial();
 	MoGr->SetName("MoGr");
 	MoGr->SetSymbol("MoGr");
-	MoGr->AddMaterialByMassFraction(Mo,0.21);
-	MoGr->AddMaterialByMassFraction(C,0.79);
-	MoGr->Assemble();
+	// number frac
+	double Mo_M = 0.667 * Mo->GetAtomicNumber();
+	double C_M = 0.333 * C->GetAtomicNumber();
+	double Mo_tot = 0.027 * Mo_M / (Mo_M + C_M);
+	
+	// mass frac
+	//~ double Mo_M = 0.941 * Mo->GetAtomicNumber();
+	//~ double C_M = 0.059 * C->GetAtomicNumber();
+	//~ double Mo_tot = 0.137 * 0.941;
+	
+	
+	double C_tot = 1-Mo_tot;
+	
+	cout << "\n\n\n\n\n\t\t\tMoGr Test, Mo = " << Mo_tot << "%, C = " << 1-Mo_tot << endl;
+	
+	MoGr->AddMaterialByNumberFraction(Mo,Mo_tot);
+	MoGr->AddMaterialByNumberFraction(C,(1 - Mo_tot));
+	
+	//~ MoGr->AddMaterialByMassFraction(Mo,Mo_tot);
+	//~ MoGr->AddMaterialByMassFraction(C,(1 - Mo_tot));
 
 	MoGr->SetDensity(2690);
 	MoGr->SetConductivity(1E6);
 	MoGr->Assemble();
+	MoGr->VerifyMaterial();
 	db.insert(pair<string,Material*>(MoGr->GetSymbol(),MoGr));
 	
 	//~ DumpMaterialProperties();

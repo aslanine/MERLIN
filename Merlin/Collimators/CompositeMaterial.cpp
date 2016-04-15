@@ -368,6 +368,8 @@ bool CompositeMaterial::VerifyMaterial() const
 
 bool CompositeMaterial::Assemble()
 {
+	if(Assembled){return true;}
+	
     std::map<Material*,std::pair<double,double> >::iterator MaterialIt;
     MaterialIt = MixtureMap.begin();
 	unsigned int count = MixtureMap.size();
@@ -406,6 +408,7 @@ bool CompositeMaterial::Assemble()
 	            FractionVectorIt++;
 	        }
 	    CalculateAllWeightedVariables();
+	    Assembled = true;
 		return true;
 	}
 	else if(AssembledByNumber)
@@ -418,6 +421,7 @@ bool CompositeMaterial::Assemble()
 	        	        MaterialIt++;
 	        }
 	    CalculateAllWeightedVariables();
+	    Assembled = true;
 		return true;
 	}
 	else
@@ -499,18 +503,41 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 	
 	std::map<Material*,std::pair<double,double> >::const_iterator MaterialIt;
 	MaterialIt = MixtureMap.begin();
+	
+	cout << "\nCompositeMaterial " << GetSymbol() << " MixtureMap.size() = " << MixtureMap.size() << endl;
+		
+	double fraction = 0;
+	
 	while(MaterialIt != MixtureMap.end())
 	{
 		//value += mass_fraction (MaterialIt->second.second) * element_value
 		//~ value += (MaterialIt->second.second * MaterialIt->first->GetValue());
-		wA += (MaterialIt->second.second * MaterialIt->first->GetAtomicMass());
-		wZ += (MaterialIt->second.second * MaterialIt->first->GetAtomicNumber());
-		wb_n += (MaterialIt->second.second * MaterialIt->first->GetSixtrackNuclearSlope());
-		wsig_R += (MaterialIt->second.second * MaterialIt->first->GetSixtrackRutherfordCrossSection());
-		wsig_tot += (MaterialIt->second.second * MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
-		wsig_E += (MaterialIt->second.second * MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
-		wsig_I += (MaterialIt->second.second * MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
+		
+		if(AssembledByMass){ fraction = MaterialIt->second.second;}
+		else{ fraction = MaterialIt->second.first;}
+		
+		wA += (fraction * MaterialIt->first->GetAtomicMass());
+		
+		wZ += (fraction * MaterialIt->first->GetAtomicNumber());
+		
+		cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wA = " << wA << endl;
+		cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wZ = " << wZ << endl;
+		
+		wb_n += (fraction * MaterialIt->first->GetSixtrackNuclearSlope());
+		wsig_R += (fraction * MaterialIt->first->GetSixtrackRutherfordCrossSection());
+		wsig_tot += (fraction * MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
+		wsig_E += (fraction * MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
+		wsig_I += (fraction * MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
 				
+		//~ wA += (MaterialIt->second.second * MaterialIt->first->GetAtomicMass());
+		//~ wZ += (MaterialIt->second.second * MaterialIt->first->GetAtomicNumber());
+		//~ wb_n += (MaterialIt->second.second * MaterialIt->first->GetSixtrackNuclearSlope());
+		//~ wsig_R += (MaterialIt->second.second * MaterialIt->first->GetSixtrackRutherfordCrossSection());
+		//~ wsig_tot += (MaterialIt->second.second * MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
+		//~ wsig_E += (MaterialIt->second.second * MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
+		//~ wsig_I += (MaterialIt->second.second * MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
+		
+	
 		MaterialIt++;
 	}
 		

@@ -47,7 +47,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart 			= 1E6;                     	// number of halo particles to track
+    int npart 			= 10;                     	// number of halo particles to track
     int nleft = npart;
        
     if (argc >=2){npart = atoi(argv[1]);}
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "28Mar16_NonComposite/";
+		case_dir = "15_Apr_test/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -141,19 +141,19 @@ int main(int argc, char* argv[])
 	vector<string> material_names;
 	//~ material_names.push_back("Be");
 	//~ material_names.push_back("B");
-	material_names.push_back("C");
+	//~ material_names.push_back("C");
 	//~ material_names.push_back("O");
 	//~ material_names.push_back("Al");
 	//~ material_names.push_back("Fe");
 	//~ material_names.push_back("Ni");
-	material_names.push_back("Cu");
-	material_names.push_back("Mo");
-	material_names.push_back("W");
+	//~ material_names.push_back("Cu");
+	//~ material_names.push_back("Mo");
+	//~ material_names.push_back("W");
 	//~ material_names.push_back("Pb");
-	material_names.push_back("AC150K");
-	material_names.push_back("IT180");
-	material_names.push_back("GCOP");
+	//~ material_names.push_back("AC150K");
+	//~ material_names.push_back("GCOP");
 	material_names.push_back("MoGr");
+	material_names.push_back("IT180");
 
 /************************
 *	BEAM  SETTINGS	*
@@ -287,11 +287,11 @@ int main(int argc, char* argv[])
 		// Track
 		myParticleTracker->Track(myBunch);
 		
-		
+		nleft = myBunch->size();
 		cout << "Material 	: " << *pit << endl;
 		cout << "Particles 	: " << npart << endl;
 		cout << "Absorbed	: " << npart - myBunch->size() << endl;	
-		cout << "Remaining 	: " << myBunch->size() << endl;
+		cout << "Remaining 	: " << nleft << endl;
 	
 		// Output
 		//~ myScatter->OutputJawImpact(full_output_dir);
@@ -309,136 +309,139 @@ int main(int argc, char* argv[])
 
 		 }
 		 
-		 // Histogramming
-		for (PSvectorArray::iterator ip=myBunch->begin(); ip!=myBunch->end(); ip++){
+		 // Histogramming		 
+		if(nleft>1){
+			for (PSvectorArray::iterator ip=myBunch->begin(); ip!=myBunch->end(); ip++){
 
-			int bin_x = ((ip->x() - bin_min_x) / (bin_max_x-bin_min_x) * (nbins)) +1; // +1 because bin zero for outliers
-			// so handle end bins, by check against x, not bin
-			if (ip->x() < bin_min_x) bin_x = 0;
-			if (ip->x() > bin_max_x) bin_x = nbins+1;
-			hist_x[bin_x] += 1;
+				int bin_x = ((ip->x() - bin_min_x) / (bin_max_x-bin_min_x) * (nbins)) +1; // +1 because bin zero for outliers
+				// so handle end bins, by check against x, not bin
+				if (ip->x() < bin_min_x) bin_x = 0;
+				if (ip->x() > bin_max_x) bin_x = nbins+1;
+				hist_x[bin_x] += 1;
 
-			int bin_xp = ((ip->xp() - bin_min_xp) / (bin_max_xp-bin_min_xp) * (nbins)) +1; // +1 because bin zero for outliers
-			if (ip->xp() < bin_min_xp) bin_xp = 0;
-			if (ip->xp() > bin_max_xp) bin_xp = nbins+1;
-			hist_xp[bin_xp] += 1;
+				int bin_xp = ((ip->xp() - bin_min_xp) / (bin_max_xp-bin_min_xp) * (nbins)) +1; // +1 because bin zero for outliers
+				if (ip->xp() < bin_min_xp) bin_xp = 0;
+				if (ip->xp() > bin_max_xp) bin_xp = nbins+1;
+				hist_xp[bin_xp] += 1;
 
-			int bin_y = ((ip->y() - bin_min_y) / (bin_max_y-bin_min_y) * (nbins)) +1; // +1 because bin zero for outliers
-			if (ip->y() < bin_min_y) bin_y = 0;
-			if (ip->y() > bin_max_y) bin_y = nbins+1;
-			hist_y[bin_y] += 1;
+				int bin_y = ((ip->y() - bin_min_y) / (bin_max_y-bin_min_y) * (nbins)) +1; // +1 because bin zero for outliers
+				if (ip->y() < bin_min_y) bin_y = 0;
+				if (ip->y() > bin_max_y) bin_y = nbins+1;
+				hist_y[bin_y] += 1;
 
-			int bin_yp = ((ip->yp() - bin_min_yp) / (bin_max_yp-bin_min_yp) * (nbins)) +1; // +1 because bin zero for outliers
-			if (ip->yp() < bin_min_yp) bin_yp = 0;
-			if (ip->yp() > bin_max_yp) bin_yp = nbins+1;
-			hist_yp[bin_yp] += 1;
+				int bin_yp = ((ip->yp() - bin_min_yp) / (bin_max_yp-bin_min_yp) * (nbins)) +1; // +1 because bin zero for outliers
+				if (ip->yp() < bin_min_yp) bin_yp = 0;
+				if (ip->yp() > bin_max_yp) bin_yp = nbins+1;
+				hist_yp[bin_yp] += 1;
 
-			int bin_dp = ((-ip->dp() - bin_min_dp) / (bin_max_dp-bin_min_dp) * (nbins)) +1; // +1 because bin zero for outliers
-			if (-ip->dp() < bin_min_dp) bin_dp = 0;
-			if (-ip->dp() > bin_max_dp) bin_dp = nbins+1;
-			hist_dp[bin_dp] += 1;
+				int bin_dp = ((-ip->dp() - bin_min_dp) / (bin_max_dp-bin_min_dp) * (nbins)) +1; // +1 because bin zero for outliers
+				if (-ip->dp() < bin_min_dp) bin_dp = 0;
+				if (-ip->dp() > bin_max_dp) bin_dp = nbins+1;
+				hist_dp[bin_dp] += 1;
+			}
 		}
-
 		
 		/*********************************************************************
 		**	Output Final Hist
-		*********************************************************************/		
-		ostringstream hist_output_file;
-		hist_output_file << bunch_dir << "hist_" << *pit <<"_.txt";
-		ofstream* out2 = new ofstream(hist_output_file.str().c_str());
-		if(!out2->good()){ std::cerr << "Could not open finalbunch output file for material " << *pit << std::endl; exit(EXIT_FAILURE); }  
-		nleft = myBunch->size();
-		for (size_t i=0; i<nbins+2; i++){
+		*********************************************************************/
+			ostringstream hist_output_file;
+			hist_output_file << bunch_dir << "hist_" << *pit <<"_.txt";
+			ofstream* out2 = new ofstream(hist_output_file.str().c_str());
+			if(!out2->good()){ std::cerr << "Could not open finalbunch output file for material " << *pit << std::endl; exit(EXIT_FAILURE); }  
+
 			
-			/*** This output should be normalised by the original particle
-			* number npart in order to compare the number of lost particles
-			* It may also need to be normalised to the bin width */
-			
-			// Normalised by bin_width * npart, centre bin			
-			//~ (*out2) << bin_min_x + (x_bw/2) + (x_bw*i) << "\t";
-			//~ (*out2) << (double)hist_x[i]/(x_bw *npart) << "\t";
-			//~ (*out2) << bin_min_xp + (xp_bw/2) + (xp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_xp[i]/(xp_bw *npart) <<"\t";
-			//~ (*out2) << bin_min_y + (y_bw/2) + (y_bw*i) << "\t";
-			//~ (*out2) << (double)hist_y[i]/(y_bw *npart) << "\t";
-			//~ (*out2) << bin_min_yp + (yp_bw/2) + (yp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_yp[i]/(yp_bw *npart) <<"\t";
-			//~ (*out2) << bin_min_dp + (dp_bw/2) + (dp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_dp[i]/(dp_bw *npart) << endl;
-			
-			// Normalised by npart, start bin
-			(*out2) << bin_min_x + (x_bw*i) << "\t";
-			(*out2) << (double)hist_x[i]/npart << "\t";
-			(*out2) << bin_min_xp + (xp_bw*i) << "\t";
-			(*out2) << (double)hist_xp[i]/npart <<"\t";
-			(*out2) << bin_min_y + (y_bw*i) << "\t";
-			(*out2) << (double)hist_y[i]/npart << "\t";
-			(*out2) << bin_min_yp + (yp_bw*i) << "\t";
-			(*out2) << (double)hist_yp[i]/npart <<"\t";
-			(*out2) << bin_min_dp + (dp_bw*i) << "\t";
-			(*out2) << (double)hist_dp[i]/npart << endl;
-			
-			// Normalised by bin_width * nleft, centre bin			
-			//~ (*out2) << bin_min_x + (x_bw/2) + (x_bw*i) << "\t";
-			//~ (*out2) << (double)hist_x[i]/(x_bw *nleft) << "\t";
-			//~ (*out2) << bin_min_xp + (xp_bw/2) + (xp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_xp[i]/(xp_bw *nleft) <<"\t";
-			//~ (*out2) << bin_min_y + (y_bw/2) + (y_bw*i) << "\t";
-			//~ (*out2) << (double)hist_y[i]/(y_bw *nleft) << "\t";
-			//~ (*out2) << bin_min_yp + (yp_bw/2) + (yp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_yp[i]/(yp_bw *nleft) <<"\t";
-			//~ (*out2) << bin_min_dp + (dp_bw/2) + (dp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_dp[i]/(dp_bw *nleft) << endl;
-			
-			// Normalised by bin_width * nleft, start bin		
-			//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
-			//~ (*out2) << (double)hist_x[i]/(x_bw *nleft) << "\t";
-			//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_xp[i]/(xp_bw *nleft) <<"\t";
-			//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
-			//~ (*out2) << (double)hist_y[i]/(y_bw *nleft) << "\t";
-			//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_yp[i]/(yp_bw *nleft) <<"\t";
-			//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_dp[i]/(dp_bw *nleft) << endl;
-			
-			// Normalised by bin_width, start bin		
-			//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
-			//~ (*out2) << (double)hist_x[i]/(x_bw) << "\t";
-			//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_xp[i]/(xp_bw) <<"\t";
-			//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
-			//~ (*out2) << (double)hist_y[i]/(y_bw) << "\t";
-			//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_yp[i]/(yp_bw) <<"\t";
-			//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_dp[i]/(dp_bw) << endl;
-			
-			// Normalised by nleft, start bin		
-			//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
-			//~ (*out2) << (double)hist_x[i]/(nleft) << "\t";
-			//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_xp[i]/(nleft) <<"\t";
-			//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
-			//~ (*out2) << (double)hist_y[i]/(nleft) << "\t";
-			//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_yp[i]/(nleft) <<"\t";
-			//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_dp[i]/(dp_bw *nleft) << endl;
-			
-			// Not normalised, start bin		
-			//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
-			//~ (*out2) << (double)hist_x[i] << "\t";
-			//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_xp[i] <<"\t";
-			//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
-			//~ (*out2) << (double)hist_y[i] << "\t";
-			//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_yp[i] <<"\t";
-			//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
-			//~ (*out2) << (double)hist_dp[i] << endl;
-		}				
-			
+			if(nleft>1){		
+				for (size_t i=0; i<nbins+2; i++){
+				
+				/*** This output should be normalised by the original particle
+				* number npart in order to compare the number of lost particles
+				* It may also need to be normalised to the bin width */
+				
+				// Normalised by bin_width * npart, centre bin			
+				//~ (*out2) << bin_min_x + (x_bw/2) + (x_bw*i) << "\t";
+				//~ (*out2) << (double)hist_x[i]/(x_bw *npart) << "\t";
+				//~ (*out2) << bin_min_xp + (xp_bw/2) + (xp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_xp[i]/(xp_bw *npart) <<"\t";
+				//~ (*out2) << bin_min_y + (y_bw/2) + (y_bw*i) << "\t";
+				//~ (*out2) << (double)hist_y[i]/(y_bw *npart) << "\t";
+				//~ (*out2) << bin_min_yp + (yp_bw/2) + (yp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_yp[i]/(yp_bw *npart) <<"\t";
+				//~ (*out2) << bin_min_dp + (dp_bw/2) + (dp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_dp[i]/(dp_bw *npart) << endl;
+				
+				// Normalised by npart, start bin
+				(*out2) << bin_min_x + (x_bw*i) << "\t";
+				(*out2) << (double)hist_x[i]/npart << "\t";
+				(*out2) << bin_min_xp + (xp_bw*i) << "\t";
+				(*out2) << (double)hist_xp[i]/npart <<"\t";
+				(*out2) << bin_min_y + (y_bw*i) << "\t";
+				(*out2) << (double)hist_y[i]/npart << "\t";
+				(*out2) << bin_min_yp + (yp_bw*i) << "\t";
+				(*out2) << (double)hist_yp[i]/npart <<"\t";
+				(*out2) << bin_min_dp + (dp_bw*i) << "\t";
+				(*out2) << (double)hist_dp[i]/npart << endl;
+				
+				// Normalised by bin_width * nleft, centre bin			
+				//~ (*out2) << bin_min_x + (x_bw/2) + (x_bw*i) << "\t";
+				//~ (*out2) << (double)hist_x[i]/(x_bw *nleft) << "\t";
+				//~ (*out2) << bin_min_xp + (xp_bw/2) + (xp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_xp[i]/(xp_bw *nleft) <<"\t";
+				//~ (*out2) << bin_min_y + (y_bw/2) + (y_bw*i) << "\t";
+				//~ (*out2) << (double)hist_y[i]/(y_bw *nleft) << "\t";
+				//~ (*out2) << bin_min_yp + (yp_bw/2) + (yp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_yp[i]/(yp_bw *nleft) <<"\t";
+				//~ (*out2) << bin_min_dp + (dp_bw/2) + (dp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_dp[i]/(dp_bw *nleft) << endl;
+				
+				// Normalised by bin_width * nleft, start bin		
+				//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
+				//~ (*out2) << (double)hist_x[i]/(x_bw *nleft) << "\t";
+				//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_xp[i]/(xp_bw *nleft) <<"\t";
+				//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
+				//~ (*out2) << (double)hist_y[i]/(y_bw *nleft) << "\t";
+				//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_yp[i]/(yp_bw *nleft) <<"\t";
+				//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_dp[i]/(dp_bw *nleft) << endl;
+				
+				// Normalised by bin_width, start bin		
+				//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
+				//~ (*out2) << (double)hist_x[i]/(x_bw) << "\t";
+				//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_xp[i]/(xp_bw) <<"\t";
+				//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
+				//~ (*out2) << (double)hist_y[i]/(y_bw) << "\t";
+				//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_yp[i]/(yp_bw) <<"\t";
+				//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_dp[i]/(dp_bw) << endl;
+				
+				// Normalised by nleft, start bin		
+				//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
+				//~ (*out2) << (double)hist_x[i]/(nleft) << "\t";
+				//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_xp[i]/(nleft) <<"\t";
+				//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
+				//~ (*out2) << (double)hist_y[i]/(nleft) << "\t";
+				//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_yp[i]/(nleft) <<"\t";
+				//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_dp[i]/(dp_bw *nleft) << endl;
+				
+				// Not normalised, start bin		
+				//~ (*out2) << bin_min_x + (x_bw*i) << "\t";
+				//~ (*out2) << (double)hist_x[i] << "\t";
+				//~ (*out2) << bin_min_xp + (xp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_xp[i] <<"\t";
+				//~ (*out2) << bin_min_y + (y_bw*i) << "\t";
+				//~ (*out2) << (double)hist_y[i] << "\t";
+				//~ (*out2) << bin_min_yp + (yp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_yp[i] <<"\t";
+				//~ (*out2) << bin_min_dp + (dp_bw*i) << "\t";
+				//~ (*out2) << (double)hist_dp[i] << endl;
+			}				
+		}
 		cout << "Deleting stuff" << endl;
 		//~ delete coll;
 		delete myaccmodelctor;
