@@ -353,32 +353,43 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	//~ MoGr->AddMaterialByMassFraction(Mo,0.21);
 	//~ MoGr->AddMaterialByMassFraction(C,0.79);
 	//~ MoGr->Assemble();
+	//~ MoGr->SetDensity(2690);
+	//~ MoGr->SetConductivity(1E6);
+	//~ MoGr->Assemble();
+	//~ MoGr->VerifyMaterial();
+	//~ db.insert(pair<string,Material*>(MoGr->GetSymbol(),MoGr));
 	
+	/**
+	 * Updated molybdenum-carbide-graphite
+	 * density 2.5
+	 * Mass fractions: 12.8917% Mo, 87.1083% C
+	 * Number fractions: 1.8% Mo, 98.2% C
+	 **/
+	 
 	CompositeMaterial* MoGr = new CompositeMaterial();
 	MoGr->SetName("MoGr");
 	MoGr->SetSymbol("MoGr");
+	
 	// number frac
-	double Mo_M = 0.667 * Mo->GetAtomicNumber();
-	double C_M = 0.333 * C->GetAtomicNumber();
-	double Mo_tot = 0.027 * Mo_M / (Mo_M + C_M);
+	//~ double Mo_M = 0.667 * Mo->GetAtomicNumber();
+	//~ double C_M = 0.333 * C->GetAtomicNumber();
+	//~ double Mo_tot = 0.027 * Mo_M / (Mo_M + C_M);
+	//~ //MoGr->AddMaterialByNumberFraction(Mo,Mo_tot);
+	//~ // MoGr->AddMaterialByNumberFraction(C,(1 - Mo_tot));
+	//~ MoGr->AddMaterialByNumberFraction(Mo,0.018);
+	//~ MoGr->AddMaterialByNumberFraction(C,0.982);
 	
 	// mass frac
-	//~ double Mo_M = 0.941 * Mo->GetAtomicNumber();
-	//~ double C_M = 0.059 * C->GetAtomicNumber();
-	//~ double Mo_tot = 0.137 * 0.941;
-	
-	
-	double C_tot = 1-Mo_tot;
-	
+	//double Mo_M = 0.941 * Mo->GetAtomicNumber();
+	//double C_M = 0.059 * C->GetAtomicNumber();
+	double Mo_tot = 0.128917 * 0.941;
+	MoGr->AddMaterialByMassFraction(Mo,Mo_tot);
+	MoGr->AddMaterialByMassFraction(C,(1 - Mo_tot));
+		
 	cout << "\n\n\n\n\n\t\t\tMoGr Test, Mo = " << Mo_tot << "%, C = " << 1-Mo_tot << endl;
 	
-	MoGr->AddMaterialByNumberFraction(Mo,Mo_tot);
-	MoGr->AddMaterialByNumberFraction(C,(1 - Mo_tot));
-	
-	//~ MoGr->AddMaterialByMassFraction(Mo,Mo_tot);
-	//~ MoGr->AddMaterialByMassFraction(C,(1 - Mo_tot));
-
-	MoGr->SetDensity(2690);
+	MoGr->SetDensity(2500);
+	//~ MoGr->SetDensity(5300);
 	MoGr->SetConductivity(1E6);
 	MoGr->Assemble();
 	MoGr->VerifyMaterial();

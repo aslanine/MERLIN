@@ -20,9 +20,9 @@ using namespace PhysicalUnits;
 */
 bool CompositeMaterial::AddMaterialByMassFraction(Material* m ,double f)
 {
-	if(AssembledByNumber)
+	if(AssembledByNumber || AssembledByBoth)
 	{
-		std::cerr << "Already added a material to this mixture by number fraction. Adding by Mass fraction will break things." << std::endl;
+		std::cerr << "Already added a material to this mixture by number fraction or both. Adding by Mass fraction will break things." << std::endl;
 		return false;
 	}
 	/*
@@ -45,9 +45,9 @@ bool CompositeMaterial::AddMaterialByMassFraction(Material* m ,double f)
 */
 bool CompositeMaterial::AddMaterialByNumberFraction(Material* m,double f)
 {
-	if(AssembledByMass)
+	if(AssembledByMass || AssembledByBoth)
 	{
-		std::cerr << "Already added a material to this mixture by mass fraction. Adding by number fraction will break things." << std::endl;
+		std::cerr << "Already added a material to this mixture by mass fraction or both. Adding by number fraction will break things." << std::endl;
 		return false;
 	}
 	std::pair<double,double> p;
@@ -57,6 +57,24 @@ bool CompositeMaterial::AddMaterialByNumberFraction(Material* m,double f)
 	std::pair<std::map<Material*,std::pair<double,double> >::iterator,bool> test;
 	test = MixtureMap.insert(std::pair<Material*, std::pair<double,double> >(m,p));
 	AssembledByNumber = true;
+	return test.second;
+}
+
+bool CompositeMaterial::AddMaterialByFractions(Material* m ,double m_f, double n_f)
+{
+	if(AssembledByNumber || AssembledByMass)
+	{
+		std::cerr << "Already added a material to this mixture by individual number or mass fraction. Adding by both fractions will break things." << std::endl;
+		return false;
+	}
+
+	std::pair<double,double> p;
+	p.first = n_f;	//Number fraction 
+	p.second = m_f;	//Mass fraction
+
+	std::pair<std::map<Material*,std::pair<double,double> >::iterator,bool> test;
+	test = MixtureMap.insert(std::pair<Material*,std::pair<double,double> >(m,p));
+	AssembledByBoth = true;
 	return test.second;
 }
 
@@ -272,42 +290,36 @@ double CompositeMaterial::GetSixtrackdEdx() const
 	return dEdx;
 }
 
-//Random element
 double CompositeMaterial::GetAtomicNumber() const
 {
 	//~ return CurrentMaterial->GetAtomicNumber();
 	return AtomicNumber;
 }
 
-//Random element
 double CompositeMaterial::GetAtomicMass() const
 {
 	//~ return CurrentMaterial->GetAtomicMass();
 	return AtomicMass;
 }
 
-//Random element
 double CompositeMaterial::GetSixtrackTotalNucleusCrossSection() const
 {
 	//~ return CurrentMaterial->GetSixtrackTotalNucleusCrossSection();
 	return sigma_pN_total;
 }
 
-//Random element
 double CompositeMaterial::GetSixtrackInelasticNucleusCrossSection() const
 {
 	//~ return CurrentMaterial->GetSixtrackInelasticNucleusCrossSection();
 	return sigma_pN_inelastic;
 }
 
-//Random element
 double CompositeMaterial::GetSixtrackRutherfordCrossSection() const
 {
 	//~ return CurrentMaterial->GetSixtrackRutherfordCrossSection();
 	return sigma_Rutherford;
 }
 
-//Random element
 double CompositeMaterial::GetSixtrackNuclearSlope() const
 {
 	//~ return CurrentMaterial->GetSixtrackNuclearSlope();
@@ -379,9 +391,13 @@ bool CompositeMaterial::Assemble()
 	FractionVector.reserve(count);
 
 	double CurrentFraction,Total = 0.0;
+	double wA = 0.0;
+	double wZ = 0.0;
+	double fraction = 0.0;
+		
 	/*
-	* MassFraction = NumberFraction * AtomicNumber
-	* NumberFraction = MassFraction / AtomicNumber
+	* MassFraction = NumberFraction * AtomicMass
+	* NumberFraction = MassFraction / AtomicMass
 	*/
 
 	if(AssembledByMass)
@@ -389,24 +405,27 @@ bool CompositeMaterial::Assemble()
 		//Set CurrentMaterial with the first element listed
 		CurrentMaterial = MaterialIt->first;
 
-		//Want the number fraction here
-		//Needs 2 passes
-        	while(MaterialIt != MixtureMap.end())
-	        {
-				CurrentFraction = MaterialIt->second.second / MaterialIt->first->GetAtomicNumber();
-				Total += CurrentFraction;
-				FractionVector.push_back(CurrentFraction);
-	            MaterialIt++;
-	        }
+		//Want the number fraction here - needs 2 passes
+        while(MaterialIt != MixtureMap.end())
+		{
+			//~ CurrentFraction = MaterialIt->second.second / MaterialIt->first->GetAtomicNumber();
+			CurrentFraction = MaterialIt->second.second / MaterialIt->first->GetAtomicMass();
+			Total += CurrentFraction;
+			FractionVector.push_back(CurrentFraction);
+			MaterialIt++;
+		}
 
 		MaterialIt = MixtureMap.begin();
 		FractionVectorIt = FractionVector.begin();
-        	while(MaterialIt != MixtureMap.end())
-	        {
-				MaterialIt->second.first = *FractionVectorIt / Total;
-	            MaterialIt++;
-	            FractionVectorIt++;
-	        }
+		
+		while(MaterialIt != MixtureMap.end())
+		{
+			MaterialIt->second.first = *FractionVectorIt / Total;
+			cout << "Calculating number fractions from mass fractions: " << MaterialIt->first->GetSymbol() << " n = " << MaterialIt->second.first << " m = " << MaterialIt->second.second << endl;
+			MaterialIt++;
+			FractionVectorIt++;
+		}
+		
 	    CalculateAllWeightedVariables();
 	    Assembled = true;
 		return true;
@@ -416,10 +435,44 @@ bool CompositeMaterial::Assemble()
 		//Set CurrentMaterial with the first element listed
 		CurrentMaterial = MaterialIt->first;
 
-	        while(MaterialIt != MixtureMap.end())
-	        {
-	        	        MaterialIt++;
-	        }
+		// First need to set A and Z
+		while(MaterialIt != MixtureMap.end())
+		{
+			fraction = MaterialIt->second.first;
+			wA += (fraction * MaterialIt->first->GetAtomicMass());
+			
+			wZ += (fraction * MaterialIt->first->GetAtomicNumber());
+			
+			cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wA = " << wA << endl;
+			cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wZ = " << wZ << endl;
+			MaterialIt++;
+		}
+		
+		SetAtomicMass(wA);
+		SetAtomicNumber(wZ);
+		MaterialIt = MixtureMap.begin();
+		
+		//Want the mass fraction here - needs 2 passes
+        while(MaterialIt != MixtureMap.end())
+		{
+			//~ CurrentFraction = MaterialIt->second.second / MaterialIt->first->GetAtomicNumber();
+			CurrentFraction = MaterialIt->second.first * MaterialIt->first->GetAtomicMass();
+			Total += CurrentFraction;
+			FractionVector.push_back(CurrentFraction);
+			MaterialIt++;
+		}
+
+		MaterialIt = MixtureMap.begin();
+		FractionVectorIt = FractionVector.begin();
+		
+		while(MaterialIt != MixtureMap.end())
+		{
+			MaterialIt->second.second = *FractionVectorIt / Total;
+			cout << "Calculating mass fractions from number fractions: " << MaterialIt->first->GetSymbol() << " n = " << MaterialIt->second.first << " m = " << MaterialIt->second.second << endl;
+			MaterialIt++;
+			FractionVectorIt++;
+		}
+		
 	    CalculateAllWeightedVariables();
 	    Assembled = true;
 		return true;
@@ -510,19 +563,26 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 	
 	while(MaterialIt != MixtureMap.end())
 	{
+		
+		// A and Z must be calculated using the number fraction
+		
 		//value += mass_fraction (MaterialIt->second.second) * element_value
 		//~ value += (MaterialIt->second.second * MaterialIt->first->GetValue());
 		
-		if(AssembledByMass){ fraction = MaterialIt->second.second;}
-		else{ fraction = MaterialIt->second.first;}
+		//~ if(AssembledByMass){ fraction = MaterialIt->second.second;}
+		//~ else{ fraction = MaterialIt->second.first;}
 		
-		wA += (fraction * MaterialIt->first->GetAtomicMass());
-		
-		wZ += (fraction * MaterialIt->first->GetAtomicNumber());
-		
-		cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wA = " << wA << endl;
-		cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wZ = " << wZ << endl;
-		
+		if(AssembledByMass){
+			fraction = MaterialIt->second.first;
+			wA += (fraction * MaterialIt->first->GetAtomicMass());
+			
+			wZ += (fraction * MaterialIt->first->GetAtomicNumber());
+			
+			cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wA = " << wA << endl;
+			cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wZ = " << wZ << endl;
+		}
+		// The rest is calculated using the mass fraction
+		fraction = MaterialIt->second.second;
 		wb_n += (fraction * MaterialIt->first->GetSixtrackNuclearSlope());
 		wsig_R += (fraction * MaterialIt->first->GetSixtrackRutherfordCrossSection());
 		wsig_tot += (fraction * MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
@@ -547,8 +607,10 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 	SetSixtrackTotalNucleusCrossSection(wsig_tot);
 	SetSixtrackInelasticNucleusCrossSection(wsig_I);
 	SetSixtrackElasticNucleusCrossSection(wsig_E);
-	SetAtomicMass(wA);
-	SetAtomicNumber(wZ);		
+	if(AssembledByMass){
+		SetAtomicMass(wA);
+		SetAtomicNumber(wZ);	
+	}	
 }
 
 void CompositeMaterial::StartMIT(){

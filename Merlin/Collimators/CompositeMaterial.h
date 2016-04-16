@@ -98,6 +98,10 @@ public:
 	// This function adds materials by number density fraction
 	// i.e. if 5% of the component atoms are element m, the double here is 0.05, etc.
 	bool AddMaterialByNumberFraction(Material*,double);
+	
+	// This function adds materials by MASS then NUMBER density fraction
+	// only used when both are known
+	bool AddMaterialByFractions(Material*, double, double);
 
 	// Returns a random element and sets CurrentElement to this element also.
 	Material* SelectRandomMaterial();
@@ -140,5 +144,6 @@ private:
 	bool Assembled;
 	bool AssembledByNumber;
 	bool AssembledByMass;
+	bool AssembledByBoth;
 };
 #endif
