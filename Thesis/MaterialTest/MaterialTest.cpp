@@ -140,20 +140,22 @@ int main(int argc, char* argv[])
 	// List of material names
 	vector<string> material_names;
 	//~ material_names.push_back("Be");
-	//~ material_names.push_back("B");
+	material_names.push_back("B");
 	//~ material_names.push_back("C");
 	//~ material_names.push_back("O");
 	//~ material_names.push_back("Al");
 	//~ material_names.push_back("Fe");
 	//~ material_names.push_back("Ni");
-	//~ material_names.push_back("Cu");
+	material_names.push_back("Cu");
+	material_names.push_back("CD");
 	//~ material_names.push_back("Mo");
 	//~ material_names.push_back("W");
 	//~ material_names.push_back("Pb");
-	//~ material_names.push_back("AC150K");
-	//~ material_names.push_back("GCOP");
-	material_names.push_back("MoGr");
+	material_names.push_back("AC150K");
+	material_names.push_back("GCOP");
 	material_names.push_back("IT180");
+	material_names.push_back("CuCD");
+	material_names.push_back("MoGr");
 
 /************************
 *	BEAM  SETTINGS	*

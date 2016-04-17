@@ -20,7 +20,11 @@ Here we create new materials, add their properties, then push them into a map fo
 References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties/
 */
 
-//ALL CROSS SECTIONS IN BARNS!
+	// Use SixTrack reference cross sections for composites, or calculate them
+	// using a weighted average of constituent cross sections
+	bool ST_CS = 1;
+
+	//ALL CROSS SECTIONS IN BARNS!
 
 	//new Material(Name, symbol, A, Z, SE, SI, SR, dE, X, rho, sig);
 	//Beryllium - using constructor rather than addinf each variable
@@ -54,7 +58,8 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	B->SetSymbol("B");
 	B->SetSixtrackTotalNucleusCrossSection(B->CalculateSixtrackTotalNucleusCrossSection());
 	B->SetSixtrackInelasticNucleusCrossSection(B->CalculateSixtrackInelasticNucleusCrossSection());
-	B->SetSixtrackRutherfordCrossSection(B->CalculateSixtrackRutherfordCrossSection());
+	//~ B->SetSixtrackRutherfordCrossSection(B->CalculateSixtrackRutherfordCrossSection());
+	B->SetSixtrackRutherfordCrossSection(0.000054);
 	B->SetSixtrackdEdx(B->CalculateSixtrackdEdx());
 	B->SetConductivity(-1);
 	B->SetRadiationLength(B->CalculateRadiationLength());
@@ -63,6 +68,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	B->SetMeanExcitationEnergy(76.0*eV);
 	B->SetElectronDensity(B->CalculateElectronDensity());
 	B->SetPlasmaEnergy(B->CalculatePlasmaEnergy());
+	B->SetSixtrackNuclearSlope(66.2);
 	db.insert(pair<string,Material*>(B->GetSymbol(),B));
 
 
@@ -282,7 +288,8 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	AC150K->SetSixtrackInelasticNucleusCrossSection(0.231);
 	AC150K->SetSixtrackRutherfordCrossSection(0.000076);
 	AC150K->SetSixtrackdEdx(0.68);		//Needs to be scaled
-	AC150K->SetConductivity(7.14E4);	//This is just the same value as graphite - check
+	//~ AC150K->SetConductivity(7.14E4);	//This is just the same value as graphite - check
+	AC150K->SetConductivity(0.14E6);	// HR update
 	AC150K->SetRadiationLength(AC150K->CalculateRadiationLength());
 	AC150K->SetDensity(1650);		//This is different - was 2210
 	AC150K->SetSixtrackNuclearSlope(70.0);
@@ -308,13 +315,21 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	IT180->SetDensity(18060);
 	IT180->SetConductivity(8.6E6);
 	IT180->Assemble();
+	
+	if(ST_CS){
+		IT180->SetSixtrackTotalNucleusCrossSection(2.185);
+		IT180->SetSixtrackInelasticNucleusCrossSection(1.263);
+		IT180->SetSixtrackRutherfordCrossSection(0.004838);
+	}
+	
+	IT180->VerifyMaterial();
 	db.insert(pair<string,Material*>(IT180->GetSymbol(),IT180));
 
-	/*
+	/**
 	* LHC TCLA/TCL material
 	* Copper + Aluminium Oxide powder 
-	* Glidcop - 99.72% Copper + 0.28% Aluminium Oxide for Glidcop-15 by mass
-	*/
+	* Glidcop - 99.72% Copper + 0.28% Aluminium Oxide (AL2O3) for Glidcop-15 by mass
+	**/
 	//~ MaterialMixture* Glidcop = new MaterialMixture();
 	CompositeMaterial* Glidcop = new CompositeMaterial();
 	Glidcop->SetName("Glidcop");
@@ -328,6 +343,14 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	Glidcop->SetDensity(8930);
 	Glidcop->SetConductivity(5.38E7);	//CERN-ATS-2011-224	
 	Glidcop->Assemble();
+	
+	if(ST_CS){
+		Glidcop->SetSixtrackTotalNucleusCrossSection(1.255);
+		Glidcop->SetSixtrackInelasticNucleusCrossSection(0.77);
+		Glidcop->SetSixtrackRutherfordCrossSection(0.001402);
+	}
+	
+	Glidcop->VerifyMaterial();
 	db.insert(pair<string,Material*>(Glidcop->GetSymbol(),Glidcop));
 
 	//~ Glidcop->VerifyMaterial();
@@ -367,7 +390,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	 **/
 	 
 	CompositeMaterial* MoGr = new CompositeMaterial();
-	MoGr->SetName("MoGr");
+	MoGr->SetName("MolybdenumCarbideGraphite");
 	MoGr->SetSymbol("MoGr");
 	
 	// number frac
@@ -394,8 +417,77 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	//~ MoGr->SetDensity(5300);
 	MoGr->SetConductivity(1E6);
 	MoGr->Assemble();
+	
+	if(ST_CS){
+		MoGr->SetSixtrackTotalNucleusCrossSection(0.328);
+		MoGr->SetSixtrackInelasticNucleusCrossSection(0.224);
+		MoGr->SetSixtrackRutherfordCrossSection(0.03214);
+	}
+	
 	MoGr->VerifyMaterial();
 	db.insert(pair<string,Material*>(MoGr->GetSymbol(),MoGr));
+	
+	/**
+	 * Carbon Diamond - similar to Carbon
+	 * Used for Copper-Diamond composite
+	 * data from E. Quaranta, private communication
+	 * conductivity used is that of carbon fibre - probably incorrect
+	 **/
+	Material* CD = new Material();
+	CD->SetAtomicNumber(6);
+	CD->SetAtomicMass(12.0107);
+	CD->SetName("CarbonDiamond");
+	CD->SetSymbol("CD");
+	CD->SetSixtrackTotalNucleusCrossSection(0.337);
+	CD->SetSixtrackInelasticNucleusCrossSection(0.232);
+	CD->SetSixtrackRutherfordCrossSection(0.000078);
+	CD->SetSixtrackdEdx(0.68);
+	CD->SetConductivity(7.14E4);
+	CD->SetRadiationLength(427000);
+	CD->SetDensity(3520);
+	CD->SetSixtrackNuclearSlope(70.9);
+	CD->SetMeanExcitationEnergy(78.0*eV);
+	CD->SetElectronDensity(C->CalculateElectronDensity());
+	CD->SetPlasmaEnergy(C->CalculatePlasmaEnergy());
+	db.insert(pair<string,Material*>(CD->GetSymbol(),CD));
+	
+	/**
+	 * Copper Carbon Diamond
+	 * data from E. Quaranta, private communication
+	 **/	
+	CompositeMaterial* CuCD = new CompositeMaterial();
+	CuCD->SetName("CopperCarbonDiamond");
+	CuCD->SetSymbol("CuCD");
+	
+	//~ // normalised
+	//~ CuCD->AddMaterialByMassFraction(CD,0.62066);
+	//~ CuCD->AddMaterialByMassFraction(Cu,0.37512);
+	//~ CuCD->AddMaterialByMassFraction(B,0.00422);
+	// not normalised
+	//~ CuCD->AddMaterialByMassFraction(Cu,0.6471);
+	//~ CuCD->AddMaterialByMassFraction(CD,0.3911);
+	//~ CuCD->AddMaterialByMassFraction(B,0.0044);
+	
+	CuCD->AddMaterialByNumberFraction(Cu,0.23598);
+	CuCD->AddMaterialByNumberFraction(CD,0.754589);
+	CuCD->AddMaterialByNumberFraction(B,0.009431);
+	
+	CuCD->SetDensity(5400);
+	CuCD->SetConductivity(12.6E6);
+	CuCD->Assemble();
+	
+	if(ST_CS){
+		CuCD->SetSixtrackTotalNucleusCrossSection(0.354);
+		CuCD->SetSixtrackInelasticNucleusCrossSection(0.230);
+		CuCD->SetSixtrackRutherfordCrossSection(0.0009791);
+	}
+	
+	CuCD->VerifyMaterial();
+	db.insert(pair<string,Material*>(CuCD->GetSymbol(),CuCD));
+	
+	
+	
+	
 	
 	//~ DumpMaterialProperties();
 	

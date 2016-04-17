@@ -563,16 +563,9 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 	
 	while(MaterialIt != MixtureMap.end())
 	{
-		
+
 		// A and Z must be calculated using the number fraction
-		
-		//value += mass_fraction (MaterialIt->second.second) * element_value
-		//~ value += (MaterialIt->second.second * MaterialIt->first->GetValue());
-		
-		//~ if(AssembledByMass){ fraction = MaterialIt->second.second;}
-		//~ else{ fraction = MaterialIt->second.first;}
-		
-		if(AssembledByMass){
+		if(AssembledByMass){ // if Assembled by number - already done in Assemble()
 			fraction = MaterialIt->second.first;
 			wA += (fraction * MaterialIt->first->GetAtomicMass());
 			
