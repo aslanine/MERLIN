@@ -371,20 +371,22 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	MoGr->SetSymbol("MoGr");
 	
 	// number frac
-	//~ double Mo_M = 0.667 * Mo->GetAtomicNumber();
-	//~ double C_M = 0.333 * C->GetAtomicNumber();
-	//~ double Mo_tot = 0.027 * Mo_M / (Mo_M + C_M);
-	//~ //MoGr->AddMaterialByNumberFraction(Mo,Mo_tot);
-	//~ // MoGr->AddMaterialByNumberFraction(C,(1 - Mo_tot));
-	//~ MoGr->AddMaterialByNumberFraction(Mo,0.018);
-	//~ MoGr->AddMaterialByNumberFraction(C,0.982);
+	double Mo_M = 0.667 * Mo->GetAtomicNumber();
+	double C_M = 0.333 * C->GetAtomicNumber();
+	double Mo_tot = 0.027 * Mo_M / (Mo_M + C_M);
+	//MoGr->AddMaterialByNumberFraction(Mo,Mo_tot);
+	// MoGr->AddMaterialByNumberFraction(C,(1 - Mo_tot));
+	//MoGr->AddMaterialByNumberFraction(Mo,0.018);
+	//MoGr->AddMaterialByNumberFraction(C,0.982);
+	MoGr->AddMaterialByNumberFraction(Mo,0.01698);
+	MoGr->AddMaterialByNumberFraction(C,0.98302);
 	
 	// mass frac
 	//double Mo_M = 0.941 * Mo->GetAtomicNumber();
 	//double C_M = 0.059 * C->GetAtomicNumber();
-	double Mo_tot = 0.128917 * 0.941;
-	MoGr->AddMaterialByMassFraction(Mo,Mo_tot);
-	MoGr->AddMaterialByMassFraction(C,(1 - Mo_tot));
+	//~ double Mo_tot = 0.128917 * 0.941;
+	//~ MoGr->AddMaterialByMassFraction(Mo,Mo_tot);
+	//~ MoGr->AddMaterialByMassFraction(C,(1 - Mo_tot));
 		
 	cout << "\n\n\n\n\n\t\t\tMoGr Test, Mo = " << Mo_tot << "%, C = " << 1-Mo_tot << endl;
 	
