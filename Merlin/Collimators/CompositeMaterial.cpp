@@ -439,8 +439,7 @@ bool CompositeMaterial::Assemble()
 		while(MaterialIt != MixtureMap.end())
 		{
 			fraction = MaterialIt->second.first;
-			wA += (fraction * MaterialIt->first->GetAtomicMass());
-			
+			wA += (fraction * MaterialIt->first->GetAtomicMass());			
 			wZ += (fraction * MaterialIt->first->GetAtomicNumber());
 			
 			cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wA = " << wA << endl;
@@ -545,14 +544,7 @@ vector< pair<string,double> > CompositeMaterial::GetConstituentElements()
 
 void CompositeMaterial::CalculateAllWeightedVariables()
 {	
-	// already done
-	SetElectronDensity(CalculateElectronDensity());
-	SetPlasmaEnergy(CalculatePlasmaEnergy());
-	SetMeanExcitationEnergy(CalculateMeanExcitationEnergy());
-	SetRadiationLength(CalculateRadiationLength());
-	SetSixtrackdEdx(CalculateSixtrackdEdx());
-	
-	double wb_n, wsig_R, wsig_tot, wsig_E, wsig_I, wA, wZ = 0.0;
+	double wb_n, wsig_R, wsig_tot, wsig_E, wsig_I, wA, wZ, wrad= 0.0;
 	
 	std::map<Material*,std::pair<double,double> >::const_iterator MaterialIt;
 	MaterialIt = MixtureMap.begin();
@@ -567,43 +559,47 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 		// A and Z must be calculated using the number fraction
 		if(AssembledByMass){ // if Assembled by number - already done in Assemble()
 			fraction = MaterialIt->second.first;
-			wA += (fraction * MaterialIt->first->GetAtomicMass());
-			
+			wA += (fraction * MaterialIt->first->GetAtomicMass());			
 			wZ += (fraction * MaterialIt->first->GetAtomicNumber());
+			//~ wA += (fraction / MaterialIt->first->GetAtomicMass());			
+			//~ wZ += (fraction / MaterialIt->first->GetAtomicNumber());
 			
 			cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wA = " << wA << endl;
 			cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wZ = " << wZ << endl;
 		}
 		// The rest is calculated using the mass fraction
 		fraction = MaterialIt->second.second;
-		wb_n += (fraction * MaterialIt->first->GetSixtrackNuclearSlope());
-		wsig_R += (fraction * MaterialIt->first->GetSixtrackRutherfordCrossSection());
-		wsig_tot += (fraction * MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
-		wsig_E += (fraction * MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
-		wsig_I += (fraction * MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
-				
-		//~ wA += (MaterialIt->second.second * MaterialIt->first->GetAtomicMass());
-		//~ wZ += (MaterialIt->second.second * MaterialIt->first->GetAtomicNumber());
-		//~ wb_n += (MaterialIt->second.second * MaterialIt->first->GetSixtrackNuclearSlope());
-		//~ wsig_R += (MaterialIt->second.second * MaterialIt->first->GetSixtrackRutherfordCrossSection());
-		//~ wsig_tot += (MaterialIt->second.second * MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
-		//~ wsig_E += (MaterialIt->second.second * MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
-		//~ wsig_I += (MaterialIt->second.second * MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
+		
+		wsig_R += (fraction / MaterialIt->first->GetSixtrackRutherfordCrossSection());
+		wsig_tot += (fraction / MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
+		wsig_E += (fraction / MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
+		wsig_I += (fraction / MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
+		wrad += (fraction / MaterialIt->first->GetRadiationLength());
 		
 	
 		MaterialIt++;
 	}
 		
-	// Set weighted values
-	SetSixtrackNuclearSlope(wb_n);
-	SetSixtrackRutherfordCrossSection(wsig_R);
-	SetSixtrackTotalNucleusCrossSection(wsig_tot);
-	SetSixtrackInelasticNucleusCrossSection(wsig_I);
-	SetSixtrackElasticNucleusCrossSection(wsig_E);
+	// Set weighted values	
+	SetSixtrackRutherfordCrossSection(1/wsig_R);
+	SetSixtrackTotalNucleusCrossSection(1/wsig_tot);
+	SetSixtrackInelasticNucleusCrossSection(1/wsig_I);
+	SetSixtrackElasticNucleusCrossSection(1/wsig_E);
+	SetRadiationLength(1/wrad);
+	
 	if(AssembledByMass){
 		SetAtomicMass(wA);
 		SetAtomicNumber(wZ);	
 	}	
+	
+	// already done
+	SetElectronDensity(CalculateElectronDensity());
+	SetPlasmaEnergy(CalculatePlasmaEnergy());
+	SetMeanExcitationEnergy(CalculateMeanExcitationEnergy());
+	//~ SetRadiationLength(CalculateRadiationLength());
+	SetSixtrackdEdx(CalculateSixtrackdEdx());
+	SetSixtrackNuclearSlope(CalculateSixtrackNuclearSlope());
+	
 }
 
 void CompositeMaterial::StartMIT(){

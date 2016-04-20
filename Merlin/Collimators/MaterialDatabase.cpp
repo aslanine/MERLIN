@@ -22,7 +22,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 
 	// Use SixTrack reference cross sections for composites, or calculate them
 	// using a weighted average of constituent cross sections
-	bool ST_CS = 1;
+	bool ST_CS = 0;
 
 	//ALL CROSS SECTIONS IN BARNS!
 
@@ -166,7 +166,8 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	Ni->SetSymbol("Ni");
 	Ni->SetSixtrackTotalNucleusCrossSection(Ni->CalculateSixtrackTotalNucleusCrossSection());
 	Ni->SetSixtrackInelasticNucleusCrossSection(Ni->CalculateSixtrackInelasticNucleusCrossSection());
-	Ni->SetSixtrackRutherfordCrossSection(Ni->CalculateSixtrackRutherfordCrossSection());
+	//~ Ni->SetSixtrackRutherfordCrossSection(Ni->CalculateSixtrackRutherfordCrossSection());
+	Ni->SetSixtrackRutherfordCrossSection(0.001329);
 	Ni->SetSixtrackdEdx(Ni->CalculateSixtrackdEdx());
 //	Ni->rho=8.90;
 	Ni->SetConductivity(1.44E7);
@@ -180,43 +181,86 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	db.insert(pair<string,Material*>(Ni->GetSymbol(),Ni));
 
 	//Copper
+	//~ Material* Cu = new Material();
+	//~ Cu->SetAtomicNumber(29);
+	//~ Cu->SetAtomicMass(63.546);
+	//~ Cu->SetName("Copper");
+	//~ Cu->SetSymbol("Cu");
+	//~ Cu->SetSixtrackTotalNucleusCrossSection(1.232);
+	//~ Cu->SetSixtrackInelasticNucleusCrossSection(0.782);
+	//~ Cu->SetSixtrackRutherfordCrossSection(0.00153);
+	//~ Cu->SetSixtrackdEdx(2.69);
+//~ //	Cu->SetSixtrackdEdx(1.250776630157339);
+//~ //	Cu->rho=8.96;
+	//~ Cu->SetConductivity(5.98E7);
+	//~ Cu->SetRadiationLength(Cu->CalculateRadiationLength());
+	//~ Cu->SetDensity(8960);
+	//~ Cu->SetSixtrackNuclearSlope(217.8);
+	//~ Cu->SetMeanExcitationEnergy(322.0*eV);
+	//~ Cu->SetElectronDensity(Cu->CalculateElectronDensity());
+//~ //	Cu->SetElectronCriticalEnergy(19.42*MeV);
+	//~ Cu->SetPlasmaEnergy(Cu->CalculatePlasmaEnergy());
+	//~ db.insert(pair<string,Material*>(Cu->GetSymbol(),Cu));
+	
+	/** Updated Copper using latest SixTrack reference cross sections 
+	 * HR April 2016
+	 **/
 	Material* Cu = new Material();
 	Cu->SetAtomicNumber(29);
 	Cu->SetAtomicMass(63.546);
 	Cu->SetName("Copper");
 	Cu->SetSymbol("Cu");
-	Cu->SetSixtrackTotalNucleusCrossSection(1.232);
-	Cu->SetSixtrackInelasticNucleusCrossSection(0.782);
-	Cu->SetSixtrackRutherfordCrossSection(0.00153);
+	Cu->SetSixtrackTotalNucleusCrossSection(1.253);
+	Cu->SetSixtrackInelasticNucleusCrossSection(0.769);
+	Cu->SetSixtrackRutherfordCrossSection(0.001523);
 	Cu->SetSixtrackdEdx(2.69);
-//	Cu->SetSixtrackdEdx(1.250776630157339);
-//	Cu->rho=8.96;
 	Cu->SetConductivity(5.98E7);
 	Cu->SetRadiationLength(Cu->CalculateRadiationLength());
 	Cu->SetDensity(8960);
-	Cu->SetSixtrackNuclearSlope(217.8);
+	Cu->SetSixtrackNuclearSlope(2209.5);
 	Cu->SetMeanExcitationEnergy(322.0*eV);
 	Cu->SetElectronDensity(Cu->CalculateElectronDensity());
-//	Cu->SetElectronCriticalEnergy(19.42*MeV);
 	Cu->SetPlasmaEnergy(Cu->CalculatePlasmaEnergy());
 	db.insert(pair<string,Material*>(Cu->GetSymbol(),Cu));
 
-	//Molybdenum
+	//~ //Molybdenum
+	//~ Material* Mo = new Material();
+	//~ Mo->SetAtomicNumber(42);
+	//~ Mo->SetAtomicMass(95.96);
+	//~ Mo->SetName("Molybdenum");
+	//~ Mo->SetSymbol("Mo");
+	//~ Mo->SetSixtrackTotalNucleusCrossSection(Mo->CalculateSixtrackTotalNucleusCrossSection());
+	//~ Mo->SetSixtrackInelasticNucleusCrossSection(Mo->CalculateSixtrackInelasticNucleusCrossSection());
+	//~ //Mo->SetSixtrackRutherfordCrossSection(Mo->CalculateSixtrackRutherfordCrossSection());
+	//~ Mo->SetSixtrackRutherfordCrossSection(0.00264483);
+	//~ Mo->SetSixtrackdEdx(Mo->CalculateSixtrackdEdx());
+//~ //	Mo->rho=10.2;
+	//~ Mo->SetConductivity(1.87E7);
+	//~ Mo->SetRadiationLength(Mo->CalculateRadiationLength());
+	//~ Mo->SetDensity(10200);
+	//~ Mo->SetSixtrackNuclearSlope(Mo->CalculateSixtrackNuclearSlope());
+	//~ Mo->SetMeanExcitationEnergy(424.0*eV);
+	//~ Mo->SetElectronDensity(Mo->CalculateElectronDensity());
+//~ //	Mo->SetElectronCriticalEnergy(13.85*MeV);
+	//~ Mo->SetPlasmaEnergy(Mo->CalculatePlasmaEnergy());
+	//~ db.insert(pair<string,Material*>(Mo->GetSymbol(),Mo));
+	
+	/** Updated Molybdenum using recent SixTrack nuclear cross sections
+	 * HR April 2016
+	 **/
 	Material* Mo = new Material();
 	Mo->SetAtomicNumber(42);
 	Mo->SetAtomicMass(95.96);
 	Mo->SetName("Molybdenum");
 	Mo->SetSymbol("Mo");
-	Mo->SetSixtrackTotalNucleusCrossSection(Mo->CalculateSixtrackTotalNucleusCrossSection());
-	Mo->SetSixtrackInelasticNucleusCrossSection(Mo->CalculateSixtrackInelasticNucleusCrossSection());
-	//~ Mo->SetSixtrackRutherfordCrossSection(Mo->CalculateSixtrackRutherfordCrossSection());
-	Mo->SetSixtrackRutherfordCrossSection(0.264483);
+	Mo->SetSixtrackTotalNucleusCrossSection(1.713);
+	Mo->SetSixtrackInelasticNucleusCrossSection(1.023);
+	Mo->SetSixtrackRutherfordCrossSection(0.002645);
 	Mo->SetSixtrackdEdx(Mo->CalculateSixtrackdEdx());
-//	Mo->rho=10.2;
 	Mo->SetConductivity(1.87E7);
 	Mo->SetRadiationLength(Mo->CalculateRadiationLength());
 	Mo->SetDensity(10200);
-	Mo->SetSixtrackNuclearSlope(Mo->CalculateSixtrackNuclearSlope());
+	Mo->SetSixtrackNuclearSlope(273.895);
 	Mo->SetMeanExcitationEnergy(424.0*eV);
 	Mo->SetElectronDensity(Mo->CalculateElectronDensity());
 //	Mo->SetElectronCriticalEnergy(13.85*MeV);
@@ -312,14 +356,14 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	IT180->AddMaterialByMassFraction(Ni,0.035);
 	IT180->AddMaterialByMassFraction(Cu,0.015);
 
-	IT180->SetDensity(18060);
+	IT180->SetDensity(18000);
 	IT180->SetConductivity(8.6E6);
 	IT180->Assemble();
 	
 	if(ST_CS){
-		IT180->SetSixtrackTotalNucleusCrossSection(2.185);
-		IT180->SetSixtrackInelasticNucleusCrossSection(1.263);
-		IT180->SetSixtrackRutherfordCrossSection(0.004838);
+		IT180->SetSixtrackTotalNucleusCrossSection(2.548);
+		IT180->SetSixtrackInelasticNucleusCrossSection(1.473);
+		IT180->SetSixtrackRutherfordCrossSection(0.005737);
 	}
 	
 	IT180->VerifyMaterial();
@@ -330,31 +374,74 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	* Copper + Aluminium Oxide powder 
 	* Glidcop - 99.72% Copper + 0.28% Aluminium Oxide (AL2O3) for Glidcop-15 by mass
 	**/
-	//~ MaterialMixture* Glidcop = new MaterialMixture();
+	//~ CompositeMaterial* Glidcop = new CompositeMaterial();
+	//~ Glidcop->SetName("Glidcop");
+	//~ Glidcop->SetSymbol("GCOP");
+	//~ double Al_M = 0.4 * Al->GetAtomicNumber();
+	//~ double O_M = 0.6 * O->GetAtomicNumber();
+	//~ Glidcop->AddMaterialByMassFraction(Cu,0.9972);
+	//~ Glidcop->AddMaterialByMassFraction(Al,0.0028 * Al_M / (Al_M + O_M));
+	//~ Glidcop->AddMaterialByMassFraction(O,0.0028 * O_M / (Al_M + O_M));
+
+	//~ Glidcop->SetDensity(8930);
+	//~ Glidcop->SetConductivity(5.38E7);	//CERN-ATS-2011-224	
+	//~ Glidcop->Assemble();
+	
+	//~ if(ST_CS){
+		//~ Glidcop->SetSixtrackTotalNucleusCrossSection(1.255);
+		//~ Glidcop->SetSixtrackInelasticNucleusCrossSection(0.77);
+		//~ Glidcop->SetSixtrackRutherfordCrossSection(0.001402);
+	//~ }
+	
+	//~ Glidcop->VerifyMaterial();
+	//~ Glidcop->VerifyMaterial();
+	//~ db.insert(pair<string,Material*>(Glidcop->GetSymbol(),Glidcop));
+
+	/**
+	* LHC TCLA/TCL material
+	* Copper + Aluminium Oxide powder 
+	* Glidcop - 99.72% Copper + 0.28% Aluminium Oxide (AL2O3) for Glidcop-15 by mass
+	**/
+	// This is a messy material for testing only
+	// First make an Al2O3 (don't have Rutherford cross section for O)
+	Material* AlOx = new Material();
+	AlOx->SetName("AluminiumOxide");
+	AlOx->SetSymbol("Al2O3");
+	AlOx->SetAtomicMass(20.392);
+	AlOx->SetAtomicNumber(10);
+	AlOx->SetSixtrackInelasticNucleusCrossSection(0.344);
+	AlOx->SetSixtrackNuclearSlope(100.1);
+	AlOx->SetSixtrackRutherfordCrossSection(0.000203);
+	AlOx->SetSixtrackTotalNucleusCrossSection(0.517);
+	//~ AlOx->SetSixtrackdEdx(AlOx->CalculateSixtrackdEdx()); //returns 1
+	AlOx->SetSixtrackdEdx(0.81); // Value for Al
+	AlOx->SetRadiationLength(279400);
+	AlOx->SetDensity(3.97);
+	AlOx->SetElectronDensity(AlOx->CalculateElectronDensity());
+	AlOx->SetPlasmaEnergy(AlOx->CalculatePlasmaEnergy());
+	AlOx->SetMeanExcitationEnergy(AlOx->CalculateMeanExcitationEnergy());
+	
 	CompositeMaterial* Glidcop = new CompositeMaterial();
 	Glidcop->SetName("Glidcop");
 	Glidcop->SetSymbol("GCOP");
-	double Al_M = 0.4 * Al->GetAtomicNumber();
-	double O_M = 0.6 * O->GetAtomicNumber();
-	Glidcop->AddMaterialByMassFraction(Cu,0.9972);
-	Glidcop->AddMaterialByMassFraction(Al,0.0028 * Al_M / (Al_M + O_M));
-	Glidcop->AddMaterialByMassFraction(O,0.0028 * O_M / (Al_M + O_M));
+	//~ double Al_M = 0.4 * Al->GetAtomicNumber();
+	//~ double O_M = 0.6 * O->GetAtomicNumber();
+	Glidcop->AddMaterialByMassFraction(Cu,0.997);
+	Glidcop->AddMaterialByMassFraction(AlOx,0.003);
 
 	Glidcop->SetDensity(8930);
 	Glidcop->SetConductivity(5.38E7);	//CERN-ATS-2011-224	
 	Glidcop->Assemble();
 	
 	if(ST_CS){
-		Glidcop->SetSixtrackTotalNucleusCrossSection(1.255);
-		Glidcop->SetSixtrackInelasticNucleusCrossSection(0.77);
-		Glidcop->SetSixtrackRutherfordCrossSection(0.001402);
+		Glidcop->SetSixtrackTotalNucleusCrossSection(1.246);
+		Glidcop->SetSixtrackInelasticNucleusCrossSection(0.765);
+		Glidcop->SetSixtrackRutherfordCrossSection(0.001385);
 	}
 	
 	Glidcop->VerifyMaterial();
+	Glidcop->VerifyMaterial();
 	db.insert(pair<string,Material*>(Glidcop->GetSymbol(),Glidcop));
-
-	//~ Glidcop->VerifyMaterial();
-
 	
 	// Test Mixture function
 	vector< pair<string,double> > els = Glidcop->GetConstituentElements();
@@ -419,9 +506,9 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	MoGr->Assemble();
 	
 	if(ST_CS){
-		MoGr->SetSixtrackTotalNucleusCrossSection(0.328);
-		MoGr->SetSixtrackInelasticNucleusCrossSection(0.224);
-		MoGr->SetSixtrackRutherfordCrossSection(0.03214);
+		MoGr->SetSixtrackTotalNucleusCrossSection(0.362);
+		MoGr->SetSixtrackInelasticNucleusCrossSection(0.247);
+		MoGr->SetSixtrackRutherfordCrossSection(0.000094);
 	}
 	
 	MoGr->VerifyMaterial();
@@ -446,7 +533,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	CD->SetRadiationLength(427000);
 	CD->SetDensity(3520);
 	CD->SetSixtrackNuclearSlope(70.9);
-	CD->SetMeanExcitationEnergy(78.0*eV);
+	CD->SetMeanExcitationEnergy(CD->CalculateMeanExcitationEnergy());
 	CD->SetElectronDensity(C->CalculateElectronDensity());
 	CD->SetPlasmaEnergy(C->CalculatePlasmaEnergy());
 	db.insert(pair<string,Material*>(CD->GetSymbol(),CD));
@@ -459,34 +546,32 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	CuCD->SetName("CopperCarbonDiamond");
 	CuCD->SetSymbol("CuCD");
 	
-	//~ // normalised
-	//~ CuCD->AddMaterialByMassFraction(CD,0.62066);
-	//~ CuCD->AddMaterialByMassFraction(Cu,0.37512);
-	//~ CuCD->AddMaterialByMassFraction(B,0.00422);
-	// not normalised
-	//~ CuCD->AddMaterialByMassFraction(Cu,0.6471);
-	//~ CuCD->AddMaterialByMassFraction(CD,0.3911);
-	//~ CuCD->AddMaterialByMassFraction(B,0.0044);
+
+	//~ CuCD->AddMaterialByMassFraction(CD,0.349);
+	//~ CuCD->AddMaterialByMassFraction(Cu,0.647);
+	//~ CuCD->AddMaterialByMassFraction(B,0.00439);
 	
-	CuCD->AddMaterialByNumberFraction(Cu,0.23598);
-	CuCD->AddMaterialByNumberFraction(CD,0.754589);
-	CuCD->AddMaterialByNumberFraction(B,0.009431);
+	// normalised
+	CuCD->AddMaterialByMassFraction(CD,0.3489);
+	CuCD->AddMaterialByMassFraction(Cu,0.6467);
+	CuCD->AddMaterialByMassFraction(B,0.0044);
+
+	//~ CuCD->AddMaterialByNumberFraction(Cu,0.23598);
+	//~ CuCD->AddMaterialByNumberFraction(CD,0.754589);
+	//~ CuCD->AddMaterialByNumberFraction(B,0.009431);
 	
 	CuCD->SetDensity(5400);
 	CuCD->SetConductivity(12.6E6);
 	CuCD->Assemble();
 	
 	if(ST_CS){
-		CuCD->SetSixtrackTotalNucleusCrossSection(0.354);
-		CuCD->SetSixtrackInelasticNucleusCrossSection(0.230);
-		CuCD->SetSixtrackRutherfordCrossSection(0.0009791);
+		CuCD->SetSixtrackTotalNucleusCrossSection(0.572);
+		CuCD->SetSixtrackInelasticNucleusCrossSection(0.370);
+		CuCD->SetSixtrackRutherfordCrossSection(0.000279);
 	}
 	
 	CuCD->VerifyMaterial();
 	db.insert(pair<string,Material*>(CuCD->GetSymbol(),CuCD));
-	
-	
-	
 	
 	
 	//~ DumpMaterialProperties();
