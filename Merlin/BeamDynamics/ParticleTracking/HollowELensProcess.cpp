@@ -165,7 +165,7 @@ void HollowELensProcess::DoProcess (double ds)
 				
 				if(theta!=0){
 					
-					if(!Elliptical){			
+					if(!Elliptical && !HulaElliptical && !PogoElliptical && !CloseHulaElliptical){			
 						ParticleAngle = atan2((*p).y(), (*p).x());
 					}
 					else{					
@@ -229,7 +229,7 @@ void HollowELensProcess::DoProcess (double ds)
 						Phi = Multiplier * ( Turn * OpTune * 2 * pi );
 						theta *= 0.5*(1 + cos(Phi));
 										
-						if(!Elliptical){			
+						if(!Elliptical && !HulaElliptical && !PogoElliptical && !CloseHulaElliptical){				
 							ParticleAngle = atan2((*p).y(), (*p).x());
 						}
 						else{				
@@ -262,7 +262,7 @@ void HollowELensProcess::DoProcess (double ds)
 					//~ else{				ParticleAngle = atan2((*p).y(), (*p).x());		}		
 					//~ if ((*p).x() < 0){	ParticleAngle = 2*pi + atan2((*p).y(), (*p).x());	}
 					//~ else{				ParticleAngle = atan2((*p).y(), (*p).x());		}	
-					if(!Elliptical){			
+					if(!Elliptical && !HulaElliptical && !PogoElliptical && !CloseHulaElliptical){				
 						ParticleAngle = atan2((*p).y(), (*p).x());
 					}
 					else{					
@@ -295,7 +295,7 @@ void HollowELensProcess::DoProcess (double ds)
 					//~ else{				ParticleAngle = atan2((*p).y(), (*p).x());		}		
 					//~ if ((*p).x() < 0){	ParticleAngle = pi + atan2((*p).y(), (*p).x());	}
 					//~ else{				ParticleAngle = atan2((*p).y(), (*p).x());		}
-					if(!Elliptical){			
+					if(!Elliptical && !HulaElliptical && !PogoElliptical && !CloseHulaElliptical){			
 						ParticleAngle = atan2((*p).y(), (*p).x());
 					}
 					else{					
@@ -1157,7 +1157,7 @@ void HollowELensProcess::SetHulaElliptical(bool io){
 		PogoEllipticalSet = 0;
 		CloseHulaElliptical = 0;
 		CloseHulaEllipticalSet = 0;
-		Elliptical = 0;
+		Elliptical = 1;
 		
 		SetEllipticalMatching(io);
 		
@@ -1185,7 +1185,7 @@ void HollowELensProcess::SetCloseHulaElliptical(bool io){
 		HulaEllipticalSet = 0;
 		PogoElliptical = 0;
 		PogoEllipticalSet = 0;
-		Elliptical = 0;
+		Elliptical = 1;
 		
 		SetEllipticalMatching(io);
 		
@@ -1213,7 +1213,7 @@ void HollowELensProcess::SetPogoElliptical(bool io){
 		CloseHulaEllipticalSet = 0;
 		HulaElliptical = 0;
 		HulaEllipticalSet = 0;
-		Elliptical = 0;
+		Elliptical = 1;
 		
 		SetEllipticalMatching(io);
 		
