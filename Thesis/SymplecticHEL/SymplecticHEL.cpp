@@ -51,14 +51,17 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL); // seed for random number generators
-    int npart = 31;             // number of particles to track
-    int nturns = 1E3;             // number of turns to track
+    int npart = 65;             // number of particles to track
+    int nturns = 1E4;             // number of turns to track
+    
+    if (argc >=2){ npart = atoi(argv[1]); }
+    if (argc >=3){ seed = atoi(argv[2]);  }
     
     string bunch_dir, loss_dir, sp_dir, pn_dir, tune_dir, lattice_dir, case_dir, full_case_dir;
     
     //~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
 	//~ string directory = "/home/haroon/git/Merlin";				//iiaa1
-	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN/";					//M11x	
+	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
 	
 	string input_dir = "/Thesis/data/SymplecticHEL/";
@@ -72,7 +75,7 @@ int main(int argc, char* argv[])
 	
 	bool batch = 1;
 	if(batch){
-		case_dir = "02Dec15/";
+		case_dir = "20APR16_test/";
 		full_output_dir = (directory + output_dir + case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -106,7 +109,7 @@ int main(int argc, char* argv[])
 	bool start_at_IP1			= 1;		//Inject at IP1?
 	
 	bool hel_on 				= 1; 		//Hollow electron lens process?
-	bool LHC_HEL				= 1;
+	bool LHC_HEL				= 0;
 		bool DCon							= 1;
 		bool ACon							= 0;
 		if(ACon){DCon=0;}
@@ -138,7 +141,7 @@ int main(int argc, char* argv[])
 			mkdir(tune_dir.c_str(), S_IRWXU);
 		}
 		
-	bool input_distn 			= 0;	//use SixTrack input distn
+	bool input_distn 			= 1;	//use SixTrack input distn
 	bool cleaning				= 0;
 	if(cleaning){
 		collimation_on 		= 1;
@@ -153,13 +156,7 @@ int main(int argc, char* argv[])
 		input_distn 		= 0;
 	}	
 	 
-    if (argc >=2){
-        npart = atoi(argv[1]);
-    }
 
-    if (argc >=3){
-        seed = atoi(argv[2]);
-    }
 
 // Initialise the random number generator with the seed
 
@@ -181,8 +178,9 @@ int main(int argc, char* argv[])
 ///////////////////////////////////
 	cout << "MADInterface" << endl;
 
-	MADInterface* myMADinterface = new MADInterface( directory+input_dir+"twiss_hllhc_b1_thick_HEL.tfs", beam_energy );
-	//~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
+	//~ MADInterface* myMADinterface = new MADInterface( directory+input_dir+"twiss_hllhc_b1_thick_HEL.tfs", beam_energy );
+	MADInterface* myMADinterface = new MADInterface( directory+input_dir+"twiss.hel.7.0tev.b1.thin.tfs", beam_energy );
+	myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
 	myMADinterface->ConstructApertures(false);
@@ -246,7 +244,8 @@ int main(int argc, char* argv[])
 ///////////////////////
 	cout << "Collimator Setup" << endl;   
 	MaterialDatabase* myMaterialDatabase = new MaterialDatabase();
-	CollimatorDatabase* collimator_db = new CollimatorDatabase( directory+input_dir+"CollimatorFile_HL_HEL.txt", myMaterialDatabase,  true);
+	//~ CollimatorDatabase* collimator_db = new CollimatorDatabase( directory+input_dir+"CollimatorFile_HL_HEL.txt", myMaterialDatabase,  true);
+    CollimatorDatabase* collimator_db = new CollimatorDatabase( directory+input_dir+"collimator.hel.7.0.sigma", myMaterialDatabase,  true);
    
     collimator_db->MatchBeamEnvelope(true);
     collimator_db->EnableJawAlignmentErrors(false);
@@ -288,7 +287,8 @@ int main(int argc, char* argv[])
 // Aperture Configuration //
 ////////////////////////////
 
-	ApertureConfiguration* myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"lhc_b1_thick_corr.tfs",1);      
+	//~ ApertureConfiguration* myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"lhc_b1_thick_corr.tfs",1);  
+	ApertureConfiguration* myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"aperture_hel_7TeV.tfs",1);      
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;

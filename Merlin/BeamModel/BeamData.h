@@ -29,7 +29,9 @@ public:
             : beta_x(0), beta_y(0), alpha_x(0), alpha_y(0),
             emit_x(0), emit_y(0), sig_dp(0), sig_z(0), x0(0),
             xp0(0), y0(0), yp0(0), ct0(0), p0(0), c_xy(0), c_xyp(0),
-            c_xpy(0), c_xpyp(0), Dx(0), Dxp(0), Dy(0), Dyp(0), charge(1)
+            c_xpy(0), c_xpyp(0), Dx(0), Dxp(0), Dy(0), Dyp(0), charge(1),
+           min_sig_x(0), max_sig_x(0), min_sig_y(0), max_sig_y(0), 
+           min_sig_z(0), max_sig_z(0), min_sig_dp(0), max_sig_dp(0)
     {}
 
     //	Checks consistancy of definition. Returns true if *this
