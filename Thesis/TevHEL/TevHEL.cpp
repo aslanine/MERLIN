@@ -46,11 +46,11 @@ using namespace PhysicalUnits;
 //e.g. for 1000 particles and a seed of 356: ./test 1000 356
 int main(int argc, char* argv[])
 {
-    int seed = (int)time(NULL);     // seed for random number generators
+    int seed = 0;     // seed for random number generators
     int seedi = (int)time(NULL);     // seed for random number generators
-    int ncorepart 	= 1;			// number of core particles to track
-    int npart 		= 1E3;           // number of halo particles to track
-    int nturns 		= 1E2;			// number of turns to track
+    int ncorepart 	= 65;			// number of core particles to track
+    int npart 		= 65;           // number of halo particles to track
+    int nturns 		= 1E3;			// number of turns to track
  
     //~ if (argc >=2){npart = atoi(argv[1]);}
 
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "06AprilTest/";
+		case_dir = "20AprilTest/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 			cpn_dir = pn_dir + core_string;					mkdir(cpn_dir.c_str(), S_IRWXU);
 			hpn_dir = pn_dir + halo_string;					mkdir(hpn_dir.c_str(), S_IRWXU);
 		}		
-	bool every_bunch			= 0;		// output whole bunch every turn in a single file
+	bool every_bunch			= 1;		// output whole bunch every turn in a single file
 	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 1;		
 		if (output_initial_bunch || output_final_bunch || every_bunch){
@@ -113,13 +113,13 @@ int main(int argc, char* argv[])
 	bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
 	bool elliptical_HEL			= 0;		// Use elliptical operation
 	
-		bool DCon				= 0;
+		bool DCon				= 1;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
 		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 1;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
-	bool collimation_on 		= 1;
+	bool collimation_on 		= 0;
 		if(collimation_on){
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);
 			cdustbin_dir = dustbin_dir + core_string; 	mkdir(cdustbin_dir.c_str(), S_IRWXU);
@@ -136,11 +136,12 @@ int main(int argc, char* argv[])
 	
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
 	// note that this gives the correct phase advance if we don't use m.apply()
-	bool start_at_ip1			= 0;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
+	bool start_at_ip1			= 1;	// True: 3 trackers: IP1->HEL, HEL->TCP, TCP->IP1 
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
 										// False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 																	
-	bool cleaning				= 1;
+	bool input_distn 			= 1;	//use SixTrack input distn
+	bool cleaning				= 0;
 		if(cleaning){
 			collimation_on		= 1;
 			every_bunch			= 0;
@@ -443,47 +444,64 @@ int main(int argc, char* argv[])
     ProtonBunch* myCoreBunch;
     ParticleBunchConstructor* myHaloBunchCtor;
     ParticleBunchConstructor* myCoreBunchCtor;
-
-    // horizontalHaloDistribution1 is a halo in xx' plane, zero in yy'
-    // horizontalHaloDistribution2 is a halo in xx' plane, gaussian in yy'
-    if(cleaning){
-		//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, horizontalHaloDistribution2);
-		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
-		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
-	}
-    else{
-    	//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
-    	//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, tuneTestDistribution);
-		myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
-		myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
-	}
     
-	if(collimation_on && cut_distn){ 
-		double h_offset = myTwiss->Value(1,0,0,start_element_number);
-		double JawPosition = (CollimatorJaw->GetFullWidth() / 2.0);
-		if(seed ==1){cout << "h_offset: " << h_offset << endl;	
-		cout << "Jaw position: " << JawPosition << endl;}
-
-		HorizontalHaloParticleBunchFilter* hFilter = new HorizontalHaloParticleBunchFilter();
-		//~ double tcpsig = 0.000273539;
-		double tcpsig = 0.000266313;
-		hFilter->SetHorizontalLimit(4*tcpsig);
-		hFilter->SetHorizontalOrbit(h_offset);
-
-		myHaloBunchCtor->SetFilter(hFilter); 
+    
+    if(input_distn){
+		ifstream* bunch_input = new ifstream("/home/HR/Downloads/MERLINHRThesis/Thesis/data/SymplecticHEL/input.txt");
+		ifstream* bunch_input2 = new ifstream("/home/HR/Downloads/MERLINHRThesis/Thesis/data/SymplecticHEL/input2.txt");
+		
+		istream* is = bunch_input;
+		istream* is2 = bunch_input2;
+		
+		myHaloBunch = new ProtonBunch(beam_energy, myHaloBeam.charge, *is);	
+		myCoreBunch = new ProtonBunch(beam_energy, myCoreBeam.charge, *is);	
+				
+		myHaloBunch->SetMacroParticleCharge(myHaloBeam.charge);
+		myCoreBunch->SetMacroParticleCharge(myCoreBeam.charge); 
+		
 	}
-	
-	myHaloBunch = myHaloBunchCtor->ConstructParticleBunch<ProtonBunch>();
-    delete myHaloBunchCtor;
-    
-	myCoreBunch = myCoreBunchCtor->ConstructParticleBunch<ProtonBunch>();
-    delete myCoreBunchCtor;
+	else{
+		// horizontalHaloDistribution1 is a halo in xx' plane, zero in yy'
+		// horizontalHaloDistribution2 is a halo in xx' plane, gaussian in yy'
+		if(cleaning){
+			//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, horizontalHaloDistribution2);
+			myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
+			myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
+		}
+		else{
+			//~ myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, tuneTestDistribution);
+			//~ myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, tuneTestDistribution);
+			myHaloBunchCtor = new ParticleBunchConstructor(myHaloBeam, node_particles, HELHaloDistribution);
+			myCoreBunchCtor = new ParticleBunchConstructor(myCoreBeam, core_particles, HELHaloDistribution);
+		}
+		
+		if(collimation_on && cut_distn){ 
+			double h_offset = myTwiss->Value(1,0,0,start_element_number);
+			double JawPosition = (CollimatorJaw->GetFullWidth() / 2.0);
+			if(seed ==1){cout << "h_offset: " << h_offset << endl;	
+			cout << "Jaw position: " << JawPosition << endl;}
 
-    myHaloBunch->SetMacroParticleCharge(myHaloBeam.charge);
-    myCoreBunch->SetMacroParticleCharge(myCoreBeam.charge);    
+			HorizontalHaloParticleBunchFilter* hFilter = new HorizontalHaloParticleBunchFilter();
+			//~ double tcpsig = 0.000273539;
+			double tcpsig = 0.000266313;
+			hFilter->SetHorizontalLimit(4*tcpsig);
+			hFilter->SetHorizontalOrbit(h_offset);
+
+			myHaloBunchCtor->SetFilter(hFilter); 
+		}
+		
+		myHaloBunch = myHaloBunchCtor->ConstructParticleBunch<ProtonBunch>();
+		delete myHaloBunchCtor;
+		
+		myCoreBunch = myCoreBunchCtor->ConstructParticleBunch<ProtonBunch>();
+		delete myCoreBunchCtor;
+
+		myHaloBunch->SetMacroParticleCharge(myHaloBeam.charge);
+		myCoreBunch->SetMacroParticleCharge(myCoreBeam.charge);   
+		
+	} 
     
-   if(output_initial_bunch){
-	
+   if(output_initial_bunch){	
 		ostringstream hbunch_output_file;
 		hbunch_output_file << hbunch_dir << "initial_bunch_" << seed << ".txt";
 		ofstream* hbunch_output = new ofstream(hbunch_output_file.str().c_str());
