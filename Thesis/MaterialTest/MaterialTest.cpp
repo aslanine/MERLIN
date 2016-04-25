@@ -47,7 +47,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart 			= 1;                     	// number of halo particles to track
+    int npart 			= 1E3;                     	// number of halo particles to track
     int nleft = npart;
        
     if (argc >=2){npart = atoi(argv[1]);}
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 			output_final_bunch	= 1;
 		}
 	bool symplectic = 1;
-	bool composite = 0;
+	bool composite = 1;
 	
 /************************
 *	HISTOGRAM STUFF		*
@@ -300,6 +300,7 @@ int main(int argc, char* argv[])
 		//~ myScatter->OutputJawImpact(full_output_dir);
 		//~ myScatter->OutputScatterPlot(full_output_dir);	
 		myScatter->OutputScatteringProcesses(full_output_dir, ii);
+		myScatter->OutputCounter(full_output_dir, ii);
 		
 		if(output_final_bunch){
 			ostringstream fin_output_file;

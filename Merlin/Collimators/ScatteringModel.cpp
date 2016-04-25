@@ -108,7 +108,14 @@ double ScatteringModel::PathLength(Material* mat, double E0){
 				
 				std::cout << "\tScatteringModel::PathLength: Calculating fractions in composite sub-element: " << aComposite->MixtureMapIterator->first->GetSymbol();
 				std::cout << ", in material : " << mat->GetSymbol() << endl;	
-				ConfigureProcesses(CurrentCS, aComposite->MixtureMapIterator->first);				
+				ConfigureProcesses(CurrentCS, aComposite->MixtureMapIterator->first);	
+				
+				string CounterName = mat->GetSymbol();
+				CounterName += "_";
+				CounterName += aComposite->MixtureMapIterator->first->GetSymbol();
+				
+				CompCounter.insert(std::map<string, int>::value_type(CounterName,0));
+							
 			}
 			++aComposite->MixtureMapIterator;
 		}
@@ -347,10 +354,17 @@ bool ScatteringModel::ParticleScatter(PSvector& p, Material* mat, double E){
 	// or that for the material
 	if(composite && useComposites){
 		RandomElement = aComposite->GetRandomMaterialSymbol();
+		
 		P_iterator = stored_processes.find(RandomElement);
 		Processes = P_iterator->second;
 		F_iterator = stored_fractions.find(RandomElement);
 		fraction = F_iterator->second;
+		
+		string matstring = mat->GetSymbol();
+		string ccstring = matstring+"_"+RandomElement;
+		
+		CC_it=CompCounter.find(ccstring);
+		CC_it->second +=1;		
 	}
 	else{
 		material = mat;
@@ -647,4 +661,22 @@ void ScatteringModel::OutputScatteringProcesses(string directory, int seed){
 			++process_i;
 		}				
 	}			
+}
+
+void ScatteringModel::OutputCounter(string directory, int seed){
+	
+	std::ostringstream sp_file;
+	if(seed >= 0)
+		sp_file << directory << "CompositeCounter_" << seed << ".txt";
+	else
+		sp_file << directory << "CompositeCounter.txt";
+	ofstream* os = new ofstream(sp_file.str().c_str());	
+	if(!os->good())    {
+		std::cerr << "ScatteringModel::OutputCounter: Could not open CompositeCounter file "<< std::endl;
+		exit(EXIT_FAILURE);
+	} 
+	for(CC_it = CompCounter.begin(); CC_it != CompCounter.end(); CC_it++){
+		
+		(*os) << CC_it->first << "\t" << CC_it->second << endl;
+	}
 }

@@ -315,11 +315,18 @@ public:
 	*/
 	void OutputScatteringProcesses(string directory, int seed = -1);
 		
+		
+	void OutputCounter(string directory, int seed =-1);
+	
 protected:
 
 private:
 	/*** Used to switch between composite elements and the composite imaginary nucleus	*/
 	bool useComposites;
+
+	/*** Used to count point like scatters from components of a composite */
+	std::map< string, int> CompCounter;
+	std::map< string, int>::iterator CC_it;
 
 	/*** 0 = SixTrack, 1 = ST+Ad Ion, 2 = ST + Ad El, 3 = ST + Ad SD, 4 = MERLIN	*/
     int ScatteringPhysicsModel;
