@@ -482,7 +482,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	Mo2C->AddMaterialByNumberFraction(Mo, 0.667);
 	Mo2C->AddMaterialByNumberFraction(C2, 0.333);
 	Mo2C->SetDensity(8400);
-	Mo2C->SetConductivity(1.4);
+	Mo2C->SetConductivity(1.4E6);
 	Mo2C->Assemble();
 	
 	if(ST_CS){
