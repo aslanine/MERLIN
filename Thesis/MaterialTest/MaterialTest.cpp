@@ -47,7 +47,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart 			= 1E3;                     	// number of halo particles to track
+    int npart 			= 1E6;                     	// number of halo particles to track
     int nleft = npart;
        
     if (argc >=2){npart = atoi(argv[1]);}
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "19_Apr_test/";
+		case_dir = "25_Apr_test/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -153,9 +153,9 @@ int main(int argc, char* argv[])
 	//~ material_names.push_back("Pb");
 	//~ material_names.push_back("AC150K");
 	material_names.push_back("Mo2C");
-	//~ material_names.push_back("GCOP");
-	//~ material_names.push_back("IT180");
-	//~ material_names.push_back("CuCD");
+	material_names.push_back("GCOP");
+	material_names.push_back("IT180");
+	material_names.push_back("CuCD");
 	material_names.push_back("MoGr");
 
 /************************

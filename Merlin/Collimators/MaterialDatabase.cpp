@@ -238,7 +238,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	Cu->SetConductivity(5.98E7);
 	Cu->SetRadiationLength(Cu->CalculateRadiationLength());
 	Cu->SetDensity(8960);
-	Cu->SetSixtrackNuclearSlope(2209.5);
+	Cu->SetSixtrackNuclearSlope(217.8);
 	Cu->SetMeanExcitationEnergy(322.0*eV);
 	Cu->SetElectronDensity(Cu->CalculateElectronDensity());
 	Cu->SetPlasmaEnergy(Cu->CalculatePlasmaEnergy());
