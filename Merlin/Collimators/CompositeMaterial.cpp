@@ -568,24 +568,26 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 			cout << "\nCompositeMaterial " << GetSymbol() << " constituent: " << MaterialIt->first->GetSymbol() << " wZ = " << wZ << endl;
 		}
 		// The rest is calculated using the mass fraction
-		fraction = MaterialIt->second.second;
+		//~ fraction = MaterialIt->second.second;
+		fraction = MaterialIt->second.first;
 		
-		wsig_R += (fraction / MaterialIt->first->GetSixtrackRutherfordCrossSection());
-		wsig_tot += (fraction / MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
-		wsig_E += (fraction / MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
-		wsig_I += (fraction / MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
-		wrad += (fraction / MaterialIt->first->GetRadiationLength());
+		wsig_R += (fraction * MaterialIt->first->GetSixtrackRutherfordCrossSection());
+		wsig_tot += (fraction * MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
+		wsig_E += (fraction * MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
+		wsig_I += (fraction * MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
+		
+		//~ wrad += (MaterialIt->second.second / MaterialIt->first->GetRadiationLength());
 		
 	
 		MaterialIt++;
 	}
 		
 	// Set weighted values	
-	SetSixtrackRutherfordCrossSection(1/wsig_R);
-	SetSixtrackTotalNucleusCrossSection(1/wsig_tot);
-	SetSixtrackInelasticNucleusCrossSection(1/wsig_I);
-	SetSixtrackElasticNucleusCrossSection(1/wsig_E);
-	SetRadiationLength(1/wrad);
+	SetSixtrackRutherfordCrossSection(wsig_R);
+	SetSixtrackTotalNucleusCrossSection(wsig_tot);
+	SetSixtrackInelasticNucleusCrossSection(wsig_I);
+	SetSixtrackElasticNucleusCrossSection(wsig_E);
+	//~ SetRadiationLength(1/wrad);
 	
 	if(AssembledByMass){
 		SetAtomicMass(wA);
@@ -596,7 +598,7 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 	SetElectronDensity(CalculateElectronDensity());
 	SetPlasmaEnergy(CalculatePlasmaEnergy());
 	SetMeanExcitationEnergy(CalculateMeanExcitationEnergy());
-	//~ SetRadiationLength(CalculateRadiationLength());
+	SetRadiationLength(CalculateRadiationLength());
 	SetSixtrackdEdx(CalculateSixtrackdEdx());
 	SetSixtrackNuclearSlope(CalculateSixtrackNuclearSlope());
 	

@@ -332,7 +332,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	db.insert(pair<string,Material*>(Pb->GetSymbol(),Pb));
 
 	/**
-	* AC150K
+	* AC150K (CFC)
 	* LHC TCP/TCSG collimator material
 	* Graphite but different density etc.
 	**/
