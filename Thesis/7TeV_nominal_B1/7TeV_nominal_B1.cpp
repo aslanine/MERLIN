@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
     int npart = 1E3;				// number of particles to track
     int nturns = 200;				// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
-	bool beam1 = 0;
+	bool beam1 = 1;
 	 
     if (argc >=2){npart = atoi(argv[1]);}
     if (argc >=3){seed = atoi(argv[2]);}

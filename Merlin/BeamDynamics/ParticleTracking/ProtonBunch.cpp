@@ -2496,3 +2496,32 @@ void ProtonBunch::OutputScattered (std::ostream& os) const{
     os.precision(oldp);
     os.flags(oflg);	
 }
+
+void ProtonBunch::OutputScattered (std::ostream& os, int n) const{
+
+    //~ double x ()  const{ return v[0];}
+    //~ double y ()  const{ return v[2];}
+    //~ double ct () const{ return v[4];}
+    //~ double xp () const{ return v[1];}
+    //~ double yp () const{ return v[3];}
+    //~ double dp () const{ return v[5];}
+    //~ double type () const{ return v[6];}
+    //~ double location () const{ return v[7];}
+    //~ double id () const{ return v[8];}
+    //~ double sd () const{ return v[9];} 
+
+    int oldp	=	os.precision(16);
+    ios_base::fmtflags oflg = os.setf(ios::scientific,	ios::floatfield);
+    
+    for(PSvectorArray::const_iterator p = begin(); p!=end(); p++) {		
+		if( (*p).type() == n){
+			os	<<	std::setw(35)	<<	GetReferenceTime();
+			os	<<	std::setw(35)	<<	GetReferenceMomentum();
+			for(size_t k=0; k<10; k++)
+				os	<<	std::setw(35)	<<	(*p)[k];
+			os	<<	endl;
+		}
+    }
+    os.precision(oldp);
+    os.flags(oflg);	
+}

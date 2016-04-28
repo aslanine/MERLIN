@@ -304,6 +304,7 @@ void ScatteringModel::EnergyLoss(PSvector& p, double x, Material* mat, double E0
 
     p.dp() = ((E1 - dp) - E0) / E0;
     // Set scatter type to any interaction
+    if (p.type() == (-1 || 5))
     p.type() = 0;
 }
 
@@ -326,7 +327,8 @@ void ScatteringModel::Straggle(PSvector& p, double x, Material* mat, double E1, 
 	p.y ()  += y_plane;
 	p.yp () += theta_plane_y; 
 	// Set scatter type to Coulomb
-	p.type() = 5;
+	if (p.type() == -1 || p.type() == 0)
+		p.type() = 5;
 	
  }
 
@@ -475,7 +477,28 @@ void ScatteringModel::JawInelastic(Particle& p, double z, int turn, string name)
 	
 	StoredJawInelasticData.push_back(temp);
 }
+
+void ScatteringModel::SelectScatter(Particle& p, double z, int turn, string name){
 	
+	SelectScatterData* temp = new SelectScatterData;
+	(*temp).ID = p.id();
+	(*temp).x = p.x();
+	(*temp).xp = p.xp();
+	(*temp).y = p.y();
+	(*temp).yp = p.yp();
+	(*temp).ct = p.ct();
+	(*temp).dp = p.dp();
+	(*temp).z = z;
+	(*temp).turn = turn;	
+	(*temp).name = name;
+	(*temp).type = p.type();
+	(*temp).theta = atan ( sqrt( p.xp()*p.xp() + p.yp()*p.yp() ) );
+	(*temp).mom_t = - (4.9E19)*((*temp).theta*(*temp).theta);
+	
+	//~ cout << "SelectScatter IN: name = " << name << endl;
+	
+	StoredSelectScatterData.push_back(temp);
+}
 	
 void ScatteringModel::SetScatterPlot(string name, int single_turn){
 	ScatterPlotNames.push_back(name);
@@ -491,6 +514,12 @@ void ScatteringModel::SetJawInelastic(string name, int single_turn){
 	JawInelasticNames.push_back(name);
 	JawInelastic_on = 1;
 }
+
+void ScatteringModel::SetSelectScatter(string name, int single_turn){
+	SelectScatterNames.push_back(name);
+	SelectScatter_on = 1;
+}
+
 
 
 //~ void ScatteringModel::OutputScatterPlot(std::ostream* os){
@@ -609,6 +638,98 @@ void ScatteringModel::OutputJawInelastic(string directory, int seed){
 	StoredJawInelasticData.clear();	
 }
 
+void ScatteringModel::OutputSelectScatter(string directory, int seed){
+	
+	// Iterate over collimators
+	for(vector<string>::iterator name = SelectScatterNames.begin(); name != SelectScatterNames.end(); ++name){
+		
+		// INELASTIC
+		std::ostringstream ss_file1;
+		ss_file1 << directory << "select_scatter_" << (*name) << "_inelastic_.txt";
+		ofstream* os1 = new ofstream(ss_file1.str().c_str());	
+		if(!os1->good())    {
+			std::cerr << "ScatteringModel::OutputSelectScatter: Could not open inelastic SelectScatter file for collimator " << (*name) << std::endl;
+			exit(EXIT_FAILURE);
+		} 		
+		(*os1) << "#\tparticle_id\tx\tx'\ty\ty'\tct\tdp\tz\ttheta\tt\ttype" << endl;
+	
+		for(vector <SelectScatterData*>::iterator its = StoredSelectScatterData.begin(); its != StoredSelectScatterData.end(); ++its)
+		{
+			if( (*its)->name == (*name) && (*its)->type == 1){
+				(*os1) << setw(10) << left << setprecision(10) <<  (*its)->ID;
+				(*os1) << setw(30) << left << setprecision(20) << (*its)->x;
+				(*os1) << setw(30) << left << setprecision(20) <<  (*its)->xp;
+				(*os1) << setw(30) << left << setprecision(20) <<  (*its)->y;
+				(*os1) << setw(30) << left << setprecision(20) <<  (*its)->yp;
+				(*os1) << setw(30) << left << setprecision(20) << (*its)->ct;
+				(*os1) << setw(30) << left << setprecision(20) << (*its)->dp;
+				(*os1) << setw(30) << left << setprecision(20) << (*its)->z;
+				(*os1) << setw(30) << left << setprecision(20) << (*its)->theta;
+				(*os1) << setw(30) << left << setprecision(20) << (*its)->mom_t;
+				(*os1) << setw(30) << left << setprecision(20) << (*its)->type;
+				(*os1) << endl;
+			}
+		}
+		
+		// ELASTIC
+		std::ostringstream ss_file2;
+		ss_file2 << directory << "select_scatter_" << (*name) << "_elastic_.txt";
+		ofstream* os2 = new ofstream(ss_file2.str().c_str());	
+		if(!os2->good())    {
+			std::cerr << "ScatteringModel::OutputSelectScatter: Could not open elastic SelectScatter file for collimator " << (*name) << std::endl;
+			exit(EXIT_FAILURE);
+		} 		
+		(*os2) << "#\tparticle_id\tx\tx'\ty\ty'\tct\tdp\tz\ttheta\tt\ttype" << endl;
+	
+		for(vector <SelectScatterData*>::iterator its = StoredSelectScatterData.begin(); its != StoredSelectScatterData.end(); ++its)
+		{
+			if( (*its)->name == (*name) && ( (*its)->type == 2 || (*its)->type == 3 ) ){
+				(*os2) << setw(10) << left << setprecision(10) <<  (*its)->ID;
+				(*os2) << setw(30) << left << setprecision(20) << (*its)->x;
+				(*os2) << setw(30) << left << setprecision(20) <<  (*its)->xp;
+				(*os2) << setw(30) << left << setprecision(20) <<  (*its)->y;
+				(*os2) << setw(30) << left << setprecision(20) <<  (*its)->yp;
+				(*os2) << setw(30) << left << setprecision(20) << (*its)->ct;
+				(*os2) << setw(30) << left << setprecision(20) << (*its)->dp;
+				(*os2) << setw(30) << left << setprecision(20) << (*its)->z;
+				(*os2) << setw(30) << left << setprecision(20) << (*its)->theta;
+				(*os2) << setw(30) << left << setprecision(20) << (*its)->mom_t;
+				(*os2) << setw(30) << left << setprecision(20) << (*its)->type;
+				(*os2) << endl;
+			}
+		}
+		
+		// SD
+		std::ostringstream ss_file3;
+		ss_file3 << directory << "select_scatter_" << (*name) << "_singlediffractive_.txt";
+		ofstream* os3 = new ofstream(ss_file3.str().c_str());	
+		if(!os3->good())    {
+			std::cerr << "ScatteringModel::OutputSelectScatter: Could not open SD SelectScatter file for collimator " << (*name) << std::endl;
+			exit(EXIT_FAILURE);
+		} 		
+		(*os3) << "#\tparticle_id\tx\tx'\ty\ty'\tct\tdp\tz\ttheta\tt\ttype" << endl;
+	
+		for(vector <SelectScatterData*>::iterator its = StoredSelectScatterData.begin(); its != StoredSelectScatterData.end(); ++its)
+		{
+			if( (*its)->name == (*name) && (*its)->type == 4){
+				(*os3) << setw(10) << left << setprecision(10) <<  (*its)->ID;
+				(*os3) << setw(30) << left << setprecision(20) << (*its)->x;
+				(*os3) << setw(30) << left << setprecision(20) <<  (*its)->xp;
+				(*os3) << setw(30) << left << setprecision(20) <<  (*its)->y;
+				(*os3) << setw(30) << left << setprecision(20) <<  (*its)->yp;
+				(*os3) << setw(30) << left << setprecision(20) << (*its)->ct;
+				(*os3) << setw(30) << left << setprecision(20) << (*its)->dp;
+				(*os3) << setw(30) << left << setprecision(20) << (*its)->z;
+				(*os3) << setw(30) << left << setprecision(20) << (*its)->theta;
+				(*os3) << setw(30) << left << setprecision(20) << (*its)->mom_t;
+				(*os3) << setw(30) << left << setprecision(20) << (*its)->type;
+				(*os3) << endl;
+			}
+		}	
+	}			
+	StoredSelectScatterData.clear();	
+}
+
 void ScatteringModel::OutputScatteringProcesses(string directory, int seed){
 	
 	std::ostringstream sp_file;
@@ -680,3 +801,124 @@ void ScatteringModel::OutputCounter(string directory, int seed){
 		(*os) << CC_it->first << "\t" << CC_it->second << endl;
 	}
 }
+
+void ScatteringModel::OutputSelectScatterHistogram(string directory, int n, int nbins, int norm){
+	
+	for(vector<string>::iterator name = SelectScatterNames.begin(); name != SelectScatterNames.end(); ++name){
+		double bob = 5E-6;
+		const double bin_min_x = -bob, bin_max_x = bob;
+		const double x_bw = (bin_max_x - bin_min_x) / nbins;
+		
+		const double bin_min_xp = -bob, bin_max_xp = bob;	
+		const double xp_bw = (bin_max_xp - bin_min_xp) / nbins;
+		
+		const double bin_min_y = -bob, bin_max_y = bob;	
+		const double y_bw = (bin_max_y - bin_min_y) / nbins;
+		
+		const double bin_min_yp = -bob, bin_max_yp = bob;		
+		const double yp_bw = (bin_max_yp - bin_min_yp) / nbins;
+		
+		
+		double bin_min_dp = 0, bin_max_dp = 2E-5;
+		if(n==4){bin_max_dp = 0.15;}
+		const double dp_bw = (bin_max_dp - bin_min_dp) / nbins;
+		
+		const double bin_min_t = -1E9, bin_max_t = 0;
+		const double t_bw = (bin_max_t - bin_min_t) / nbins;
+		
+		const double bin_min_th = 0, bin_max_th = 3E-6;
+		const double th_bw = (bin_max_th - bin_min_th) / nbins;
+		
+		int hist_x[nbins+2] = {0};
+		int hist_xp[nbins+2] = {0};
+		int hist_y[nbins+2] = {0};
+		int hist_yp[nbins+2] = {0};
+		int hist_dp[nbins+2] = {0};
+		int hist_t[nbins+2] = {0};
+		int hist_th[nbins+2] = {0};	
+		
+		int cut_type = 0;
+		
+		//~ cout << "vector<string>::iterator = " << *name << endl;
+		std::ostringstream select_scatter_file;
+		select_scatter_file << directory << "HIST_" << (*name) << "_" << n << ".txt";
+
+		ofstream* os = new ofstream(select_scatter_file.str().c_str());	
+		if(!os->good())    {
+			std::cerr << "ScatteringModel::OutputSelectScatter: Could not open SelectScatter HIST file for collimator " << (*name) << std::endl;
+			exit(EXIT_FAILURE);
+		} 
+		
+		(*os) << "#\tbin_x\tx\tbin_xp\txp\tbin_y\ty\tbin_yp\typ\tbin_ct\tct\tbin_dp\tdp\tbin_theta\ttheta\tbin_t\tt" << endl;
+	
+		for(vector <SelectScatterData*>::iterator its = StoredSelectScatterData.begin(); its != StoredSelectScatterData.end(); ++its)
+		{
+			cut_type = (*its)->type;
+			// For elastic
+			if(n==3){n=2;}
+			if ((*its)->type == (2||3)){cut_type = 2;}
+			
+			if (cut_type == n){
+				int bin_x = (((*its)->x - bin_min_x) / (bin_max_x-bin_min_x) * (nbins)) +1; // +1 because bin zero for outliers
+				// so handle end bins, by check against x, not bin
+				if ((*its)->x < bin_min_x) bin_x = 0;
+				if ((*its)->x > bin_max_x) bin_x = nbins+1;
+				hist_x[bin_x] += 1;
+
+				int bin_xp = (((*its)->xp - bin_min_xp) / (bin_max_xp-bin_min_xp) * (nbins)) +1; // +1 because bin zero for outliers
+				if ((*its)->xp < bin_min_xp) bin_xp = 0;
+				if ((*its)->xp > bin_max_xp) bin_xp = nbins+1;
+				hist_xp[bin_xp] += 1;
+
+				int bin_y = (((*its)->y - bin_min_y) / (bin_max_y-bin_min_y) * (nbins)) +1; // +1 because bin zero for outliers
+				if ((*its)->y < bin_min_y) bin_y = 0;
+				if ((*its)->y > bin_max_y) bin_y = nbins+1;
+				hist_y[bin_y] += 1;
+
+				int bin_yp = (((*its)->yp - bin_min_yp) / (bin_max_yp-bin_min_yp) * (nbins)) +1; // +1 because bin zero for outliers
+				if ((*its)->yp < bin_min_yp) bin_yp = 0;
+				if ((*its)->yp > bin_max_yp) bin_yp = nbins+1;
+				hist_yp[bin_yp] += 1;
+
+				int bin_dp = ((-(*its)->dp - bin_min_dp) / (bin_max_dp-bin_min_dp) * (nbins)) +1; // +1 because bin zero for outliers
+				if (-(*its)->dp < bin_min_dp) bin_dp = 0;
+				if (-(*its)->dp > bin_max_dp) bin_dp = nbins+1;
+				hist_dp[bin_dp] += 1;
+
+				int bin_th = (((*its)->theta - bin_min_th) / (bin_max_th-bin_min_th) * (nbins)) +1; // +1 because bin zero for outliers
+				if ((*its)->theta < bin_min_th) bin_th = 0;
+				if ((*its)->theta > bin_max_th) bin_th = nbins+1;
+				hist_th[bin_th] += 1;
+				
+				int bin_t = (((*its)->mom_t - bin_min_t) / (bin_max_t-bin_min_t) * (nbins)) +1; // +1 because bin zero for outliers
+				if ((*its)->mom_t < bin_min_t) bin_t = 0;
+				if ((*its)->mom_t > bin_max_t) bin_t = nbins+1;
+				hist_t[bin_t] += 1;		
+			}		
+		}
+		
+		for (size_t i=0; i<nbins+2; i++){
+			
+			/*** This output should be normalised by the original particle
+			* number npart in order to compare the number of lost particles
+			* It may also need to be normalised to the bin width */
+			
+			// Normalised by npart, start bin
+			(*os) << bin_min_x + (x_bw*i) << "\t";
+			(*os) << (double)hist_x[i]/norm << "\t";
+			(*os) << bin_min_xp + (xp_bw*i) << "\t";
+			(*os) << (double)hist_xp[i]/norm <<"\t";
+			(*os) << bin_min_y + (y_bw*i) << "\t";
+			(*os) << (double)hist_y[i]/norm << "\t";
+			(*os) << bin_min_yp + (yp_bw*i) << "\t";
+			(*os) << (double)hist_yp[i]/norm <<"\t";
+			(*os) << bin_min_dp + (dp_bw*i) << "\t";
+			(*os) << (double)hist_dp[i]/norm << "\t";
+			(*os) << bin_min_th + (th_bw*i) << "\t";
+			(*os) << (double)hist_th[i]/norm << "\t";
+			(*os) << bin_min_t + (t_bw*i) << "\t";
+			(*os) << (double)hist_t[i]/norm << endl;				
+		}		
+	}
+}
+
