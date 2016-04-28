@@ -20,7 +20,7 @@ using namespace PhysicalUnits;
 */
 bool CompositeMaterial::AddMaterialByMassFraction(Material* m ,double f)
 {
-	if(AssembledByNumber || AssembledByBoth)
+	if(AssembledByNumber)
 	{
 		std::cerr << "Already added a material to this mixture by number fraction or both. Adding by Mass fraction will break things." << std::endl;
 		return false;
@@ -45,7 +45,7 @@ bool CompositeMaterial::AddMaterialByMassFraction(Material* m ,double f)
 */
 bool CompositeMaterial::AddMaterialByNumberFraction(Material* m,double f)
 {
-	if(AssembledByMass || AssembledByBoth)
+	if(AssembledByMass)
 	{
 		std::cerr << "Already added a material to this mixture by mass fraction or both. Adding by number fraction will break things." << std::endl;
 		return false;
@@ -60,23 +60,6 @@ bool CompositeMaterial::AddMaterialByNumberFraction(Material* m,double f)
 	return test.second;
 }
 
-bool CompositeMaterial::AddMaterialByFractions(Material* m ,double m_f, double n_f)
-{
-	if(AssembledByNumber || AssembledByMass)
-	{
-		std::cerr << "Already added a material to this mixture by individual number or mass fraction. Adding by both fractions will break things." << std::endl;
-		return false;
-	}
-
-	std::pair<double,double> p;
-	p.first = n_f;	//Number fraction 
-	p.second = m_f;	//Mass fraction
-
-	std::pair<std::map<Material*,std::pair<double,double> >::iterator,bool> test;
-	test = MixtureMap.insert(std::pair<Material*,std::pair<double,double> >(m,p));
-	AssembledByBoth = true;
-	return test.second;
-}
 
 double CompositeMaterial::CalculateElectronDensity()
 {

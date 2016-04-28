@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #include "Collimators/MaterialDatabase.h"
-#include "Collimators/MaterialMixture.h"
+//~ #include "Collimators/MaterialMixture.h"
 #include "Collimators/CompositeMaterial.h"
 
 #include "NumericalUtils/PhysicalUnits.h"
@@ -19,7 +19,7 @@ MaterialDatabase::MaterialDatabase()
 Here we create new materials, add their properties, then push them into a map for manipulation.
 References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties/
 */
-
+	
 	// Use SixTrack reference cross sections for composites, or calculate them
 	// using a weighted average of constituent cross sections
 	bool ST_CS = 0;
@@ -61,10 +61,10 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	//~ B->SetSixtrackRutherfordCrossSection(B->CalculateSixtrackRutherfordCrossSection());
 	B->SetSixtrackRutherfordCrossSection(0.000054);
 	B->SetSixtrackdEdx(B->CalculateSixtrackdEdx());
-	B->SetConductivity(-1);
+	B->SetConductivity(0);
 	B->SetRadiationLength(B->CalculateRadiationLength());
 	B->SetDensity(2370);
-	B->SetSixtrackNuclearSlope(-1);
+	B->SetSixtrackNuclearSlope(B->CalculateSixtrackNuclearSlope());
 	B->SetMeanExcitationEnergy(76.0*eV);
 	B->SetElectronDensity(B->CalculateElectronDensity());
 	B->SetPlasmaEnergy(B->CalculatePlasmaEnergy());
@@ -521,12 +521,12 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	//~ MoGr->AddMaterialByNumberFraction(C,0.98302);
 	
 	// test with Mo2C
-	//~ MoGr->AddMaterialByNumberFraction(Mo2C,0.027);
-	//~ MoGr->AddMaterialByNumberFraction(C,0.973);
+	MoGr->AddMaterialByNumberFraction(Mo2C,0.027);
+	MoGr->AddMaterialByNumberFraction(C,0.973);
 	
 	// use	
-	MoGr->AddMaterialByNumberFraction(Mo,0.01698);
-	MoGr->AddMaterialByNumberFraction(C,0.98302);
+	//~ MoGr->AddMaterialByNumberFraction(Mo,0.01698);
+	//~ MoGr->AddMaterialByNumberFraction(C,0.98302);
 	
 	// mass frac
 	//double Mo_M = 0.941 * Mo->GetAtomicNumber();
