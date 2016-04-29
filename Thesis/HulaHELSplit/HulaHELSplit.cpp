@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "24April_88_Diff_Hula/";
+		case_dir = "24April_88_Diff_Elliptical/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -107,8 +107,8 @@ int main(int argc, char* argv[])
 	
 
 	bool hel_on 				= 1; 		// Hollow electron lens process?
-	bool elliptical_HEL			= 0;		// Use elliptical operation
-	bool hula_HEL				= 1;		// Use hula elliptical operation
+	bool elliptical_HEL			= 1;		// Use elliptical operation
+	bool hula_HEL				= 0;		// Use hula elliptical operation
 											if(hula_HEL){elliptical_HEL = 0;}
 	bool pogo_HEL				= 0;		// Use pogo elliptical operation
 											if(pogo_HEL){hula_HEL = 0; elliptical_HEL = 0;}
