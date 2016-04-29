@@ -574,7 +574,12 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 		wsig_tot += (fraction / MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
 		wsig_E += (fraction / MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
 		wsig_I += (fraction / MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
-		wrad += (fraction / MaterialIt->first->GetRadiationLength());
+		wrad += (fraction/MaterialIt->first->GetRadiationLength());
+		//~ wsig_R += (fraction * MaterialIt->first->GetSixtrackRutherfordCrossSection());
+		//~ wsig_tot += (fraction * MaterialIt->first->GetSixtrackTotalNucleusCrossSection());
+		//~ wsig_E += (fraction * MaterialIt->first->GetSixtrackElasticNucleusCrossSection());
+		//~ wsig_I += (fraction * MaterialIt->first->GetSixtrackInelasticNucleusCrossSection());
+		//~ wrad += (fraction / MaterialIt->first->GetRadiationLength());
 		
 	
 		MaterialIt++;
@@ -586,6 +591,11 @@ void CompositeMaterial::CalculateAllWeightedVariables()
 	SetSixtrackInelasticNucleusCrossSection(1/wsig_I);
 	SetSixtrackElasticNucleusCrossSection(1/wsig_E);
 	SetRadiationLength(1/wrad);
+	//~ SetSixtrackRutherfordCrossSection(wsig_R);
+	//~ SetSixtrackTotalNucleusCrossSection(wsig_tot);
+	//~ SetSixtrackInelasticNucleusCrossSection(wsig_I);
+	//~ SetSixtrackElasticNucleusCrossSection(wsig_E);
+	//~ SetRadiationLength(wrad);
 	
 	if(AssembledByMass){
 		SetAtomicMass(wA);

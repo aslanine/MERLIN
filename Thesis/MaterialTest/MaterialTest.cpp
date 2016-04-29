@@ -152,8 +152,8 @@ int main(int argc, char* argv[])
 	//~ material_names.push_back("W");
 	//~ material_names.push_back("Pb");
 	//~ material_names.push_back("AC150K");
-	material_names.push_back("GCOP");
-	material_names.push_back("IT180");
+	//~ material_names.push_back("GCOP");
+	//~ material_names.push_back("IT180");
 	material_names.push_back("CuCD");
 	material_names.push_back("MoGr");
 
