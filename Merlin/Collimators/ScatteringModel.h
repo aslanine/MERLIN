@@ -51,6 +51,25 @@ struct JawImpactData{
 	double dp;	
 	string name;
 };
+	
+	/**
+	* Struct to handle SelectScatter data
+	*/	
+struct SelectScatterData{
+	int turn;
+	int ID;
+	double x;
+	double xp;
+	double y;
+	double yp;
+	double ct;
+	double dp;	
+	double z;
+	double theta;
+	double mom_t;
+	int type;
+	string name;
+};
 	/**
 	* Struct to handle ScatterPlot data
 	*/	
@@ -63,7 +82,7 @@ struct ScatterPlotData{
 	double yp;
 	double z;
 	string name;	
-	
+			
 	/**
 	* == operator to compare ScatterPlotData
 	*/	
@@ -224,7 +243,7 @@ public:
 	void JawImpact(ParticleTracking::Particle& p, int turn, string name);
 	
 	/**
-	* Used to select which collimators to store JawImpact data for.
+	* Used to select which collimators to store JawImpact data.
 	* @param[in] name the collimator name.
 	* @param[in] single_turn not currently used.
 	*/
@@ -242,8 +261,8 @@ public:
 	vector <JawImpactData*> StoredJawImpactData;
 	
 	/**
-	* Called in CollimateProtonProcess::DoScatter to store data for.
-	* JawInelastic
+	* Called in CollimateProtonProcess::DoScatter to store data for
+	* JawInelastic.
 	* @param[in] p the particle vector.
 	* @param[in] z the exact loss position in the collimator.
 	* @param[in] turn the turn.
@@ -252,7 +271,7 @@ public:
 	void JawInelastic(ParticleTracking::Particle& p, double z, int turn, string name);
 	
 	/**
-	* Used to select which collimators to store JawInelastic data for.
+	* Used to select which collimators to store JawInelastic data.
 	* @param[in] name the collimator name.
 	* @param[in] single_turn not currently used.
 	*/
@@ -268,6 +287,45 @@ public:
 	vector<string> JawInelasticNames;
 	bool JawInelastic_on;
 	vector <JawInelasticData*> StoredJawInelasticData;
+	
+	/**
+	* Called in CollimateProtonProcess::DoScatter to store data for.
+	* SelectScatter
+	* @param[in] p the particle vector.
+	* @param[in] z the exact loss position in the collimator.
+	* @param[in] turn the turn.
+	* @param[in] name the collimator name.
+	*/
+	void SelectScatter(ParticleTracking::Particle& p, double z, int turn, string name);
+	
+	/**
+	* Used to select which collimators to store SelectScatter data for.
+	* @param[in] name the collimator name.
+	* @param[in] single_turn not currently used.
+	*/
+	void SetSelectScatter(string name, int single_turn = 0);
+	
+	/**
+	* Used to output SelectScatter data for previously named collimators.
+	* @param[in] directory the output directory.
+	* @param[in] seed used if running multiple jobs, the seed will create an output file per collimator per seed.
+	*/
+	void OutputSelectScatter(string directory, int seed = -1);
+		
+	vector<string> SelectScatterNames;
+	bool SelectScatter_on;
+	vector <SelectScatterData*> StoredSelectScatterData;
+	
+	/**
+	* Used to output SelectScatter data as a histogram.
+	* @param[in] directory the output directory.
+	* @param[in] scattering type to be histogrammed.
+	* @param[in] number of bins.
+	* @param[in] minimum bin.
+	* @param[in] maximum bin.
+	* @param[in] normalisation factor.
+	*/
+	void OutputSelectScatterHistogram(string directory, int n, int nbins, int norm=1);
 
 	/**
 	* Used to configure individual ScatteringProcesses for a given material.
@@ -315,11 +373,18 @@ public:
 	*/
 	void OutputScatteringProcesses(string directory, int seed = -1);
 		
+		
+	void OutputCounter(string directory, int seed =-1);
+	
 protected:
 
 private:
 	/*** Used to switch between composite elements and the composite imaginary nucleus	*/
 	bool useComposites;
+
+	/*** Used to count point like scatters from components of a composite */
+	std::map< string, int> CompCounter;
+	std::map< string, int>::iterator CC_it;
 
 	/*** 0 = SixTrack, 1 = ST+Ad Ion, 2 = ST + Ad El, 3 = ST + Ad SD, 4 = MERLIN	*/
     int ScatteringPhysicsModel;

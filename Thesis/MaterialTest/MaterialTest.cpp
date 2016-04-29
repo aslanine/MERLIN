@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "19_Apr_test/";
+		case_dir = "25_Apr_MoGr/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -152,8 +152,9 @@ int main(int argc, char* argv[])
 	//~ material_names.push_back("W");
 	//~ material_names.push_back("Pb");
 	//~ material_names.push_back("AC150K");
-	material_names.push_back("GCOP");
-	material_names.push_back("IT180");
+	//~ material_names.push_back("GCOP");
+	//~ material_names.push_back("IT180");
+	//~ material_names.push_back("Mo2C");
 	material_names.push_back("CuCD");
 	material_names.push_back("MoGr");
 
@@ -299,6 +300,7 @@ int main(int argc, char* argv[])
 		//~ myScatter->OutputJawImpact(full_output_dir);
 		//~ myScatter->OutputScatterPlot(full_output_dir);	
 		myScatter->OutputScatteringProcesses(full_output_dir, ii);
+		myScatter->OutputCounter(full_output_dir, ii);
 		
 		if(output_final_bunch){
 			ostringstream fin_output_file;

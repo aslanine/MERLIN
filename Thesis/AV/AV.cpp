@@ -10,6 +10,7 @@
 
 //include relevant MERLIN headers
 #include "AcceleratorModel/ApertureSurvey.h"
+#include "AcceleratorModel/ControlElements/Klystron.h"
 
 #include "BeamDynamics/ParticleTracking/ParticleBunchConstructor.h"
 #include "BeamDynamics/ParticleTracking/ParticleTracker.h"
@@ -23,6 +24,7 @@
 #include "Collimators/ScatteringProcess.h"
 #include "Collimators/ScatteringModel.h"
 #include "Collimators/CollimatorDatabase.h"
+#include "Collimators/Material.h"
 #include "Collimators/MaterialDatabase.h"
 #include "Collimators/ApertureConfiguration.h"
 #include "Collimators/Dustbin.h"
@@ -55,22 +57,16 @@ bool SortComponent(const AcceleratorComponent* first, const AcceleratorComponent
 
 int main(int argc, char* argv[])
 {
-    int seed = (int)time(NULL);                 // seed for random number generators
-    int npart = 1E2;                          // number of particles to track
-    int nturns = 1;                           // number of turns to track
-	bool DoTwiss = 1;							// run twiss and align to beam envelope etc?
+    int seed = (int)time(NULL);     // seed for random number generators
+    int iseed = (int)time(NULL);	// seed for random number generators
+    int npart = 1E4;                // number of particles to track
+    int nturns = 10;                 // number of turns to track
+	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	bool beam1 = 0;
-	
- 
-    if (argc >=2){
-        npart = atoi(argv[1]);
-    }
+	 
+    //~ if (argc >=2){npart = atoi(argv[1]);}
+    if (argc >=3){seed = atoi(argv[2]);}
 
-    if (argc >=3){
-        seed = atoi(argv[2]);
-    }
-
-// Initialise the random number generator with the seed
 	seed =0;
     RandomNG::init(seed);
 
@@ -79,21 +75,16 @@ int main(int argc, char* argv[])
     cout << "npart=" << npart << " nturns=" << nturns << " beam energy = " << beam_energy << endl;
 
 	string start_element;
-	if(beam1)
-	    start_element = "TCP.C6L7.B1";    // HORIZONTAL COLLIMATOR (x)
-	else	
-	    start_element = "TCP.C6R7.B2";    // HORIZONTAL COLLIMATOR (x)
+	if(beam1){	    start_element = "TCP.C6L7.B1"; }  // HORIZONTAL COLLIMATOR (x)
+	else{		    start_element = "TCP.C6R7.B2"; }   // HORIZONTAL COLLIMATOR (x)
 	    
-    //~ string tcp_element = "TCP.C6L7.B1";    // HORIZONTAL COLLIMATOR (x)
-    //~ string start_element = "IP1";    // HORIZONTAL COLLIMATOR (x)
-
     // Define useful variables
     double beam_charge = 1.1e11;
     double normalized_emittance = 3.5e-6;
     double gamma = beam_energy/PhysicalConstants::ProtonMassMeV/PhysicalUnits::MeV;
 	double beta = sqrt(1.0-(1.0/pow(gamma,2)));
 	double emittance = normalized_emittance/(gamma*beta);
-	bool output_fluka_database = 		1;
+	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
 	//~ string directory = "/home/haroon/git/Merlin/HR";				//iiaa1
 		string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
@@ -102,127 +93,160 @@ int main(int argc, char* argv[])
 	//~ string input_dir = "/UserSim/data/6p5TeV_RunII_FlatTop_B2/";
 	string input_dir = "/Thesis/data/AV/";
 	
-	//~ string output_dir = "/test2/UserSim/outputs/HL/";
-	//~ string output_dir = "/Build/UserSim/outputs/6p5TeV_RunII_FlatTop_B2/";
-	//~ string batch_directory="beam2_test_1000/";
-	string output_dir = "/Build/Thesis/outputs/AV/";
-	string batch_directory="10Mar16_Ap_test/";
-
+	string pn_dir, case_dir, bunch_dir, lattice_dir, fluka_dir, dustbin_dir;			
+	
+	string output_dir = "/Build/Thesis/outputs/6p5TeV/";
+	string batch_directory="27APR_test/";
+	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
+	
 	full_output_dir = (directory+output_dir+batch_directory);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
 	
-	string fluka_dir = full_output_dir + "Fluka/";    
+	fluka_dir = full_output_dir + "Fluka/";    
 	mkdir(fluka_dir.c_str(), S_IRWXU);  
+		
+	bool every_bunch			= 1;		// output whole bunch every turn in a single file
+	bool rf_test				= 1;
+	bool output_initial_bunch 	= 1;
+	bool output_final_bunch 	= 1;
+		if (output_initial_bunch || output_final_bunch || every_bunch){
+			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
+		}	
 	
-///////////////////////////////////
-// ACCELERATORMODEL CONSTRUCTION //
-///////////////////////////////////
+	bool output_fluka_database 	= 1;
+	bool output_twiss			= 1;		
+		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
+	
+	bool collimation_on 		= 1;
+		if(collimation_on){
+			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
+		}		
+	bool use_sixtrack_like_scattering = 0;
+	bool scatterplot			= 0;
+	bool jawinelastic			= 0;
+	bool jawimpact				= 0;
+	
+	bool ap_survey				= 0;
+	bool coll_survey			= 0;
+	bool output_particletracks	= 0;
+	
+	bool cleaning				= 0;
+		if(cleaning){
+			collimation_on		= 1;
+			every_bunch			= 0;	
+			output_initial_bunch= 1;
+			output_final_bunch	= 1;
+		}
+	
+	bool symplectic				= 1;
+	bool sixD					= 0;
+	
+/************************************
+*	ACCELERATORMODEL CONSTRUCTION	*
+************************************/
 	cout << "MADInterface" << endl;
 
-    // The MADInterface class takes the MADX TFS table and the beam energy as arguments
-    //    It reads the TFS table, using the keywords to build an AcceleratorModel
-    //~ MADInterface* myMADinterface = new MADInterface( "/home/HR/Downloads/MERLIN/UserSim/data/TFSTable.tfs", beam_energy );
-    //~ MADInterface* myMADinterface = new MADInterface( "/home/HR/Downloads/MERLIN/UserSim/data/HL_Input/twiss_hllhc_b1.tfs", beam_energy );
-    //~ MADInterface* myMADinterface = new MADInterface( "/home/HR/Downloads/MERLIN/UserSim/data/HL_Input/twiss_hllhc_b1_thick.tfs", beam_energy );
-    MADInterface* myMADinterface;
+	MADInterface* myMADinterface;
     if(beam1)
 		myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV.tfs", beam_energy );
     else
-		//~ myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2.tfs", beam_energy );
-		//~ myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2_rf.tfs", beam_energy );
-		myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2_noRF.tfs", beam_energy );
+		myMADinterface = new MADInterface( directory+input_dir+"Twiss_6p5TeV_flat_top_beam2.tfs", beam_energy );
 	cout << "MADInterface Done" << endl;
 
-    // As we are only tracking for 200 turns we can choose to ignore the accelerating cavities
-    // To do this we use the TreatTypeAsDrift() function, which takes an element type string as an argument, this can be done for any element
     //~ myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
 
-    // If, as in the LHC case, the actual lattice apertures do not correspond to a single aperture per lattice element, we must not construct these apertures
-    // Instead we will use an aperture file later to construct the correct apertures
     myMADinterface->ConstructApertures(false);
 
-    // Now we can build an AcceleratorModel using MADInterface
     AcceleratorModel* myAccModel = myMADinterface->ConstructModel();    
+	
+	std::vector<RFStructure*> RFCavities;
+	myAccModel->ExtractTypedElements(RFCavities,"ACS*");
+	Klystron* Kly1 = new Klystron("KLY1",RFCavities);
+	Kly1->SetVoltage(0.0);
+	Kly1->SetPhase(pi/2);    
 
 
-///////////
-// TWISS //
-///////////
+/************
+*	TWISS	*
+************/
 
-
-    int start_element_number_test = FindElementLatticePosition(start_element.c_str(), myAccModel);
+    int start_element_number = myAccModel->FindElementLatticePosition(start_element.c_str());
     
-    cout << "Found start element TCP.C6L7 at element number " << start_element_number_test << endl;
+    cout << "Found start element TCP.C6L7 at element number " << start_element_number << endl;
 
-    // We have an AcceleratorModel, but two further items must be addressed, firstly the collimators, then the apertures
-    // The LatticeFunctionTable is used to calculate the optics of the accelerator lattice, MERLIN does not use the values given in the TFS table
-    LatticeFunctionTable* myTwiss = new LatticeFunctionTable(myAccModel, beam_energy);
-    myTwiss->AddFunction(1,6,3);
+	LatticeFunctionTable* myTwiss = new LatticeFunctionTable(myAccModel, beam_energy);
+	myTwiss->UseDefaultFunctions();
+	myTwiss->AddFunction(1,6,3);
     myTwiss->AddFunction(2,6,3);
     myTwiss->AddFunction(3,6,3);
     myTwiss->AddFunction(4,6,3);
     myTwiss->AddFunction(6,6,3);
-
-    // Next we find the TWISS parameters
-    double bscale1 = 1e-22;
-    //~ double bscale1 = 1e-3;
     
+    double bscale1 = 1e-22;    
     if(DoTwiss){    
 		while(true)
 		{
 		cout << "start while(true) to scale bend path length" << endl;
-			// If we are running a lattice with no RF, the TWISS parameters will not be calculated correctly
-			// This is because some are calculated from using the eigenvalues of the one turn map, which is not complete with RF (i.e. longitudinal motion) switched off
-			// In order to compensate for this we use the ScaleBendPath function which calls a RingDeltaT process and attaches it to the TWISS tracker
-			// RingDeltaT process adjusts the ct and dp values such that the TWISS may be calculated and there are no convergence errors
+			// If we are running a lattice with no RF, the TWISS parameters
+			// will not be calculated correctly. This is because some are
+			// calculated from using the eigenvalues of the one turn map,
+			// which is not complete with RF (i.e. longitudinal motion) 
+			// switched off. In order to compensate for this we use the 
+			// ScaleBendPath function which calls a RingDeltaT process 
+			// and attaches it to the TWISS tracker. RingDeltaT process 
+			// adjusts the ct and dp values such that the TWISS may be 
+			// calculated and there are no convergence errors
 			myTwiss->ScaleBendPathLength(bscale1);
 			myTwiss->Calculate();
 
-			// If Beta_x is a number (as opposed to -nan) then we have calculated the correct TWISS parameters, otherwise the loop keeps running
+			// If Beta_x is a number (as opposed to -nan) then we have 
+			// calculated the correct TWISS parameters, otherwise the loop
+			//  keeps running
 			if(!std::isnan(myTwiss->Value(1,1,1,0))) {break;}
 			bscale1 *= 2;
 			cout << "\n\ttrying bscale = " << bscale1<< endl;
 		}
 	}
 	
-	ostringstream twiss_output_file; 
-    twiss_output_file << (directory+output_dir+"LatticeFunctions.dat");
-    ofstream twiss_output(twiss_output_file.str().c_str());
-	myTwiss->PrintTable(twiss_output);
+	Dispersion* myDispersion = new Dispersion(myAccModel, beam_energy);
+    myDispersion->FindDispersion(start_element_number);
 	
-///////////////////////
-// Collimator set up //
-///////////////////////
+	if (output_twiss){
+		ostringstream twiss_output_file; 
+		twiss_output_file << (lattice_dir+"LatticeFunctions.dat");
+		ofstream twiss_output(twiss_output_file.str().c_str());
+		if(!twiss_output.good()){ std::cerr << "Could not open twiss output file" << std::endl; exit(EXIT_FAILURE); } 
+		myTwiss->PrintTable(twiss_output);
+	}
+	
+	if(sixD)
+	Kly1->SetVoltage(2.0);
+	
+/************************
+*	Collimator set up	*
+************************/
+
 	cout << "Collimator Setup" << endl;   
-    // We must create a new MaterialDatabase, this is essentially a standard dictionary of materials and their properties
-    MaterialDatabase* myMaterialDatabase = new MaterialDatabase();
-    // The collimator file is read by the CollimatorDatabase, which proceeds to set up all collimators
+    
+    MaterialDatabase* myMaterialDatabase = new MaterialDatabase();    
     CollimatorDatabase* collimator_db;
     if(beam1)
 		collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_6p5TeV.txt", myMaterialDatabase,  true);
     else
 		collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_6p5TeV_flat_top_beam2.txt", myMaterialDatabase,  true);
    
-    // Flag to set automatic matching between beam envelope and collimator taper
     collimator_db->MatchBeamEnvelope(true);
-    // Flag to set jaw alignment errors
+    collimator_db->UseMiddleJawHalfGap();
     collimator_db->EnableJawAlignmentErrors(false);
 
-    // If you want to set collimator jaw position or angle errors that should be done as follows
     collimator_db->SetJawPositionError(0.0 * nanometer);
     collimator_db->SetJawAngleError(0.0 * microradian);
-
-    // Now we set the impact parameter, the beam will hit the primary collimator (TCP.C6L7.B1) at injection (in the simulation rather than the machine)
-    // We use 1 micron as the standard impact parameter
     collimator_db->SelectImpactFactor(start_element, 1.0e-6);
-
-    // Flag to use a constant jaw opening using the sigma value from the centre of the jaw in s
-    collimator_db->UseMiddleJawHalfGap();
-
+    
     double impact = 6;
     // Finally we set up the collimator jaws to appropriate sizes
     try{
@@ -231,19 +255,11 @@ int main(int argc, char* argv[])
 		else
         collimator_db->ConfigureCollimators(myAccModel);
     }
-    catch(exception& e){
-        std::cout << "Exception caught: " << e.what() << std::endl;
-        exit(1);
-    }
-    if(std::isnan(impact)){
-        cerr << "Impact is nan" << endl;
-        exit(1);
-    }
+	catch(exception& e){ std::cout << "Exception caught: " << e.what() << std::endl; exit(1); }
+    if(std::isnan(impact)){ cerr << "Impact is nan" << endl; exit(1); }
     cout << "Impact factor number of sigmas: " << impact << endl;
     
-    
-     //~ if(output_fluka_database && seed == 1){
-     if(output_fluka_database){
+    if(output_fluka_database && seed == 1){
 		ostringstream fd_output_file;
 		fd_output_file << (full_output_dir+"fluka_database.txt");
 
@@ -252,89 +268,54 @@ int main(int argc, char* argv[])
 		delete fd_output;
 	}
     delete collimator_db;
-    
-    //~ //CHECK FOR COLLIMATOR APERTURES	
-	//~ vector<Collimator*> TCP;
-	//~ int siz = myAccModel->ExtractTypedElements(TCP, start_element);
 
-	//~ cout << "\n\t Found " << TCP.size() << " Collimators when extracting" << endl;
+/****************************
+*	Aperture Configuration	*
+****************************/
 
-	//~ Aperture *ap = (TCP[0])->GetAperture();
-	//~ if(!ap){cout << "Could not get tcp ap" << endl;	abort();}
-	//~ else{cout << "TCP aperture type = " << ap->GetApertureType() << endl;}
-
-	//~ CollimatorAperture* CollimatorJaw = dynamic_cast<CollimatorAperture*>(ap);
-	//~ if(!CollimatorJaw){cout << "Could not cast" << endl;	abort();}
-
-////////////////////////////
-// Aperture Configuration //
-////////////////////////////
-
-    // The ApertureConfiguration class reads the aperture input file and assigns the appropriate apertures to each element in the lattice
-    // Note that apertures do not necessarily correspond 1:1 with each element
-    // If multiple apertures are defined within the scope (i.e. length) of a single element, an interpolated aperture is assigned to said element
-    // The second argument to this function is the flag AllRectEllipse - if the aperture file is missing the AP_TYPE, set to true
-    //~ ApertureConfiguration* myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV.tfs",1);     
-    ApertureConfiguration* myApertureConfiguration;
+	cout << "Aperture Setup" << endl;   
+	
+	ApertureConfiguration* myApertureConfiguration;
     if(beam1) 
 		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV.tfs",1);   
     else   
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV_beam2_test.tfs",1);      
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV_beam2.tfs",1);      
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
-    
-        
-/****************************
-*	Collimator Survey	*
-****************************/
-	CollimatorSurvey* CollSurvey = new CollimatorSurvey(myAccModel, emittance, emittance, myTwiss); 
-	
+
+	if(ap_survey){
+		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 0);
+	}
+		
+	if(coll_survey){
+		CollimatorSurvey* CollSurvey = new CollimatorSurvey(myAccModel, emittance, emittance, myTwiss); 
 		ostringstream cs_output_file;
 		cs_output_file << full_output_dir << "coll_survey.txt";
 		ofstream* cs_output = new ofstream(cs_output_file.str().c_str());
 		if(!cs_output->good()) { std::cerr << "Could not open collimator survey output" << std::endl; exit(EXIT_FAILURE); }   
 		CollSurvey->Output(cs_output, 20);			
 		delete cs_output;
-		
-	ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.01, 0); 
-	
-// The accelerator lattice, in the form of an AcceleratorModel, is now complete
-// The AcceleratorModel consists of a vector of AcceleratorComponent objects, each with it's own aperture and geometry
-// Each magnet has it's own field, and each collimator has it's own material
+	}
 
-///////////////////
-// BEAM SETTINGS //
-///////////////////
-cout << "BeamSettings" << endl;
-
-    // We need to calculate the dispersion for the BeamData object
-    Dispersion* myDispersion = new Dispersion(myAccModel, beam_energy);
-    int start_element_number = FindElementLatticePosition(start_element.c_str(), myAccModel);
-    myDispersion->FindDispersion(start_element_number);
-
-cout << "Dispersion done" << endl;
+/********************
+*	Beam Settings	*
+********************/
 
     BeamData mybeam;
 
-    // Default values for all members of BeamData are 0.0
-    // Particles are treated as macro particles - this has no bearing on collimation
     mybeam.charge = beam_charge/npart;
     mybeam.p0 = beam_energy;
     mybeam.beta_x = myTwiss->Value(1,1,1,start_element_number)*meter;
     mybeam.beta_y = myTwiss->Value(3,3,2,start_element_number)*meter;
     mybeam.alpha_x = -myTwiss->Value(1,2,1,start_element_number);
     mybeam.alpha_y = -myTwiss->Value(3,4,2,start_element_number);
-    // Minimum and maximum sigma for HEL Halo Distribution
-    mybeam.min_sig_x = 5.5;
-    mybeam.max_sig_x = 5.54;
-    mybeam.min_sig_y = 0;
-    mybeam.max_sig_y = 3;
-    //mybeam.min_sig_z = 0;
-    //mybeam.max_sig_z = 2;
-    //mybeam.min_sig_dp = 0;
-    //mybeam.max_sig_dp = 2;
     
+    // Minimum and maximum sigma for HEL Halo Distribution
+    //~ mybeam.min_sig_x = 5.5;
+    //~ mybeam.max_sig_x = 5.54;
+    //~ mybeam.min_sig_y = 0;
+    //~ mybeam.max_sig_y = 3;
    
     // Dispersion
     mybeam.Dx=myDispersion->Dx;
@@ -342,13 +323,9 @@ cout << "Dispersion done" << endl;
     mybeam.Dxp=myDispersion->Dxp;
     mybeam.Dyp=myDispersion->Dyp;
 
-    // We set the beam emittance such that the bunch (created from this BeamData object later) will impact upon the primary collimator
-    //mybeam.emit_x = impact * impact * emittance * meter;
-    //impact =1;
     mybeam.emit_x = emittance * meter;
     mybeam.emit_y = emittance * meter;
-    //mybeam.emit_y = impact * impact * emittance * meter;
-    //mybeam.sig_z =0;
+
 
     //Beam centroid
     mybeam.x0=myTwiss->Value(1,0,0,start_element_number);
@@ -357,8 +334,6 @@ cout << "Dispersion done" << endl;
     mybeam.yp0=myTwiss->Value(4,0,0,start_element_number);
     mybeam.ct0=myTwiss->Value(5,0,0,start_element_number);
 
-    //mybeam.sig_dp = 0.0;
-    //mybeam.sig_z = 0;
     mybeam.sig_z = ((2.51840894498383E-10 * 299792458)) * meter;
     mybeam.sig_dp =  (1.129E-4);
 
@@ -501,7 +476,7 @@ delete hbunch_output;
     // Where ST = SixTrack like, Adv. = Advanced, SD = Single Diffractive, and MERLIN includes all advanced scattering
 
     // Below we select the simplest case (0); SixTrack like scattering and ionisation
-    bool use_sixtrack_like_scattering = 0;
+
     if(use_sixtrack_like_scattering){
         myScatter->SetScatterType(0);
     }

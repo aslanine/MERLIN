@@ -82,6 +82,7 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 	bool scatter_plot = 0;
 	bool jaw_impact = 0;
 	bool jaw_inelastic = 0;
+	bool select_scatter = 0;
 	
 	// Length of the collimator
 	double coll_length = currentComponent->GetLength();
@@ -93,6 +94,14 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 		for(vector<string>::iterator its = scattermodel->ScatterPlotNames.begin(); its != scattermodel->ScatterPlotNames.end(); ++its){
 			if(ColName == *its){
 				scatter_plot = 1;
+			}
+		}
+	}
+	
+	if(scattermodel->SelectScatter_on){		
+		for(vector<string>::iterator its = scattermodel->SelectScatterNames.begin(); its != scattermodel->SelectScatterNames.end(); ++its){
+			if(ColName == *its){
+				select_scatter = 1;
 			}
 		}
 	}
@@ -150,6 +159,11 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 //Scatter Plot
 		if(scatter_plot && z == 0){
 				scattermodel->ScatterPlot(p, z, ColParProTurn, ColName);
+		}	
+		
+//Select Scatter
+		if(select_scatter && z == 0){
+				scattermodel->SelectScatter(p, z, ColParProTurn, ColName);
 		}	
 			
 		p.x() += step_size * p.xp();
@@ -225,9 +239,12 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 					}
 				}
 				if(jaw_inelastic){scattermodel->JawInelastic(p, z, ColParProTurn, ColName);}
+				if(select_scatter){scattermodel->SelectScatter(p, z, ColParProTurn, ColName);}
 				return true;
 			}
 		}
+		
+		if(select_scatter && (p.type() == 2 || p.type() == 3 || p.type() == 4 )){scattermodel->SelectScatter(p, z, ColParProTurn, ColName);}
 		
 		if(flukaset){ //for point like scattering
 			for(FlukaLossesIterator = FlukaLossesVector.begin(); FlukaLossesIterator != FlukaLossesVector.end(); ++FlukaLossesIterator){					

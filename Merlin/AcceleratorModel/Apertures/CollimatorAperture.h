@@ -2,7 +2,7 @@
 #define _CollimatorAperture_h_
 
 #include "AcceleratorModel/Apertures/SimpleApertures.h"
-#include "Collimators/MaterialDatabase.h"
+//~ #include "Collimators/MaterialDatabase.h"
 #include "Collimators/Material.h"
 #include <iostream>
 
