@@ -7,8 +7,8 @@
 // Copyright: see Merlin/copyright.txt
 //
 // Created:		2014 HR
-// Modified:	
-// Last Edited: 15.12.15 HR
+// Modified:	13.03.16 HR
+// Last Edited: 13.03.16 HR
 // 
 /////////////////////////////////////////////////////////////////////////
 #ifndef HollowELensProcess_h

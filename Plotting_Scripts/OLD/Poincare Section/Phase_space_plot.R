@@ -1,0 +1,306 @@
+#change directory to working directory
+    initial.dir<-getwd()
+    
+   # library(plotmath)
+
+#name of file and title for plot pallete
+	title<-"DCHEL_7TeV"
+	particle_no<-"_nturn=1E3_uptoSextupoles_5-6sig"
+	type<-"_xx'_@HEL"
+	date<-"_23Apr15"	
+	ext<-".png"
+
+	name<-paste(title, type, particle_no, date, ext, sep='')	
+	
+#Open output file
+    png(
+      paste(name),
+      width     = 10,
+      height    = 10,
+      units     = "cm",
+      res       = 720,
+      pointsize = 1
+    )
+
+#Open input file(s)
+
+	nofiles<-10
+
+#Normalisation
+#end of Drift_362 MAD
+#	betax <- 151.76264494060504
+#	betay <- 82.073881143760559
+#	alphax <-2.0613964076285995
+#	alphay <- -1.1446724770558507
+#	mux <- 47.339711836339916
+#	muy <- 43.438166086050998
+
+#end of TCP.C6L7.B1 MAD
+	betax <- 149.30142137927518
+	betay <- 83.457621657094819 
+	alphax <- 2.0406428612545024
+	alphay <- -1.1615617118345680 
+	
+	#end of HEL Merlin
+	betax <- 181.754
+	betay <- 180.377
+	alphax <- 0.315953
+	alphay <- -0.963648
+	
+	#start of HEL Merlin
+	betax <- 183.033
+	betay <- 176.565
+	alphax <- 0.328056
+	alphay <- -0.942263
+	
+# ? 
+#	betax <- 157.6555124350774
+#	betay <- 78.94086683336374
+#	alphax <- 2.110288802774761
+#	alphay <- -1.105681606602323	
+
+#Merlin start? of Drift 362
+#	betax <- 151.8145003937005
+#	betay <- 82.09195793285879
+#	alphax <-2.061862655347279
+#	alphay <- -1.14509775017754
+
+#Merlin Drift 362 - 2 elements
+#	betax <- 174.193188445474
+#	betay <- 70.94423599481
+#	alphax <- 2.241731202847753
+#	alphay <- -0.9986949312549456
+
+#Merlin Drift 362 + 2 elements
+#	betax <- 149.3527176451936
+#	betay <- 83.47621081284831
+#	alphax <- 2.041108592164094
+#	alphay <- -1.16199038313833
+
+#Merlin Drift 362 + 3 elements
+#	betax <- 143.7054101935269
+#	betay <- 86.78496648664434
+#	alphax <- 1.992682444736611
+#	alphay <- -1.201406526713547
+
+	sqrtbetax <- sqrt(betax)
+    
+#Normalised coordinates	
+	x<-data.frame()
+	xp<-data.frame()
+#~ 	y<-data.frame()
+#~ 	yp<-data.frame()
+#~ 	ct<-data.frame()
+#~ 	dp<-data.frame()
+#~ 	delta<-data.frame()
+#~ 	rad<-data.frame()
+
+	xin<-0
+	xpin<-0
+#~ 	yin<-0		
+#~ 	ypin<-0
+#~ 	ctin<-0
+#~ 	dpin<-0
+#~ 	radin<-0
+	
+	#Accessor is [row,col]
+
+	for(i in 1:nofiles){
+		infile<-read.table(paste("dcNode_0_p",i,".txt", sep=""))
+		
+		xnam <- paste("x", i, sep="")
+		xpnam <- paste("xp", i, sep="")
+#~ 		ynam <- paste("y", i, sep="")
+#~ 		ypnam <- paste("yp", i, sep="")
+#~ 		ctnam <- paste("ct", i, sep="")
+#~ 		dpnam <- paste("dp", i, sep="")
+#~ 		radnam <- paste("rad", i, sep="")		
+		
+		xin<-0
+		xin<-0
+#~ 		yin<-0		
+#~ 		ypin<-0
+#~ 		ctin<-0
+#~ 		dpin<-0
+#~ 		radin<-0
+
+#~ 		xin<-(as.numeric(as.character(infile$V1)))
+ 		xpin<-(as.numeric(as.character(infile$V2)))
+		xin<-(as.numeric(as.character(infile$V1)))
+#~		xpin<-(xin * alphax) + (as.numeric(as.character(infile$V2)) * betax)
+#~ 		yin<-as.numeric(as.character(infile$V3))
+#~ 		ypin<-as.numeric(as.character(infile$V4))
+		#ctin<-as.numeric(as.character(infile$V5))
+		#dpin<-as.numeric(as.character(infile$V6))
+#~ 		radin<-((xin*xin)+(xpin*xpin))
+		
+		assign (xnam,cbind(xin))
+		assign (xpnam,cbind(xpin))
+#~ 		assign (ynam,cbind(yin))
+#~ 		assign (ypnam,cbind(ypin))
+		#assign (ctnam,cbind(ctin))
+		#assign (dpnam,cbind(dpin))
+#~ 		assign (radnam,cbind(radin))
+			
+	}
+	
+#5 files
+	
+#~ 	x <- cbind(x1,x2,x3,x4,x5)
+#~ 	xp <- cbind(xp1,xp2,xp3,xp4,xp5)
+#~ 	y <- cbind(y1,y2,y3,y4,y5)
+#~ 	yp <- cbind(yp1,yp2,yp3,yp4,yp5)
+	#ct <- cbind(ct1,ct2,ct3,ct4,ct5)
+	#dp <- cbind(dp1,dp2,dp3,dp4,dp5)
+#~ 	rad <- cbind(rad1,rad2,rad3,rad4,rad5)	
+	
+#10 files
+
+	x <- cbind(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10)
+	xp <- cbind(xp1,xp2,xp3,xp4,xp5,xp6,xp7,xp8,xp9,xp10)
+#~ 	y <- cbind(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10)
+#~ 	yp <- cbind(yp1,yp2,yp3,yp4,yp5,yp6,yp7,yp8,yp9,yp10)
+	#ct <- cbind(ct1,ct2,ct3,ct4,ct5)
+	#dp <- cbind(dp1,dp2,dp3,dp4,dp5)
+#	rad <- cbind(rad1,rad2,rad3,rad4,rad5,rad6,rad7,rad8,rad9,rad10,rad11,rad12)	
+	
+#~ 	average_radius <-colMeans(rad)	
+#~ 	average_radius
+	
+	turn<-nrow(x)
+	turn
+	
+#~ 	turns<-cbind(seq(1,turn, by = 1))
+	
+#~ 	for (j in 1:nofiles){
+#~ 	
+#~ 		for (i in 0:turn){			
+#~ 				delta[i,j] <- sqrt((rad[i,j] - average_radius[j]) *(rad[i,j] - average_radius[j]))
+#~ 		}
+#~ 	}
+	
+	
+	colfunc1 <- colorRampPalette(c("black", "orange"))
+	colfunc2 <- colorRampPalette(c("black", "blue"))
+	colfunc3 <- colorRampPalette(c("black", "red"))
+	colfunc4 <- colorRampPalette(c("black", "green4"))
+	colfunc5 <- colorRampPalette(c("black", "purple"))
+	colfunc6 <- colorRampPalette(c("black", "chocolate1"))
+	colfunc7 <- colorRampPalette(c("black", "darkcyan"))
+	colfunc8 <- colorRampPalette(c("black", "tomato3"))
+	colfunc9 <- colorRampPalette(c("black", "palegreen4"))
+	colfunc10 <- colorRampPalette(c("black", "orchid4"))
+	colfunc11 <- colorRampPalette(c("black", "orangered"))
+	colfunc12 <- colorRampPalette(c("black", "mediumblue"))
+	
+	
+	#colfunc1 <- colorRampPalette(c("gray80", "black"))
+	#colfunc2 <- colorRampPalette(c("firebrick1", "darkslateblue"))
+	#colfunc3 <- colorRampPalette(c("orangered", "midnightblue"))
+	#colfunc4 <- colorRampPalette(c("red", "navy"))
+	#colfunc5 <- colorRampPalette(c("darkred", "royalblue4"))   
+    
+    col1 <- "gray85"
+	col2 <- "gray70"
+	col3 <- "gray50"
+#~ 	col4 <- "darkorange"
+#~ 	col5 <- "navy"
+#~ 	col6 <- "forestgreen"
+#~ 	col7 <- "purple"
+#~ 	col8 <- "seagreen1"
+#~ 	col9 <- "blue"
+#~ 	col10 <- "dodgerblue2"
+#~ 	col11 <- "orangered"
+#~ 	col12 <- "mediumblue" 
+	
+#~ 	    col1 <- "orange"
+#~ 	col2 <- "blue"
+#~ 	col3 <- "red"
+	col4 <- "green4"
+	col5 <- "purple"
+	col6 <- "chocolate1"
+	col7 <- "darkcyan"
+	col8 <- "tomato3"
+	col9 <- "palegreen4"
+	col10 <- "orchid4"
+#~ 	col11 <- "orangered"
+#~ 	col12 <- "mediumblue" 
+	
+	
+	allcolours <- c(col1,col2,col3,col4,col5,col6,col7,col8,col9,col10)
+	
+	multi <- 2
+    
+#Plot
+
+#This controls plot pallete layout: 2 rows, 3 cols, margins of left, right, top, bottom
+    #par(mfrow=c(2,3), oma=c(0,0,4,0))
+    par(mfrow=c(1,1), oma=c(0,0,0,0))
+#X,Y
+    #plot(x, y, type = "p", main=" x, y", xlab="x", ylab="y", pch ="o", col = colfunc(turn))
+#Px,Py
+    #plot(xp, yp, type = "p", main=" x', y'", xlab="x'", ylab="x'", pch ="o", col = colfunc(turn))
+#X,Px
+#~     plot(x[,nofiles], xp[,nofiles], type = "p", main="x, x'", xlab="x", ylab="x'", pch ='.', col = colfunc12(turn))
+  
+    
+    plot(x[,10], xp[,10], type = "p", cex.lab=multi, cex.axis = multi, xlab="x", ylab="x'", pch ='.', col = col10)
+#~     plot(x[,6], xp[,6], type = "p", cex.lab=multi, cex.axis = multi, xlab="x", ylab="x'", pch ='.', col = col6)
+
+#~     plot(x[,10], xp[,10], type = "p", cex.lab=multi, cex.axis = multi, xlab="x", ylab="x'", xlim=c(-0.004, 0), ylim=c(0, 0.004), pch ='.', col = col10)
+ 
+	points(x[,1], xp[,1], type = "p", pch = '.', col = col1)     		
+	points(x[,2], xp[,2], type = "p", pch = '.', col = col2)
+	points(x[,3], xp[,3], type = "p", pch = '.', col = col3)
+	points(x[,4], xp[,4], type = "p", pch = '.', col = col4)
+	points(x[,5], xp[,5], type = "p", pch = '.', col = col5)     		
+	points(x[,6], xp[,6], type = "p", pch = '.', col = col6)
+	points(x[,7], xp[,7], type = "p", pch = '.', col = col7)
+	points(x[,8], xp[,8], type = "p", pch = '.', col = col8)
+	points(x[,9], xp[,9], type = "p", pch = '.', col = col9) 
+#~ 	
+	#bottom axis
+#~ 	axis(1, at=seq(-0.004, 0.0, 0.001), labels = TRUE, tick=TRUE)
+	#right axis
+#~ 	axis(4, at=seq(-0.004, 0.0, 0.001), labels = TRUE)
+#~ 	title(main="x, x'", xlab="x", ylab="x'")
+#~ 	
+	legend("bottomleft", col=allcolours, lty=1, lwd=2, legend =c("5.1","5.2","5.3","5.4","5.5","5.6","5.7","5.8","5.9","6"), cex = 1.5) 	
+#~ 	abline(h=0.00024, lwd=0.5, col="grey")
+#~ 	abline(v=0.016, lwd=0.5, col="grey")
+	
+#~ 	points(x[,1], xp[,1], type = "p", pch = '.', col = colfunc1(turn))     		
+#~ 	points(x[,2], xp[,2], type = "p", pch = '.', col = colfunc2(turn))
+#~ 	points(x[,3], xp[,3], type = "p", pch = '.', col = colfunc3(turn))
+#~ 	points(x[,4], xp[,4], type = "p", pch = '.', col = colfunc4(turn))
+#~ 	points(x[,5], xp[,5], type = "p", pch = '.', col = colfunc5(turn))     		
+#~ 	points(x[,6], xp[,6], type = "p", pch = '.', col = colfunc6(turn))
+#~ 	points(x[,7], xp[,7], type = "p", pch = '.', col = colfunc7(turn))
+#~ 	points(x[,8], xp[,8], type = "p", pch = '.', col = colfunc8(turn))
+#~ 	points(x[,9], xp[,9], type = "p", pch = '.', col = colfunc9(turn))
+#~ 	points(x[,10], xp[,10], type = "p", pch = '.', col = colfunc10(turn))
+#~ 	points(x[,11], xp[,11], type = "p", pch = '.', col = colfunc11(turn))
+    
+    #plot(turns, rad, type = "l", main="error", xlab="turn", ylab=expression(paste("x^2 + x'^2")), pch ='.', col = "black")
+#~     plot(turns, delta[,5], type = "p", main="Deviation from mean", xlab="turn", ylab=expression(paste("|(x^2 + x'^2)-mean|")), pch ='.', col = "purple")
+#~     points(turns, delta[,1],  type = "p", pch = '.', col = "orange")     		
+#~ 	points(turns, delta[,2],  type = "p", pch = '.', col = "blue")
+#~ 	points(turns, delta[,3],  type = "p", pch = '.', col = "red")
+#~ 	points(turns, delta[,4],  type = "p", pch = '.', col = "green4")
+	#points(turns, delta[,5],  type = "p", pch = '.', col = "purple")     		
+	#points(turns, delta[,6],  type = "p", pch = '.', col = "chocolate1")
+	#points(turns, delta[,7],  type = "p", pch = '.', col = "darkcyan")
+	#points(turns, delta[,8],  type = "p", pch = '.', col = "tomato3")
+	#points(turns, delta[,9],  type = "p", pch = '.', col = "palegreen4")     		
+	#points(turns, delta[,10],  type = "p", pch = '.', col = "orchid4")
+	#points(turns, delta[,11],  type = "p", pch = '.', col = "orangered")
+	
+    #plot(x, xp, type = "p", main="x, x'", xlab=expression(paste(frac(x,sqrt(beta)))), ylab=expression(paste("x'",sqrt(beta))), pch =".", col = colfunc(turn))
+#Y,Py
+    #plot(y, yp, type = "p", main="y, y'", xlab="y", ylab="y'", pch ="o", col = colfunc(turn))
+#ct,dp
+    #plot(ct, dp, type = "p", main="ct, dp", xlab="ct", ylab="dp", pch ="o", col = colfunc(turn))
+
+#Title for plot pallete
+#~ title(paste(name), outer=TRUE)
+

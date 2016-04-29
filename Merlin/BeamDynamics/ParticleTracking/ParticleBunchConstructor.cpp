@@ -507,11 +507,15 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			
 			p.x()	= RandomGauss(beamdat.emit_x,cutoffs.x());
 			p.xp()	= RandomGauss(beamdat.emit_x,cutoffs.xp());
+			//~ p.xp()	= 0;
 			p.y()	= RandomGauss(beamdat.emit_y,cutoffs.y());
 			p.yp()	= RandomGauss(beamdat.emit_y,cutoffs.yp());
+			//~ p.yp()	= 0;
 			//~ p.dp()	= 0;
-			p.ct()	= RandomGauss(1E-1, 15);
-			p.dp()	= RandomNG::uniform(-10*beamdat.sig_dp,10*beamdat.sig_dp);
+			//~ p.ct()	= RandomGauss(1E-1, 15);
+			//~ p.dp()	= RandomNG::uniform(-10*beamdat.sig_dp,10*beamdat.sig_dp);
+			p.ct()	= RandomNG::uniform(-7*beamdat.sig_z,7*beamdat.sig_z);
+			p.dp()	= RandomNG::uniform(-50*beamdat.sig_dp,50*beamdat.sig_dp);
 			//~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);
 
 			M.Apply(p);
@@ -647,12 +651,18 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
         double minx(0.), maxx(0.), minz(0.), maxz(0.), mindp(0.), maxdp(0.);
        
         if( isnan(beamdat.min_sig_x) || isnan(beamdat.max_sig_x) || isnan(beamdat.min_sig_y) || isnan(beamdat.max_sig_y) ){       
-            minx = 5.5;
-            maxx = 5.54;
+            //~ minx = 5.5;
+            //~ maxx = 5.54;
+            //~ minz = 0;
+            //~ maxz = 2;
+            //~ mindp = 0;
+            //~ maxdp = 2;
+            minx = 6;
+            maxx = 6.00156;
             minz = 0;
-            maxz = 2;
+            maxz = 0;
             mindp = 0;
-            maxdp = 2;
+            maxdp = 0;
             //cout << "\n\tParticleBunchConstructor: HorizontalHaloDistributionWithLimits: no min_sig_x etc set, using default values " << endl;       
         }
         else{
@@ -696,10 +706,10 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
            
            
             R=sqrt(-2.0*log(u1));
-            p.dp() =R*cos(u)* (1.129E-4);
-            p.ct() = R*sin(u)*((2.51840894498383E-10 * 299792458))  ;
-
-           
+            //~ p.dp() = R*cos(u)* (1.129E-4);
+            //~ p.ct() = R*sin(u)*((2.51840894498383E-10 * 299792458))  ;
+            p.dp() = 0;
+            p.ct() = 0;           
        
             M.Apply(p);
             p+=pbunch.front(); // add centroid
@@ -857,7 +867,7 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 			p.x() 	= 0.;
 			p.xp() 	= 0.;  
 
-			M.Apply(p);
+			//~ M.Apply(p);
 			p+=pbunch.front(); // add centroid
 			p.type() = -1.0;
 			p.location() = -1.0;

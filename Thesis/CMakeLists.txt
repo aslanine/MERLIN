@@ -46,6 +46,8 @@ thesis_run(HulaHEL HulaHEL HulaHEL.cpp)
 thesis_run(HulaHELSplit HulaHELSplit HulaHELSplit.cpp)
 thesis_run(MaterialTest MaterialTest MaterialTest.cpp)
 thesis_run(TevHELSplit TevHELSplit TevHELSplit.cpp)
+thesis_run(1cm 1cm 1cm.cpp)
+thesis_run(7TeV_nominal_B1 7TeV_nominal_B1 7TeV_nominal_B1.cpp)
 
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
 INCLUDE(Dart)

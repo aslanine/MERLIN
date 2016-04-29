@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #include "Collimators/MaterialDatabase.h"
-#include "Collimators/MaterialMixture.h"
+//~ #include "Collimators/MaterialMixture.h"
 #include "Collimators/CompositeMaterial.h"
 
 #include "NumericalUtils/PhysicalUnits.h"
@@ -19,7 +19,7 @@ MaterialDatabase::MaterialDatabase()
 Here we create new materials, add their properties, then push them into a map for manipulation.
 References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties/
 */
-
+	
 	// Use SixTrack reference cross sections for composites, or calculate them
 	// using a weighted average of constituent cross sections
 	bool ST_CS = 0;
@@ -61,10 +61,10 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	//~ B->SetSixtrackRutherfordCrossSection(B->CalculateSixtrackRutherfordCrossSection());
 	B->SetSixtrackRutherfordCrossSection(0.000054);
 	B->SetSixtrackdEdx(B->CalculateSixtrackdEdx());
-	B->SetConductivity(-1);
+	B->SetConductivity(0);
 	B->SetRadiationLength(B->CalculateRadiationLength());
 	B->SetDensity(2370);
-	B->SetSixtrackNuclearSlope(-1);
+	B->SetSixtrackNuclearSlope(B->CalculateSixtrackNuclearSlope());
 	B->SetMeanExcitationEnergy(76.0*eV);
 	B->SetElectronDensity(B->CalculateElectronDensity());
 	B->SetPlasmaEnergy(B->CalculatePlasmaEnergy());
@@ -93,6 +93,27 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 //	C->SetElectronCriticalEnergy(81.74*MeV);
 	C->SetPlasmaEnergy(C->CalculatePlasmaEnergy());
 	db.insert(pair<string,Material*>(C->GetSymbol(),C));
+	
+	/**
+	 * Carbon (C2)
+	 **/
+	Material* C2 = new Material();
+	C2->SetAtomicNumber(6);
+	C2->SetAtomicMass(12.0107);
+	C2->SetName("Carbon2");
+	C2->SetSymbol("C2");
+	C2->SetSixtrackTotalNucleusCrossSection(0.337);
+	C2->SetSixtrackInelasticNucleusCrossSection(0.232);
+	C2->SetSixtrackRutherfordCrossSection(0.000077);
+	C2->SetSixtrackdEdx(0.68);
+	C2->SetConductivity(7.14E4);
+	C2->SetRadiationLength(424900);
+	C2->SetDensity(4520);
+	C2->SetSixtrackNuclearSlope(70.0);
+	C2->SetMeanExcitationEnergy(78.0*eV);
+	C2->SetElectronDensity(C->CalculateElectronDensity());
+	C2->SetPlasmaEnergy(C->CalculatePlasmaEnergy());
+	db.insert(pair<string,Material*>(C2->GetSymbol(),C2));
 
 	//Oxygen (note the density, etc is for liquid)!
 	//Some of these parameters are rather invalid
@@ -217,7 +238,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	Cu->SetConductivity(5.98E7);
 	Cu->SetRadiationLength(Cu->CalculateRadiationLength());
 	Cu->SetDensity(8960);
-	Cu->SetSixtrackNuclearSlope(2209.5);
+	Cu->SetSixtrackNuclearSlope(217.8);
 	Cu->SetMeanExcitationEnergy(322.0*eV);
 	Cu->SetElectronDensity(Cu->CalculateElectronDensity());
 	Cu->SetPlasmaEnergy(Cu->CalculatePlasmaEnergy());
@@ -310,19 +331,11 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	Pb->SetPlasmaEnergy(Pb->CalculatePlasmaEnergy());
 	db.insert(pair<string,Material*>(Pb->GetSymbol(),Pb));
 
-	/*
-	* Other assorted materials
-	*/
-
-	//From H.Day thesis + CERN-ATS-2011-224
-	//CuDiamond Conductivity = 1.25E7	density ~5400
-	//MoDiamond Conductivity = 5.5E6	density ~6900
-
-	/*
-	* AC150K
+	/**
+	* AC150K (CFC)
 	* LHC TCP/TCSG collimator material
 	* Graphite but different density etc.
-	*/
+	**/
 	Material* AC150K = new Material();
 	AC150K->SetAtomicNumber(6);
 	AC150K->SetAtomicMass(12.0107);
@@ -332,14 +345,12 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	AC150K->SetSixtrackInelasticNucleusCrossSection(0.231);
 	AC150K->SetSixtrackRutherfordCrossSection(0.000076);
 	AC150K->SetSixtrackdEdx(0.68);		//Needs to be scaled
-	//~ AC150K->SetConductivity(7.14E4);	//This is just the same value as graphite - check
 	AC150K->SetConductivity(0.14E6);	// HR update
 	AC150K->SetRadiationLength(AC150K->CalculateRadiationLength());
 	AC150K->SetDensity(1650);		//This is different - was 2210
 	AC150K->SetSixtrackNuclearSlope(70.0);
 	AC150K->SetMeanExcitationEnergy(78.0*eV);
 	AC150K->SetElectronDensity(AC150K->CalculateElectronDensity());
-//	AC150K->SetElectronCriticalEnergy(81.74*MeV);
 	AC150K->SetPlasmaEnergy(AC150K->CalculatePlasmaEnergy());
 	db.insert(pair<string,Material*>(AC150K->GetSymbol(),AC150K));
 
@@ -348,7 +359,6 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	* Tungsten alloy with Nickel and Copper
 	* Updated using N. Mariani PhD thesis CERN-THESIS-2014-363
 	**/
-	//~ MaterialMixture* IT180 = new MaterialMixture();
 	CompositeMaterial* IT180 = new CompositeMaterial();
 	IT180->SetName("INERMET180");
 	IT180->SetSymbol("IT180");
@@ -440,15 +450,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	}
 	
 	Glidcop->VerifyMaterial();
-	Glidcop->VerifyMaterial();
 	db.insert(pair<string,Material*>(Glidcop->GetSymbol(),Glidcop));
-	
-	// Test Mixture function
-	vector< pair<string,double> > els = Glidcop->GetConstituentElements();
-	vector< pair<string,double> >::iterator el_it;
-	for(el_it = els.begin(); el_it != els.end(); ++el_it){
-		std::cout << "MaterialDatabase::Mixture::Glidcop: Element Symbol = " << el_it->first << ", mass fraction = " << el_it->second << endl;
-	}
 	
 	/**
 	* New LHC TCS material
@@ -470,6 +472,30 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	//~ db.insert(pair<string,Material*>(MoGr->GetSymbol(),MoGr));
 	
 	/**
+	 * Molybdenum Carbide made using C2
+	 * 2/3 Mo, 1/3 C by number fraction
+	 **/
+	 
+	CompositeMaterial* Mo2C = new CompositeMaterial();
+	Mo2C->SetName("MolybdenumCarbide");
+	Mo2C->SetSymbol("Mo2C");
+	Mo2C->AddMaterialByNumberFraction(Mo, 0.667);
+	Mo2C->AddMaterialByNumberFraction(C2, 0.333);
+	Mo2C->SetDensity(8400);
+	Mo2C->SetConductivity(1.4E6);
+	Mo2C->Assemble();
+	
+	if(ST_CS){
+		Mo2C->SetSixtrackTotalNucleusCrossSection(1.255);
+		Mo2C->SetSixtrackInelasticNucleusCrossSection(0.759);
+		Mo2C->SetSixtrackRutherfordCrossSection(0.001475);
+		//Mo2C->SetSixtrackNuclearSlope(218.9);
+	}
+	Mo2C->VerifyMaterial();
+	db.insert(pair<string,Material*>(Mo2C->GetSymbol(),Mo2C));
+	
+	
+	/**
 	 * Updated molybdenum-carbide-graphite
 	 * density 2.5
 	 * Mass fractions: 12.8917% Mo, 87.1083% C
@@ -488,8 +514,19 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	// MoGr->AddMaterialByNumberFraction(C,(1 - Mo_tot));
 	//MoGr->AddMaterialByNumberFraction(Mo,0.018);
 	//MoGr->AddMaterialByNumberFraction(C,0.982);
-	MoGr->AddMaterialByNumberFraction(Mo,0.01698);
-	MoGr->AddMaterialByNumberFraction(C,0.98302);
+	
+	// test with pure carbon
+	//~ MoGr->AddMaterialByNumberFraction(C2,(0.333*0.01698));	
+	//~ MoGr->AddMaterialByNumberFraction(Mo,(0.667*0.01698));
+	//~ MoGr->AddMaterialByNumberFraction(C,0.98302);
+	
+	// test with Mo2C
+	MoGr->AddMaterialByNumberFraction(Mo2C,0.027);
+	MoGr->AddMaterialByNumberFraction(C,0.973);
+	
+	// use	
+	//~ MoGr->AddMaterialByNumberFraction(Mo,0.01698);
+	//~ MoGr->AddMaterialByNumberFraction(C,0.98302);
 	
 	// mass frac
 	//double Mo_M = 0.941 * Mo->GetAtomicNumber();
@@ -497,11 +534,8 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	//~ double Mo_tot = 0.128917 * 0.941;
 	//~ MoGr->AddMaterialByMassFraction(Mo,Mo_tot);
 	//~ MoGr->AddMaterialByMassFraction(C,(1 - Mo_tot));
-		
-	cout << "\n\n\n\n\n\t\t\tMoGr Test, Mo = " << Mo_tot << "%, C = " << 1-Mo_tot << endl;
-	
+			
 	MoGr->SetDensity(2500);
-	//~ MoGr->SetDensity(5300);
 	MoGr->SetConductivity(1E6);
 	MoGr->Assemble();
 	
@@ -509,6 +543,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 		MoGr->SetSixtrackTotalNucleusCrossSection(0.362);
 		MoGr->SetSixtrackInelasticNucleusCrossSection(0.247);
 		MoGr->SetSixtrackRutherfordCrossSection(0.000094);
+		//MoGr->SetSixtrackNuclearSlope(79.69);
 	}
 	
 	MoGr->VerifyMaterial();
@@ -572,10 +607,7 @@ References: Particle data group: http://pdg.lbl.gov/2013/AtomicNuclearProperties
 	
 	CuCD->VerifyMaterial();
 	db.insert(pair<string,Material*>(CuCD->GetSymbol(),CuCD));
-	
-	
-	//~ DumpMaterialProperties();
-	
+		
 }
 
 //Try and find the material we want
