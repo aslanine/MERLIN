@@ -48,7 +48,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
-    int npart 			= 6.4E6;	// number of halo particles to track
+    int npart 			= 1E7;	// number of halo particles to track
     int nleft = npart;
        
     if (argc >=2){npart = atoi(argv[1]);}
@@ -63,9 +63,9 @@ int main(int argc, char* argv[])
     double beam_charge = 1.1e11;
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
-	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
 	
 	string pn_dir, case_dir, bunch_dir, dustbin_dir, mat_dir, hist_dir;
 		
@@ -78,13 +78,13 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "28APR_M_2/";
+		case_dir = "29APR_M/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
 	bool output_initial_bunch 	= 0;
-	bool output_final_bunch 	= 1;		
+	bool output_final_bunch 	= 0;		
 		if (output_initial_bunch || output_final_bunch){
 			//~ bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 
 		}		
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 	
 	bool selectscatter 	= 1;
 	bool jawimpact 		= 0;
-	bool scatterplot 	= 1;
+	bool scatterplot 	= 0;
 	
 /************************
 *	HISTOGRAM STUFF		*

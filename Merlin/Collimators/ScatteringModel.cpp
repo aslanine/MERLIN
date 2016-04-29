@@ -805,19 +805,18 @@ void ScatteringModel::OutputCounter(string directory, int seed){
 void ScatteringModel::OutputSelectScatterHistogram(string directory, int n, int nbins, int norm){
 	
 	for(vector<string>::iterator name = SelectScatterNames.begin(); name != SelectScatterNames.end(); ++name){
-		double bob = 5E-6;
-		const double bin_min_x = -bob, bin_max_x = bob;
+		double bob = 1E-4;
+		const double bin_min_x = -(5*bob), bin_max_x = (5*bob);
 		const double x_bw = (bin_max_x - bin_min_x) / nbins;
 		
 		const double bin_min_xp = -bob, bin_max_xp = bob;	
 		const double xp_bw = (bin_max_xp - bin_min_xp) / nbins;
 		
-		const double bin_min_y = -bob, bin_max_y = bob;	
+		const double bin_min_y = -(5*bob), bin_max_y = (5*bob);	
 		const double y_bw = (bin_max_y - bin_min_y) / nbins;
 		
 		const double bin_min_yp = -bob, bin_max_yp = bob;		
-		const double yp_bw = (bin_max_yp - bin_min_yp) / nbins;
-		
+		const double yp_bw = (bin_max_yp - bin_min_yp) / nbins;		
 		
 		double bin_min_dp = 0, bin_max_dp = 2E-5;
 		if(n==4){bin_max_dp = 0.15;}
