@@ -63,9 +63,9 @@ int main(int argc, char* argv[])
     double beam_charge = 1.1e11;
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
-	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
 	
 	string pn_dir, case_dir, bunch_dir, dustbin_dir, mat_dir, hist_dir;
 		
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "29APR_M/";
+		case_dir = "29APR_M_STS_el/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
 		if(collimation_on){
 			//~ dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
 		}
-	bool use_sixtrack_like_scattering = 0;
+	bool use_sixtrack_like_scattering = 1;
 	bool cut_distn				= 0;
 
 	bool symplectic = 1;
@@ -298,6 +298,7 @@ int main(int argc, char* argv[])
 			if(hist){
 				myScatter->OutputSelectScatterHistogram(mat_dir, 1, nbins, 1);
 				myScatter->OutputSelectScatterHistogram(mat_dir, 2, nbins, 1);
+				myScatter->OutputSelectScatterHistogram(mat_dir, 3, nbins, 1);
 				myScatter->OutputSelectScatterHistogram(mat_dir, 4, nbins, 1);
 						}
 			myScatter->OutputSelectScatter(mat_dir);

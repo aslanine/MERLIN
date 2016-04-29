@@ -854,8 +854,8 @@ void ScatteringModel::OutputSelectScatterHistogram(string directory, int n, int 
 		{
 			cut_type = (*its)->type;
 			// For elastic
-			if(n==3){n=2;}
-			if ((*its)->type == (2||3)){cut_type = 2;}
+			//~ if(n==3){n=2;}
+			//~ if ((*its)->type == (2||3)){cut_type = 2;}
 			
 			if (cut_type == n){
 				int bin_x = (((*its)->x - bin_min_x) / (bin_max_x-bin_min_x) * (nbins)) +1; // +1 because bin zero for outliers

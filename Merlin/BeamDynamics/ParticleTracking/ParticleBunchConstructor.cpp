@@ -860,6 +860,7 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 	case pencilDistribution:
 	{
 		for(i=1; i<np;) {
+			//~ p.y()	= 0.;
 			p.y()	= 0.;
 			p.yp()	= 0.;
 			p.dp()	= 0.;
