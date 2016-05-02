@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "29APR_M_STS_el/";
+		case_dir = "ST_S/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 
 	bool symplectic = 1;
-	bool composite	= 1;
+	bool composite	= 0;
 	bool hist 		= 1;
 	
 	bool selectscatter 	= 1;
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 	const double bin_min_dp = 0, bin_max_dp = 2E-5;
 	const double dp_bw = (bin_max_dp - bin_min_dp) / nbins;
 	
-	const double bin_min_t = -1E9, bin_max_t = 0;
+	const double bin_min_t = -1E10, bin_max_t = 0;
 	const double t_bw = (bin_max_t - bin_min_t) / nbins;
 	
 	const double bin_min_th = 0, bin_max_th = 3E-6;

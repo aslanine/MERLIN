@@ -142,7 +142,7 @@ void ElasticpN::Configure(Material* matin, CrossSections* CSin){
 bool ElasticpN::Scatter(PSvector& p, double E){	
 	double TargetMass = AtomicMassUnit*mat->GetAtomicMass();
 	
-	ScatterStuff(p, t, TargetMass, E0);	
+	ScatterStuff(p, t, TargetMass, E0);
 	p.type() = 2;	
 	
 	double E3 = (1 + p.dp()) * E0;
