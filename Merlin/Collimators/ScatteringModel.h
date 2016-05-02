@@ -325,7 +325,7 @@ public:
 	* @param[in] maximum bin.
 	* @param[in] normalisation factor.
 	*/
-	void OutputSelectScatterHistogram(string directory, int n, int nbins, int norm=1);
+	//~ void OutputSelectScatterHistogram(string directory, int n, int nbins, int norm=1);
 
 	/**
 	* Used to configure individual ScatteringProcesses for a given material.
