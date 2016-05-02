@@ -119,7 +119,7 @@ void SixTrackElasticpn::Configure(Material* matin, CrossSections* CSin){
 }	
 bool SixTrackElasticpn::Scatter(PSvector& p, double E){	
 	double com_sqd = 2 * ProtonMassMeV * MeV * E;	//ecmsq in SixTrack
-	b_pp = 8.5 + 1.086 * log(sqrt(com_sqd)) ; // slope given on GeV units
+	b_pp = 8.5 + 1.086 * log(sqrt(com_sqd)) ; // slope given in GeV
 	t = -log(RandomNG::uniform(0,1))/b_pp;
 	
 	ScatterStuff(p, t, E0);
@@ -136,12 +136,12 @@ void ElasticpN::Configure(Material* matin, CrossSections* CSin){
 	sigma = cs->Get_sig_pN_el();	
 	double b_N_ref = matin->GetSixtrackNuclearSlope();	
 	b_N = b_N_ref * (cs->Get_sig_pN_tot()/cs->Get_sig_pN_tot_ref());	
-	t = -log(RandomNG::uniform(0,1))/b_N;	
 	E0 = cs->Get_E0();
 }	
 bool ElasticpN::Scatter(PSvector& p, double E){	
 	double TargetMass = AtomicMassUnit*mat->GetAtomicMass();
 	
+	t = -log(RandomNG::uniform(0,1))/b_N;	
 	ScatterStuff(p, t, TargetMass, E0);
 	p.type() = 2;	
 	
@@ -155,12 +155,12 @@ void SixTrackElasticpN::Configure(Material* matin, CrossSections* CSin){
 	ScatteringProcess::Configure(matin, CSin);
 	sigma = cs->Get_sig_pN_el();
 	double b_N_ref = matin->GetSixtrackNuclearSlope();	
-	b_N = b_N_ref * (cs->Get_sig_pN_tot()/cs->Get_sig_pN_tot_ref());		
-	t = -log(RandomNG::uniform(0,1))/b_N;	
+	b_N = b_N_ref * (cs->Get_sig_pN_tot()/cs->Get_sig_pN_tot_ref());	
 	E0 = cs->Get_E0();
 }	
 bool SixTrackElasticpN::Scatter(PSvector& p, double E){
-	
+		
+	t = -log(RandomNG::uniform(0,1))/b_N;	
 	ScatterStuff(p, t, E0);	
 	p.type() = 2;	
 	
