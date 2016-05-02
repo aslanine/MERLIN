@@ -48,7 +48,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
-    int npart 			= 1E7;	// number of halo particles to track
+    int npart 			= 6.4E6;	// number of halo particles to track
     int nleft = npart;
        
     if (argc >=2){npart = atoi(argv[1]);}
@@ -78,13 +78,13 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "ST_S/";
+		case_dir = "M2/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
 	bool output_initial_bunch 	= 0;
-	bool output_final_bunch 	= 0;		
+	bool output_final_bunch 	= 1;		
 		if (output_initial_bunch || output_final_bunch){
 			//~ bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 
 		}		
@@ -93,11 +93,11 @@ int main(int argc, char* argv[])
 		if(collimation_on){
 			//~ dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
 		}
-	bool use_sixtrack_like_scattering = 1;
+	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 
 	bool symplectic = 1;
-	bool composite	= 0;
+	bool composite	= 1;
 	bool hist 		= 1;
 	
 	bool selectscatter 	= 1;
