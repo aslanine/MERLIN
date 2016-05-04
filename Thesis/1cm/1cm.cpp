@@ -78,13 +78,13 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "M2/";
+		case_dir = "M_S/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
 	bool output_initial_bunch 	= 0;
-	bool output_final_bunch 	= 1;		
+	bool output_final_bunch 	= 0;		
 		if (output_initial_bunch || output_final_bunch){
 			//~ bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 
 		}		
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
 		if(collimation_on){
 			//~ dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
 		}
-	bool use_sixtrack_like_scattering = 0;
+	bool use_sixtrack_like_scattering = 1;
 	bool cut_distn				= 0;
 
 	bool symplectic = 1;
