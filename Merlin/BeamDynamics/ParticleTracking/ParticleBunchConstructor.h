@@ -34,7 +34,7 @@ typedef enum {normalDistribution,flatDistribution,ringDistribution,skewHaloDistr
 		horizontalHaloDistribution1,verticalHaloDistribution1,horizontalHaloDistribution2,\
 		horizontalHaloDistribution3,verticalHaloDistribution2,tuneTestDistribution,\
 		vertTestDistribution, CCDistn, CCDistn2, RFDistn, LHCDistn,\
-		SymplecticHorizontalHaloDistribution2, HELHaloDistribution, \
+		SymplecticHorizontalHaloDistribution2, HELHaloDistribution, Halo7TeV, Halo6p5TeV, \
 		HorizontalHaloDistributionWithLimits, HorizontalHaloDistributionWithLimits2,\
 		pencilDistribution} DistributionType;
 
