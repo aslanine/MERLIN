@@ -208,7 +208,7 @@ bool SixTrackSingleDiffractive::Scatter(PSvector& p, double E){
 	}
 	else if(2.0 <= xm2 && xm2 <= 5.0)
 	{
-		b = (106.0 - 17.0 * xm2 ) * b_pp / 26.0;	
+		b = (106.0 - 17.0 * xm2 ) * b_pp / 36.0;	
 	}
 	else if(xm2 > 5.0)
 	{

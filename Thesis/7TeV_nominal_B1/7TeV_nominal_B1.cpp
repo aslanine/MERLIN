@@ -52,10 +52,9 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 1E3;				// number of particles to track
+    int npart = 6.4E6;				// number of particles to track
     int nturns = 200;				// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
-	bool beam1 = 1;
 	 
     if (argc >=2){npart = atoi(argv[1]);}
     if (argc >=3){seed = atoi(argv[2]);}
@@ -67,8 +66,7 @@ int main(int argc, char* argv[])
     cout << "npart=" << npart << " nturns=" << nturns << " beam energy = " << beam_energy << endl;
 
 	string start_element;
-	if(beam1){	    start_element = "TCP.C6L7.B1"; }  // HORIZONTAL COLLIMATOR (x)
-	else{		    start_element = "TCP.C6R7.B2"; }   // HORIZONTAL COLLIMATOR (x)
+	start_element = "TCP.C6L7.B1";// HORIZONTAL COLLIMATOR (x)
 
     // Define useful variables
     double beam_charge = 1.1e11;
@@ -97,7 +95,7 @@ int main(int argc, char* argv[])
 	}
 		
 	
-	string batch_directory="results/";
+	string batch_directory="06_CuCD_2e/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -122,8 +120,8 @@ int main(int argc, char* argv[])
 		}		
 	bool use_sixtrack_like_scattering = 0;
 	bool scatterplot			= 0;
-	bool jawinelastic			= 0;
-	bool jawimpact				= 0;
+	bool jawinelastic			= 1;
+	bool jawimpact				= 1;
 	
 	bool ap_survey				= 1;
 	bool coll_survey			= 1;
@@ -133,15 +131,16 @@ int main(int argc, char* argv[])
 	bool sixD					= 1;	//0 = No RF, 1 = Rf	
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
 	
+	// 0=pure, 1=composite, 2=MoGr 2e, 3=CuCD 2e, 4=MoGr 1e, 5=CuCD 1e.
+	int CollMat					= 3;
+	
+	
 /************************************
 *	ACCELERATORMODEL CONSTRUCTION	*
 ************************************/
 	cout << "MADInterface" << endl;
 
 	MADInterface* myMADinterface;
-    if(beam1)
-		myMADinterface = new MADInterface( directory+input_dir+"Twiss_7TeV_nominal.tfs", beam_energy );
-    else
 		myMADinterface = new MADInterface( directory+input_dir+"Twiss_7TeV_nominal.tfs", beam_energy );
 	cout << "MADInterface Done" << endl;
 
@@ -224,11 +223,21 @@ int main(int argc, char* argv[])
    
 	MaterialDatabase* myMaterialDatabase = new MaterialDatabase();	
     CollimatorDatabase* collimator_db;
-    if(beam1)
-		collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_nominal.txt", myMaterialDatabase,  true);
-    else
-		collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_nominal.txt", myMaterialDatabase,  true);
-   
+	
+	switch(CollMat){
+		case 0:	collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_pure.txt", myMaterialDatabase,  true);
+		break;
+		case 1:	collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_Composite.txt", myMaterialDatabase,  true);
+		break;
+		case 2:	collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_MoGr_2.txt", myMaterialDatabase,  true);
+		break;
+		case 3:	collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_CuCD_2.txt", myMaterialDatabase,  true);
+		break;
+		case 4:	collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_MoGr_1.txt", myMaterialDatabase,  true);
+		break;
+		case 5:	collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_CuCD_1.txt", myMaterialDatabase,  true);
+		break;    
+	}
     collimator_db->MatchBeamEnvelope(true);
     collimator_db->EnableJawAlignmentErrors(false);
     collimator_db->UseMiddleJawHalfGap();
@@ -265,10 +274,7 @@ int main(int argc, char* argv[])
 ****************************/
 
 	ApertureConfiguration* myApertureConfiguration;
-    if(beam1) 
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_7TeV.tfs",1);   
-    else   
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_7TeV.tfs",1);      
+	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_7TeV.tfs",1);     
     	
 	//~ ostringstream ap_output_file;
 	//~ ap_output_file << full_output_dir << "ApertureConfiguration.log";
@@ -350,7 +356,8 @@ int main(int argc, char* argv[])
     ProtonBunch* myBunch;
     int node_particles = npart;
     
-    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HorizontalHaloDistributionWithLimits);
+    //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HorizontalHaloDistributionWithLimits);
+    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, Halo7TeV);
 
     myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
     delete myBunchCtor;
@@ -359,7 +366,7 @@ int main(int argc, char* argv[])
     
     if(output_initial_bunch){   
 		ostringstream hbunch_output_file;
-		hbunch_output_file << bunch_dir << "_" << seed  << "initial_bunch.txt";
+		hbunch_output_file << bunch_dir << seed  << "_initial_bunch.txt";
 		ofstream* hbunch_output = new ofstream(hbunch_output_file.str().c_str());
 		if(!hbunch_output->good()) { std::cerr << "Could not open initial bunch output" << std::endl; exit(EXIT_FAILURE); }   
 		myBunch->Output(*hbunch_output);			
@@ -397,62 +404,37 @@ int main(int argc, char* argv[])
 *	Collimation Process		*
 ****************************/
 
-	FlukaLosses* myFlukaLosses = new FlukaLosses;  
+	//~ FlukaLosses* myFlukaLosses = new FlukaLosses;  
 	LossMapDustbin* myLossMapDustbin = new LossMapDustbin;
 	ScatteringModel* myScatter = new ScatteringModel;
 
   	if(collimation_on){ 
 		
 		bool beam2 = 0;
-		if (!beam1){beam2=1;}
 		
 		CollimateProtonProcess* myCollimateProcess =new CollimateProtonProcess(2, 4, NULL);
 		
-		myLossMapDustbin->Beam2(beam2);
+		//~ myLossMapDustbin->Beam2(beam2);
 		myCollimateProcess->SetDustbin(myLossMapDustbin);   	        
-		myCollimateProcess->SetFlukaLosses(myFlukaLosses); 
+		//~ myCollimateProcess->SetFlukaLosses(myFlukaLosses); 
 		
 		myCollimateProcess->ScatterAtCollimator(true);
 
 		if(composite){	myScatter->SetComposites(1);}
 		else{			myScatter->SetComposites(0);}
 
-		if(beam1){
-			if(jawimpact){
-				myScatter->SetJawImpact("TCP.C6L7.B1");
-				myScatter->SetJawImpact("TCP.D6L7.B1");
-			}
-			if(scatterplot)	{
-				myScatter->SetScatterPlot("TCP.C6L7.B1");			
-				myScatter->SetScatterPlot("TCP.B6L7.B1");
-			}
-			if(jawinelastic){
-				myScatter->SetJawInelastic("TCP.C6L7.B1");
-				myScatter->SetJawInelastic("TCP.D6L7.B1");
-			}
+		if(jawimpact){
+			myScatter->SetJawImpact("TCP.C6L7.B1");
+			myScatter->SetJawImpact("TCSG.B5L7.B1");
 		}
-		else{ 
-			if(jawimpact){
-				myScatter->SetJawImpact("TCP.C6R7.B2");
-				//myScatter->SetJawImpact("TCSG.B4R7.B2");	
-				//myScatter->SetJawImpact("TCSG.B5R7.B2");	
-				//myScatter->SetJawImpact("TCP.D6R7.B2");
-				//myScatter->SetJawImpact("TCP.B6R7.B2");
-			}
-			if(scatterplot)	{
-				myScatter->SetScatterPlot("TCP.C6R7.B2");
-				//myScatter->SetScatterPlot("TCSG.B4R7.B2");
-				//myScatter->SetScatterPlot("TCP.D6R7.B2");
-			}
-			if(jawinelastic){
-				myScatter->SetJawInelastic("TCP.C6R7.B2");     
-				//myScatter->SetJawInelastic("TCP.D6R7.B2"); 
-				//myScatter->SetJawInelastic("TCSG.B4R7.B2");
-				//myScatter->SetJawInelastic("TCP.D6R7.B2");     
-				//myScatter->SetJawInelastic("TCP.B6R7.B2");
-			}
+		if(scatterplot)	{
+			myScatter->SetScatterPlot("TCP.C6L7.B1");			
+			myScatter->SetScatterPlot("TCSG.B5L7.B1");
 		}
-
+		if(jawinelastic){
+			myScatter->SetJawInelastic("TCP.C6L7.B1");
+			myScatter->SetJawInelastic("TCSG.B5L7.B1");
+		}
 
 		// 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,   
 		// 3: ST + Adv. SD,     4: MERLIN
@@ -482,13 +464,28 @@ int main(int argc, char* argv[])
 
         if( myBunch->size() <= 1 ) break;
     }
+   
+	/*********************************************************************
+	** OUTPUT FINAL BUNCH
+	*********************************************************************/
+	if(output_final_bunch){   
+		ostringstream bunch_output_file;
+		bunch_output_file << bunch_dir << seed  << "_final_bunch.txt";
+		ofstream* bunch_output = new ofstream(bunch_output_file.str().c_str());
+		if(!bunch_output->good()) { std::cerr << "Could not open final bunch output" << std::endl; exit(EXIT_FAILURE); }   
+		myBunch->Output(*bunch_output);			
+		delete bunch_output;	
+	}
 
 	/*********************************************************************
 	**	Output Jaw Impact, Scatter Plot, Jaw Inelastic
 	*********************************************************************/
-	myScatter->OutputJawImpact(full_output_dir,seed);
-	myScatter->OutputScatterPlot(full_output_dir,seed);	
-    myScatter->OutputJawInelastic(full_output_dir,seed);
+	string JawIm_dir = (full_output_dir+"Jaw_Impact/"); 	mkdir(JawIm_dir.c_str(), S_IRWXU); 	
+	myScatter->OutputJawImpact(JawIm_dir,seed);
+	string JawInel_dir = (full_output_dir+"Jaw_Inelastic/"); 	mkdir(JawInel_dir.c_str(), S_IRWXU); 	
+	myScatter->OutputJawInelastic(JawInel_dir,seed);	
+	string SPlot_dir = (full_output_dir+"Scatter_Plot/"); 	mkdir(JawIm_dir.c_str(), S_IRWXU); 	
+    myScatter->OutputScatterPlot(full_output_dir,seed);
    
 	/*********************************************************************
 	** OUTPUT FLUKA LOSSES 
@@ -508,13 +505,13 @@ int main(int argc, char* argv[])
   	/*********************************************************************
 	** OUTPUT FLUKA LOSSES  
 	*********************************************************************/
-	ostringstream fluka_file;
-	fluka_file << fluka_dir <<std::string("fluka_newlosses_")<< npart << "_" << seed << std::string(".txt");	 
-	ofstream* fluka_output1 = new ofstream(fluka_file.str().c_str());   
-	if(!fluka_output1->good()){ std::cerr << "Could not open fluka loss file" << std::endl; exit(EXIT_FAILURE); }  
-	myFlukaLosses->Finalise();
-	myFlukaLosses->Output(fluka_output1);
-	delete fluka_output1;
+	//~ ostringstream fluka_file;
+	//~ fluka_file << fluka_dir <<std::string("fluka_newlosses_")<< npart << "_" << seed << std::string(".txt");	 
+	//~ ofstream* fluka_output1 = new ofstream(fluka_file.str().c_str());   
+	//~ if(!fluka_output1->good()){ std::cerr << "Could not open fluka loss file" << std::endl; exit(EXIT_FAILURE); }  
+	//~ myFlukaLosses->Finalise();
+	//~ myFlukaLosses->Output(fluka_output1);
+	//~ delete fluka_output1;
 
    /*********************************************************************
 	** OUTPUT LOSSMAP  
