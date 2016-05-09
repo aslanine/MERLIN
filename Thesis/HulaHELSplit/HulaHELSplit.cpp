@@ -10,6 +10,7 @@
 
 //include relevant MERLIN headers
 #include "AcceleratorModel/Apertures/CollimatorAperture.h"
+#include "AcceleratorModel/ControlElements/Klystron.h"
 
 #include "BeamDynamics/ParticleTracking/ParticleBunchConstructor.h"
 #include "BeamDynamics/ParticleTracking/ParticleTracker.h"
@@ -81,8 +82,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-
-		case_dir = "24April_88_Diff_Elliptical/";
+		case_dir = "09May_NR_El/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -200,6 +200,12 @@ int main(int argc, char* argv[])
 
     AcceleratorModel* myAccModel = myMADinterface->ConstructModel();   
 
+	std::vector<RFStructure*> RFCavities;
+	myAccModel->ExtractTypedElements(RFCavities,"ACS*");
+	Klystron* Kly1 = new Klystron("KLY1",RFCavities);
+	Kly1->SetVoltage(0.0);
+	Kly1->SetPhase(pi/2); 
+	
 /**************
 *	TWISS 	  *
 **************/
@@ -294,6 +300,8 @@ int main(int argc, char* argv[])
 		myDispersion->FindRMSDispersion(disp_output);
 		delete disp_output;
 	}
+	
+	Kly1->SetVoltage(2.0);
 	
 /************************
 *	Collimator set up	*
@@ -533,12 +541,12 @@ int main(int argc, char* argv[])
 		myHaloBunch->Output(*hbunch_output);			
 		delete hbunch_output;	   
 
-		ostringstream cbunch_output_file;
-		cbunch_output_file << cbunch_dir << "initial_bunch_" << seed << ".txt";
-		ofstream* cbunch_output = new ofstream(cbunch_output_file.str().c_str());
-		if(!cbunch_output->good()) { std::cerr << "Could not open initial core bunch output" << std::endl; exit(EXIT_FAILURE); }   
-		myCoreBunch->Output(*cbunch_output);			
-		delete cbunch_output;	
+		//~ ostringstream cbunch_output_file;
+		//~ cbunch_output_file << cbunch_dir << "initial_bunch_" << seed << ".txt";
+		//~ ofstream* cbunch_output = new ofstream(cbunch_output_file.str().c_str());
+		//~ if(!cbunch_output->good()) { std::cerr << "Could not open initial core bunch output" << std::endl; exit(EXIT_FAILURE); }   
+		//~ myCoreBunch->Output(*cbunch_output);			
+		//~ delete cbunch_output;	
 	}
 
 /************************
@@ -595,14 +603,14 @@ int main(int argc, char* argv[])
 ****************************/
 	
 	LossMapDustbin* myHaloDustbin = new LossMapDustbin;
-	LossMapDustbin* myCoreDustbin = new LossMapDustbin;
+	//~ LossMapDustbin* myCoreDustbin = new LossMapDustbin;
 
 	if(collimation_on){
 		if(seed ==1){cout << "Collimation on" << endl;}
 		CollimateProtonProcess* myCollimateProcess = new CollimateProtonProcess(2, 4);
 			
 		myCollimateProcess->SetDustbin(myHaloDustbin);       
-		myCollimateProcess->SetDustbin(myCoreDustbin);       
+		//~ myCollimateProcess->SetDustbin(myCoreDustbin);       
 
 		myCollimateProcess->ScatterAtCollimator(true);
 	   
@@ -816,13 +824,13 @@ int main(int argc, char* argv[])
 		myHaloDustbin->Output(hdustbin_output); 
 		delete hdustbin_output;
 		
-		ostringstream cdustbin_file;
-		cdustbin_file << cdustbin_dir << "dustbin_losses_" << seed << ".txt";
-		ofstream* cdustbin_output = new ofstream(cdustbin_file.str().c_str());	
-		if(!cdustbin_output->good()){ std::cerr << "Could not open core dustbin loss file" << std::endl; exit(EXIT_FAILURE); }   
-		myCoreDustbin->Finalise(); 
-		myCoreDustbin->Output(cdustbin_output); 
-		delete cdustbin_output;
+		//~ ostringstream cdustbin_file;
+		//~ cdustbin_file << cdustbin_dir << "dustbin_losses_" << seed << ".txt";
+		//~ ofstream* cdustbin_output = new ofstream(cdustbin_file.str().c_str());	
+		//~ if(!cdustbin_output->good()){ std::cerr << "Could not open core dustbin loss file" << std::endl; exit(EXIT_FAILURE); }   
+		//~ myCoreDustbin->Finalise(); 
+		//~ myCoreDustbin->Output(cdustbin_output); 
+		//~ delete cdustbin_output;
 	}
 	
 /********************
@@ -836,12 +844,12 @@ int main(int argc, char* argv[])
 		myHaloBunch->Output(*hbunch_output2);
 		delete hbunch_output2;
 		
-		ostringstream cbunch_output_file2;
-		cbunch_output_file2 << cbunch_dir << "final_bunch_" << seed << ".txt";
-		ofstream* cbunch_output2 = new ofstream(cbunch_output_file2.str().c_str());
-		if(!cbunch_output2->good()){ std::cerr << "Could not open final core bunch output file" << std::endl; exit(EXIT_FAILURE); }  
-		myHaloBunch->Output(*cbunch_output2);
-		delete cbunch_output2;
+		//~ ostringstream cbunch_output_file2;
+		//~ cbunch_output_file2 << cbunch_dir << "final_bunch_" << seed << ".txt";
+		//~ ofstream* cbunch_output2 = new ofstream(cbunch_output_file2.str().c_str());
+		//~ if(!cbunch_output2->good()){ std::cerr << "Could not open final core bunch output file" << std::endl; exit(EXIT_FAILURE); }  
+		//~ myHaloBunch->Output(*cbunch_output2);
+		//~ delete cbunch_output2;
 	 }
 	 
 /************
