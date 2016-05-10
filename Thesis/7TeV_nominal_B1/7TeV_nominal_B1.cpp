@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 6.4E6;				// number of particles to track
-    int nturns = 200;				// number of turns to track
+    int npart = 10;				// number of particles to track
+    int nturns = 1;				// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
     if (argc >=2){npart = atoi(argv[1]);}
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 	}
 		
 	
-	string batch_directory="06_CuCD_2e/";
+	string batch_directory="10May_AperturePlots/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -104,17 +104,17 @@ int main(int argc, char* argv[])
 	fluka_dir = full_output_dir + "Fluka/";    
 	mkdir(fluka_dir.c_str(), S_IRWXU); 
 		
-	bool output_initial_bunch 	= 1;
-	bool output_final_bunch 	= 1;
+	bool output_initial_bunch 	= 0;
+	bool output_final_bunch 	= 0;
 		if (output_initial_bunch || output_final_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
 		}	
 	
-	bool output_fluka_database 	= 1;
+	bool output_fluka_database 	= 0;
 	bool output_twiss			= 1;		
 		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
-	bool collimation_on 		= 1;
+	bool collimation_on 		= 0;
 		if(collimation_on){
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
 		}		
@@ -238,9 +238,9 @@ int main(int argc, char* argv[])
 		case 5:	collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_CuCD_1.txt", myMaterialDatabase,  true);
 		break;    
 	}
-    collimator_db->MatchBeamEnvelope(true);
+    collimator_db->MatchBeamEnvelope(false);
     collimator_db->EnableJawAlignmentErrors(false);
-    collimator_db->UseMiddleJawHalfGap();
+    //~ collimator_db->UseMiddleJawHalfGap();
 
     collimator_db->SetJawPositionError(0.0 * nanometer);
     collimator_db->SetJawAngleError(0.0 * microradian);
@@ -286,7 +286,8 @@ int main(int argc, char* argv[])
     delete myApertureConfiguration;
     
 	if(ap_survey){
-		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 0);
+		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.01, 0);
+		//~ ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0, 20);
 	}
 		
 	if(coll_survey){
@@ -295,7 +296,7 @@ int main(int argc, char* argv[])
 		cs_output_file << full_output_dir << "coll_survey.txt";
 		ofstream* cs_output = new ofstream(cs_output_file.str().c_str());
 		if(!cs_output->good()) { std::cerr << "Could not open collimator survey output" << std::endl; exit(EXIT_FAILURE); }   
-		CollSurvey->Output(cs_output, 20);			
+		CollSurvey->Output(cs_output, 100);			
 		delete cs_output;
 	}
 
