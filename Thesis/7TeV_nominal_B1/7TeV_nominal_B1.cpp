@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 	}
 		
 	
-	string batch_directory="06_CuCD_2e/";
+	string batch_directory="06_MoGr_1e/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
 	
 	// 0=pure, 1=composite, 2=MoGr 2e, 3=CuCD 2e, 4=MoGr 1e, 5=CuCD 1e.
-	int CollMat					= 3;
+	int CollMat					= 4;
 	
 	
 /************************************
