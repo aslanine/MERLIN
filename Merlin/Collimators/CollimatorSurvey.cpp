@@ -72,10 +72,11 @@ void CollimatorSurvey::Output(std::ostream* os, int no_points){
 				(*os) << ac->GetComponentLatticePosition()+ac->GetLength() << "\t";
 				(*os) << ac->GetLength() << "\t";
 				(*os) << z << "\t";
-				(*os) << lims[0] << "\t";
-				(*os) << lims[1] << "\t";
-				(*os) << lims[2] << "\t";
-				(*os) << lims[3] << endl;
+				(*os) << setprecision(20)<< ac->GetComponentLatticePosition()+z << "\t";
+				(*os) << setprecision(20)<< lims[0] << "\t";
+				(*os) << setprecision(20)<< lims[1] << "\t";
+				(*os) << setprecision(20)<< lims[2] << "\t";
+				(*os) << setprecision(20)<< lims[3] << endl;
 			}
 		}
 

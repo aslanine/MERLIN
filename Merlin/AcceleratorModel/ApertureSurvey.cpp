@@ -71,13 +71,13 @@ ApertureSurvey::ApertureSurvey(AcceleratorModel* model, string directory, double
 			(*output_file) << ac->GetName() << "\t";
 			(*output_file) << ac->GetType() << "\t";
 			//~ (*output_file) << ac->GetComponentLatticePosition()+ac->GetLength() << "\t";
-			(*output_file) << ac->GetComponentLatticePosition()+current_s << "\t";
+			(*output_file) << setprecision(20) << ac->GetComponentLatticePosition()+current_s << "\t";
 			(*output_file) << ac->GetLength() << "\t";
 			//~ (*os) << s+z << "\t";
-			(*output_file) << lims[0] << "\t";
-			(*output_file) << lims[1] << "\t";
-			(*output_file) << lims[2] << "\t";
-			(*output_file) << lims[3] << endl;
+			(*output_file) << setprecision(20) << lims[0] << "\t";
+			(*output_file) << setprecision(20) << lims[1] << "\t";
+			(*output_file) << setprecision(20) << lims[2] << "\t";
+			(*output_file) << setprecision(20) << lims[3] << endl;
 			
 			current_s += step_size;
 		}
@@ -261,7 +261,7 @@ ApertureSurvey::ApertureSurvey(AcceleratorModel* model, string directory, double
 
 void ApertureSurvey::CheckAperture(Aperture* ap, double s, double *aps){
 	//~ cout << "CheckAperture" << endl;
-	const double step = 1e-6;
+	const double step = 1e-8;
 	const double max = 1.0;
 	const double min = 0.0;
 	

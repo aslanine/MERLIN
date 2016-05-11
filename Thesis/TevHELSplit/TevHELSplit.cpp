@@ -10,6 +10,7 @@
 
 //include relevant MERLIN headers
 #include "AcceleratorModel/Apertures/CollimatorAperture.h"
+#include "AcceleratorModel/ControlElements/Klystron.h"
 
 #include "BeamDynamics/ParticleTracking/ParticleBunchConstructor.h"
 #include "BeamDynamics/ParticleTracking/ParticleTracker.h"
@@ -86,7 +87,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "13April_NHB/";
+		case_dir = "04May_AC_DoubleCurrent/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -106,20 +107,21 @@ int main(int argc, char* argv[])
 			hbunch_dir = bunch_dir + halo_string;			mkdir(hbunch_dir.c_str(), S_IRWXU);
 		}		
 	
-	bool output_fluka_database 	= 1;
+	bool output_fluka_database 	= 0;
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
-	bool black_absorber 		= 1;
-	bool hel_on 				= 0; 		// Hollow electron lens process?
+	bool black_absorber 		= 0;
+	bool hel_on 				= 1; 		// Hollow electron lens process?
+	bool double_current 	= 1;
 
 		bool LHC_HEL				= 0;		// LHC or Tevatron Hardware
 		bool elliptical_HEL			= 0;		// Use elliptical operation
 	
 		bool DCon				= 0;
-		bool ACon				= 0;		if(ACon){DCon=0;}
+		bool ACon				= 1;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
 		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
-		bool output_hel_profile = 1;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
+		bool output_hel_profile = 0;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 1;
 		if(collimation_on){
@@ -174,6 +176,12 @@ int main(int argc, char* argv[])
     myMADinterface->ConstructApertures(false);
 
     AcceleratorModel* myAccModel = myMADinterface->ConstructModel();   
+    
+    std::vector<RFStructure*> RFCavities;
+	myAccModel->ExtractTypedElements(RFCavities,"ACS*");
+	Klystron* Kly1 = new Klystron("KLY1",RFCavities);
+	Kly1->SetVoltage(0.0);
+	Kly1->SetPhase(pi/2); 
 
 /**************
 *	TWISS 	  *
@@ -245,6 +253,8 @@ int main(int argc, char* argv[])
 		myDispersion->FindRMSDispersion(disp_output);
 		delete disp_output;
 	}
+		
+	Kly1->SetVoltage(2.0);
 	
 /************************
 *	Collimator set up	*
@@ -611,14 +621,16 @@ int main(int argc, char* argv[])
 		HollowELensProcess* myHELProcess;
 		
 		if(LHC_HEL){	// LHC: 3m, 10KeV, 5A
-			myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);
+			if(double_current){			myHELProcess = new HollowELensProcess(3, 1, 10, 0.195, 2.334948339E4, 3.0);}
+			else{								myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);}
 			myHELProcess->SetRadiiSigma(4, 8, myAccModel, emittance, emittance, myTwiss, 7000);
 			
 			// for LHC hardware we need to scale the radial profile
 			myHELProcess->SetLHCRadialProfile();
 		}
 		else{			//Tevatron: 2m, 5KeV, 1.2A
-			myHELProcess = new HollowELensProcess(3, 1, 1.2, 0.138874007, 2.334948339E4, 2.0);
+			if(double_current){	myHELProcess = new HollowELensProcess(3, 1, 2.4, 0.138874007, 2.334948339E4, 2.0);}
+			else{						myHELProcess = new HollowELensProcess(3, 1, 1.2, 0.138874007, 2.334948339E4, 2.0);}
 			//~ myHELProcess = new HollowELensProcess(3, 1, 1.2, 0.138874007, 2.334948339E4, 3.0);
 			myHELProcess->SetRadiiSigma(4, 6.8, myAccModel, emittance, emittance, myTwiss, 7000);
 		}
