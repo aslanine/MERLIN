@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 10;				// number of particles to track
+    int npart = 6.4E6;				// number of particles to track
     int nturns = 1;				// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 		output_dir 	= "/Build/Thesis/outputs/7TeV_nominal_B1/";
 	}
 		
-	string batch_directory="10May_AperturePlots/";
+	string batch_directory="17May_DistnPlots/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 	fluka_dir = full_output_dir + "Fluka/";    
 	mkdir(fluka_dir.c_str(), S_IRWXU); 
 		
-	bool output_initial_bunch 	= 0;
+	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 0;
 		if (output_initial_bunch || output_final_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
