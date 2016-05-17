@@ -540,7 +540,7 @@ void ScatteringModel::OutputScatterPlot(string directory, int seed){
 		} 
 		
 		//~ (*os) << "#\tparticle_id\tx\tx'\ty\ty'\tct\tdpctturn" << endl;
-		(*os) << "#\tparticle_id\tz\ty\tturn" << endl;
+		(*os) << "#\tparticle_id\tz\tx\ty\tturn" << endl;
 	
 		for(vector <ScatterPlotData*>::iterator its = StoredScatterPlotData.begin(); its != StoredScatterPlotData.end(); ++its)
 		{

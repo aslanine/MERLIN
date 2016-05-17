@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 6.4E6;				// number of particles to track
+    int npart = 1E5;				// number of particles to track
     int nturns = 1;				// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 		output_dir 	= "/Build/Thesis/outputs/7TeV_nominal_B1/";
 	}
 		
-	string batch_directory="17May_DistnPlots/";
+	string batch_directory="17May_ScatterPlot/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -118,9 +118,9 @@ int main(int argc, char* argv[])
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
 		}		
 	bool use_sixtrack_like_scattering = 0;
-	bool scatterplot			= 0;
-	bool jawinelastic			= 1;
-	bool jawimpact				= 1;
+	bool scatterplot			= 1;
+	bool jawinelastic			= 0;
+	bool jawimpact				= 0;
 	
 	bool ap_survey				= 1;
 	bool coll_survey			= 1;
@@ -484,8 +484,8 @@ int main(int argc, char* argv[])
 	myScatter->OutputJawImpact(JawIm_dir,seed);
 	string JawInel_dir = (full_output_dir+"Jaw_Inelastic/"); 	mkdir(JawInel_dir.c_str(), S_IRWXU); 	
 	myScatter->OutputJawInelastic(JawInel_dir,seed);	
-	string SPlot_dir = (full_output_dir+"Scatter_Plot/"); 	mkdir(JawIm_dir.c_str(), S_IRWXU); 	
-    myScatter->OutputScatterPlot(full_output_dir,seed);
+	string SPlot_dir = (full_output_dir+"Scatter_Plot/"); 	mkdir(SPlot_dir.c_str(), S_IRWXU); 	
+    myScatter->OutputScatterPlot(SPlot_dir,seed);
    
 	/*********************************************************************
 	** OUTPUT FLUKA LOSSES 
