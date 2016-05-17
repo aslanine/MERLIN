@@ -848,7 +848,7 @@ void ScatteringModel::OutputSelectScatterHistogram(string directory, int n, int 
 			exit(EXIT_FAILURE);
 		} 
 		
-		(*os) << "#\tbin_x\tx\tbin_xp\txp\tbin_y\ty\tbin_yp\typ\tbin_ct\tct\tbin_dp\tdp\tbin_theta\ttheta\tbin_t\tt" << endl;
+		(*os) << "#\tbin_x\tx\tbin_xp\txp\tbin_y\ty\tbin_yp\typ\tbin_dp\tdp\tbin_theta\ttheta\tbin_t\tt" << endl;
 	
 		for(vector <SelectScatterData*>::iterator its = StoredSelectScatterData.begin(); its != StoredSelectScatterData.end(); ++its)
 		{
