@@ -545,16 +545,11 @@ void ScatteringModel::OutputScatterPlot(string directory, int seed){
 		for(vector <ScatterPlotData*>::iterator its = StoredScatterPlotData.begin(); its != StoredScatterPlotData.end(); ++its)
 		{
 			if( (*its)->name == (*name) ){
-				(*os) << setw(10) << setprecision(10) << left << (*its)->ID;
-				(*os) << setw(30) << setprecision(20) << left << (*its)->z;
-				(*os) << setw(30)<< setprecision(20) << left << (*its)->x;
-				(*os) << setw(30) << setprecision(20) << left << (*its)->y;
-				//~ (*os) << setw(10)<< setprecision(20) << left << (*its)->ID;
-				//~ (*os) << setw(20)<< setprecision(20) << left << (*its)->xp;
-				//~ (*os) << setw(20)<< setprecision(20) << left << (*its)->y;
-				//~ (*os) << setw(20)<< setprecision(20) << left << (*its)->yp;
-				//~ (*os) << setw(20)<< setprecision(20) << left << (*its)->z;
-				(*os) << setw(10)<< setprecision(10) << left << (*its)->turn;
+				(*os) << setprecision(10) << left << (*its)->ID << "\t";
+				(*os) << setprecision(20) << left << (*its)->z << "\t";
+				(*os) << setprecision(20) << left << (*its)->x << "\t";
+				(*os) << setprecision(20) << left << (*its)->y << "\t";
+				(*os) << setprecision(10) << left << (*its)->turn << "\t";
 				(*os) << endl;
 			}	
 		}
@@ -585,14 +580,14 @@ void ScatteringModel::OutputJawImpact(string directory, int seed){
 		{
 			if( (*its)->name == (*name) ){
 				//~ cout << "ColName = " << (*its)->name << endl;
-				(*os) << setw(10) << left << setprecision(10) <<  (*its)->ID;
-				(*os) << setw(30) << left << setprecision(20) << (*its)->x;
-				(*os) << setw(30) << left << setprecision(20) <<  (*its)->xp;
-				(*os) << setw(30) << left << setprecision(20) <<  (*its)->y;
-				(*os) << setw(30) << left << setprecision(20) <<  (*its)->yp;
-				(*os) << setw(30) << left << setprecision(20) << (*its)->ct;
-				(*os) << setw(30) << left << setprecision(20) << (*its)->dp;
-				(*os) << setw(10) << left << setprecision(10) <<  (*its)->turn;
+				(*os) << setprecision(10) <<  (*its)->ID << "\t";
+				(*os) << setprecision(20) << (*its)->x << "\t";
+				(*os) << setprecision(20) <<  (*its)->xp << "\t";
+				(*os) << setprecision(20) <<  (*its)->y << "\t";
+				(*os) << setprecision(20) <<  (*its)->yp << "\t";
+				(*os) << setprecision(20) << (*its)->ct << "\t";
+				(*os) << setprecision(20) << (*its)->dp << "\t";
+				(*os) << setprecision(10) <<  (*its)->turn << "\t";
 				(*os) << endl;
 			}
 		}
@@ -621,15 +616,14 @@ void ScatteringModel::OutputJawInelastic(string directory, int seed){
 		for(vector <JawInelasticData*>::iterator its = StoredJawInelasticData.begin(); its != StoredJawInelasticData.end(); ++its)
 		{
 			if( (*its)->name == (*name) ){
-				(*os) << setw(10) << left << setprecision(10) <<  (*its)->ID;
-				(*os) << setw(30) << left << setprecision(20) << (*its)->x;
-				(*os) << setw(30) << left << setprecision(20) <<  (*its)->xp;
-				(*os) << setw(30) << left << setprecision(20) <<  (*its)->y;
-				(*os) << setw(30) << left << setprecision(20) <<  (*its)->yp;
-				(*os) << setw(30) << left << setprecision(20) << (*its)->ct;
-				(*os) << setw(30) << left << setprecision(20) << (*its)->dp;
-				(*os) << setw(30) << left << setprecision(20) << (*its)->z;
-				(*os) << setw(10) << left << setprecision(10) <<  (*its)->turn;
+				(*os) << setprecision(20) << (*its)->x << "\t";
+				(*os) << setprecision(20) << (*its)->xp << "\t";
+				(*os) << setprecision(20) << (*its)->y << "\t";
+				(*os) << setprecision(20) << (*its)->yp << "\t";
+				(*os) << setprecision(20) << (*its)->ct << "\t";
+				(*os) << setprecision(20) << (*its)->dp << "\t";
+				(*os) << setprecision(20) << (*its)->z << "\t";
+				(*os) << setprecision(10) << (*its)->turn << "\t";
 				(*os) << endl;
 			}
 		}
@@ -656,17 +650,17 @@ void ScatteringModel::OutputSelectScatter(string directory, int seed){
 		for(vector <SelectScatterData*>::iterator its = StoredSelectScatterData.begin(); its != StoredSelectScatterData.end(); ++its)
 		{
 			if( (*its)->name == (*name) && (*its)->type == 1){
-				(*os1) << setw(10) << left << setprecision(10) <<  (*its)->ID;
-				(*os1) << setw(30) << left << setprecision(20) << (*its)->x;
-				(*os1) << setw(30) << left << setprecision(20) <<  (*its)->xp;
-				(*os1) << setw(30) << left << setprecision(20) <<  (*its)->y;
-				(*os1) << setw(30) << left << setprecision(20) <<  (*its)->yp;
-				(*os1) << setw(30) << left << setprecision(20) << (*its)->ct;
-				(*os1) << setw(30) << left << setprecision(20) << (*its)->dp;
-				(*os1) << setw(30) << left << setprecision(20) << (*its)->z;
-				(*os1) << setw(30) << left << setprecision(20) << (*its)->theta;
-				(*os1) << setw(30) << left << setprecision(20) << (*its)->mom_t;
-				(*os1) << setw(30) << left << setprecision(20) << (*its)->type;
+				(*os1) << setprecision(10) <<  (*its)->ID << "\t";
+				(*os1) << setprecision(20) << (*its)->x << "\t";
+				(*os1) << setprecision(20) <<  (*its)->xp << "\t";
+				(*os1) << setprecision(20) <<  (*its)->y << "\t";
+				(*os1) << setprecision(20) <<  (*its)->yp << "\t";
+				(*os1) << setprecision(20) << (*its)->ct << "\t";
+				(*os1) << setprecision(20) << (*its)->dp << "\t";
+				(*os1) << setprecision(20) << (*its)->z << "\t";
+				(*os1) << setprecision(20) << (*its)->theta << "\t";
+				(*os1) << setprecision(20) << (*its)->mom_t << "\t";
+				(*os1) << setprecision(20) << (*its)->type << "\t";
 				(*os1) << endl;
 			}
 		}
@@ -684,17 +678,17 @@ void ScatteringModel::OutputSelectScatter(string directory, int seed){
 		for(vector <SelectScatterData*>::iterator its = StoredSelectScatterData.begin(); its != StoredSelectScatterData.end(); ++its)
 		{
 			if( (*its)->name == (*name) && ( (*its)->type == 2 || (*its)->type == 3 ) ){
-				(*os2) << setw(10) << left << setprecision(10) <<  (*its)->ID;
-				(*os2) << setw(30) << left << setprecision(20) << (*its)->x;
-				(*os2) << setw(30) << left << setprecision(20) <<  (*its)->xp;
-				(*os2) << setw(30) << left << setprecision(20) <<  (*its)->y;
-				(*os2) << setw(30) << left << setprecision(20) <<  (*its)->yp;
-				(*os2) << setw(30) << left << setprecision(20) << (*its)->ct;
-				(*os2) << setw(30) << left << setprecision(20) << (*its)->dp;
-				(*os2) << setw(30) << left << setprecision(20) << (*its)->z;
-				(*os2) << setw(30) << left << setprecision(20) << (*its)->theta;
-				(*os2) << setw(30) << left << setprecision(20) << (*its)->mom_t;
-				(*os2) << setw(30) << left << setprecision(20) << (*its)->type;
+				(*os2) << setprecision(10) <<  (*its)->ID << "\t";
+				(*os2) << setprecision(20) << (*its)->x << "\t";
+				(*os2) << setprecision(20) <<  (*its)->xp << "\t";
+				(*os2) << setprecision(20) <<  (*its)->y << "\t";
+				(*os2) << setprecision(20) <<  (*its)->yp << "\t";
+				(*os2) << setprecision(20) << (*its)->ct << "\t";
+				(*os2) << setprecision(20) << (*its)->dp << "\t";
+				(*os2) << setprecision(20) << (*its)->z << "\t";
+				(*os2) << setprecision(20) << (*its)->theta << "\t";
+				(*os2) << setprecision(20) << (*its)->mom_t << "\t";
+				(*os2) << setprecision(20) << (*its)->type << "\t";
 				(*os2) << endl;
 			}
 		}
@@ -712,17 +706,17 @@ void ScatteringModel::OutputSelectScatter(string directory, int seed){
 		for(vector <SelectScatterData*>::iterator its = StoredSelectScatterData.begin(); its != StoredSelectScatterData.end(); ++its)
 		{
 			if( (*its)->name == (*name) && (*its)->type == 4){
-				(*os3) << setw(10) << left << setprecision(10) <<  (*its)->ID;
-				(*os3) << setw(30) << left << setprecision(20) << (*its)->x;
-				(*os3) << setw(30) << left << setprecision(20) <<  (*its)->xp;
-				(*os3) << setw(30) << left << setprecision(20) <<  (*its)->y;
-				(*os3) << setw(30) << left << setprecision(20) <<  (*its)->yp;
-				(*os3) << setw(30) << left << setprecision(20) << (*its)->ct;
-				(*os3) << setw(30) << left << setprecision(20) << (*its)->dp;
-				(*os3) << setw(30) << left << setprecision(20) << (*its)->z;
-				(*os3) << setw(30) << left << setprecision(20) << (*its)->theta;
-				(*os3) << setw(30) << left << setprecision(20) << (*its)->mom_t;
-				(*os3) << setw(30) << left << setprecision(20) << (*its)->type;
+				(*os3) << setprecision(10) <<  (*its)->ID << "\t";
+				(*os3) << setprecision(20) << (*its)->x << "\t";
+				(*os3) << setprecision(20) <<  (*its)->xp << "\t";
+				(*os3) << setprecision(20) <<  (*its)->y << "\t";
+				(*os3) << setprecision(20) <<  (*its)->yp << "\t";
+				(*os3) << setprecision(20) << (*its)->ct << "\t";
+				(*os3) << setprecision(20) << (*its)->dp << "\t";
+				(*os3) << setprecision(20) << (*its)->z << "\t";
+				(*os3) << setprecision(20) << (*its)->theta << "\t";
+				(*os3) << setprecision(20) << (*its)->mom_t << "\t";
+				(*os3) << setprecision(20) << (*its)->type << "\t";
 				(*os3) << endl;
 			}
 		}	
