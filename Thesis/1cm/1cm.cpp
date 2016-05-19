@@ -77,9 +77,12 @@ int main(int argc, char* argv[])
 	
 	bool batch = 1;
 	if(batch){
-
-		case_dir = "M_S/";
+		case_dir = "19May/";
 		full_output_dir = (directory+output_dir+case_dir);
+		mkdir(full_output_dir.c_str(), S_IRWXU);
+		
+		case_dir = "S_Comp/";
+		full_output_dir = (full_output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
@@ -103,6 +106,7 @@ int main(int argc, char* argv[])
 	bool selectscatter 	= 1;
 	bool jawimpact 		= 0;
 	bool scatterplot 	= 0;
+	bool jawinelastic 	= 1;
 	
 /************************
 *	HISTOGRAM STUFF		*
@@ -152,20 +156,20 @@ int main(int argc, char* argv[])
 	vector<string> material_names;
 	//~ material_names.push_back("Be");
 	//~ material_names.push_back("B");
-	//~ material_names.push_back("C");
+	material_names.push_back("C");
 	//~ material_names.push_back("O");
 	//~ material_names.push_back("Al");
 	//~ material_names.push_back("Fe");
 	//~ material_names.push_back("Ni");
-	//~ material_names.push_back("Cu");
+	material_names.push_back("Cu");
 	//~ material_names.push_back("CD");
 	//~ material_names.push_back("Mo");
-	//~ material_names.push_back("W");
+	material_names.push_back("W");
 	//~ material_names.push_back("Pb");
 	material_names.push_back("AC150K");
 	//~ material_names.push_back("Mo2C");
-	//~ material_names.push_back("GCOP");
-	//~ material_names.push_back("IT180");
+	material_names.push_back("GCOP");
+	material_names.push_back("IT180");
 	material_names.push_back("CuCD");
 	material_names.push_back("MoGr");
 
@@ -252,6 +256,7 @@ int main(int argc, char* argv[])
 		
 		if(scatterplot) 	{myScatter->SetScatterPlot(*pit);}
 		if(jawimpact)		{myScatter->SetJawImpact(*pit);}
+		if(jawinelastic)	{myScatter->SetJawInelastic(*pit);}
 		if(selectscatter)	{myScatter->SetSelectScatter(*pit);}
 		
 		// Create bunch
@@ -293,6 +298,7 @@ int main(int argc, char* argv[])
 	
 		// Output
 		if(jawimpact)		{myScatter->OutputJawImpact(mat_dir);}
+		if(jawinelastic)	{myScatter->OutputJawInelastic(mat_dir);}
 		if(scatterplot) 	{myScatter->OutputScatterPlot(mat_dir);}
 		if(selectscatter) 	{
 			if(hist){
