@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 1E5;				// number of particles to track
-    int nturns = 1;				// number of turns to track
+    int npart = 1E2;				// number of particles to track
+    int nturns = 1;					// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
     if (argc >=2){npart = atoi(argv[1]);}
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 		output_dir 	= "/Build/Thesis/outputs/7TeV_nominal_B1/";
 	}
 		
-	string batch_directory="17May_ScatterPlot/";
+	string batch_directory="17May_Twiss/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -209,6 +209,13 @@ int main(int argc, char* argv[])
 		ofstream twiss_output(twiss_output_file.str().c_str());
 		if(!twiss_output.good()){ std::cerr << "Could not open twiss output file" << std::endl; exit(EXIT_FAILURE); } 
 		myTwiss->PrintTable(twiss_output);
+				
+		ostringstream disp_output_file; 
+		disp_output_file << (lattice_dir+"Dispersion.dat");
+		ofstream* disp_output = new ofstream(disp_output_file.str().c_str());
+		if(!disp_output->good()){ std::cerr << "Could not open dispersion output file" << std::endl; exit(EXIT_FAILURE); } 
+		myDispersion->FindRMSDispersion(disp_output);
+		delete disp_output;
 	}
 	
 	if(sixD)
