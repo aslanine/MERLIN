@@ -564,13 +564,13 @@ double MADInterface::ReadComponent ()
 	}
 	else if(type =="RFCAVITY")
 	{
-		double volts=prmMap->GetParameter("VOLT");
-		if(volts == 0){
-			type="DRIFT";
-		}
-		else{
+		//~ double volts=prmMap->GetParameter("VOLT");
+		//~ if(volts == 0){
+			//~ type="DRIFT";
+		//~ }
+		//~ else{
 			type="RFCAVITY";
-		}	
+		//~ }	
 	}
 	else if(type=="RCOLLIMATOR")    // added by Adriana Bungau, 26 October 2006
 	{
@@ -817,7 +817,7 @@ double MADInterface::ReadComponent ()
 
     else if(type=="RFCAVITY")
         {
-		cout << "Found RF cavity\t";
+		
 		// Here we assume an SW cavity
 		double freq=prmMap->GetParameter("FREQ");
 		double phase=prmMap->GetParameter("LAG");
@@ -831,7 +831,7 @@ double MADInterface::ReadComponent ()
 		
 		// adjust phase for cosine-like field
 		phase = twoPi*(phase-0.25);
-
+		
 		// LHC TFS Table fix HR 11.11.15
 		if(single_cell_rf){			
 			cout << "\n\t MADInterface::RFCAVITY: Freq = " << freq << " Hz\tV: " << volts << " MV\tncells: " << ncells << "\tWavelength/2: " << lambdaOver2 << " m\tLength: " << len1 << " m"<< endl;

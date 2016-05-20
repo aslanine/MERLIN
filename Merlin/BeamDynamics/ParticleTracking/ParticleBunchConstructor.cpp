@@ -530,6 +530,32 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		   }
 	   }
 	}
+	case RFDistn2:
+	{
+	   rx = sqrt(beamdat.emit_x);
+	   ry = sqrt(beamdat.emit_y);
+	   for(i=1; i<np;) {
+			
+			p.x()	= 0;
+			p.xp()	= 0;
+			//~ p.xp()	= 0;
+			p.y()	= 0;
+			p.yp()	= 0;
+			p.ct()	= i*0.33333*beamdat.sig_z;
+			p.dp()	= 0;
+
+			M.Apply(p);
+			p+=pbunch.front(); // add centroid
+			p.type() = -1.0;
+			p.location() = -1.0;
+			p.sd() = 0.0;
+			p.id() = i;
+			if(itsFilter==0 || itsFilter->Apply(p)) {
+			   pbunch.push_back(p);
+			   i++;
+		   }
+	   }
+	}
 	break;
 	case LHCDistn:
 	{          
