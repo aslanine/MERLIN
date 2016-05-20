@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 10;				// number of particles to track
-    int nturns = 1;				// number of turns to track
+    int npart = 1E2;				// number of particles to track
+    int nturns = 1;					// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
     if (argc >=2){npart = atoi(argv[1]);}
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/Thesis/outputs/HL_TCLD/";
 
 		
-	string batch_directory="13May_Test/";
+	string batch_directory="17May_Twiss/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
 		
 	// 0=pure, 1=composite, 2=1st TCLD, 3=2 TCLDs.
-	int CollMat					= 4;
+	int CollMat					= 3;
 	
 	
 /************************************
@@ -201,6 +201,13 @@ int main(int argc, char* argv[])
 		ofstream twiss_output(twiss_output_file.str().c_str());
 		if(!twiss_output.good()){ std::cerr << "Could not open twiss output file" << std::endl; exit(EXIT_FAILURE); } 
 		myTwiss->PrintTable(twiss_output);
+				
+		ostringstream disp_output_file; 
+		disp_output_file << (lattice_dir+"Dispersion.dat");
+		ofstream* disp_output = new ofstream(disp_output_file.str().c_str());
+		if(!disp_output->good()){ std::cerr << "Could not open dispersion output file" << std::endl; exit(EXIT_FAILURE); } 
+		myDispersion->FindRMSDispersion(disp_output);
+		delete disp_output;
 	}
 	
 	if(sixD)
@@ -261,7 +268,7 @@ int main(int argc, char* argv[])
 ****************************/
 
 	ApertureConfiguration* myApertureConfiguration;
-	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_7TeV.tfs",1);     
+	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture.tfs",1);     
     	
 	//~ ostringstream ap_output_file;
 	//~ ap_output_file << full_output_dir << "ApertureConfiguration.log";
@@ -412,16 +419,22 @@ int main(int argc, char* argv[])
 		else{			myScatter->SetComposites(0);}
 
 		if(jawimpact){
-			myScatter->SetJawImpact("TCP.C6L7.B1");
-			myScatter->SetJawImpact("TCSG.B5L7.B1");
+			//~ myScatter->SetJawImpact("TCP.C6L7.B1");
+			//~ myScatter->SetJawImpact("TCSG.B5L7.B1");
+			myScatter->SetJawImpact("TCLD.8R7.B1");
+			myScatter->SetJawImpact("TCLD.10R7.B1");
 		}
 		if(scatterplot)	{
-			myScatter->SetScatterPlot("TCP.C6L7.B1");			
-			myScatter->SetScatterPlot("TCSG.B5L7.B1");
+			//~ myScatter->SetScatterPlot("TCP.C6L7.B1");			
+			//~ myScatter->SetScatterPlot("TCSG.B5L7.B1");
+			myScatter->SetScatterPlot("TCLD.8R7.B1");
+			myScatter->SetScatterPlot("TCLD.10R7.B1");
 		}
 		if(jawinelastic){
-			myScatter->SetJawInelastic("TCP.C6L7.B1");
-			myScatter->SetJawInelastic("TCSG.B5L7.B1");
+			//~ myScatter->SetJawInelastic("TCP.C6L7.B1");
+			//~ myScatter->SetJawInelastic("TCSG.B5L7.B1");
+			myScatter->SetJawInelastic("TCLD.8R7.B1");
+			myScatter->SetJawInelastic("TCLD.10R7.B1");
 		}
 
 		// 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,   

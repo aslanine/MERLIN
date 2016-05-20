@@ -3,6 +3,7 @@
 #include <sstream>
 #include <ctime>
 #include <unistd.h>
+#include <sys/stat.h> //to use mkdir
 
 #include "AcceleratorModel/Components.h"
 #include "AcceleratorModel/Apertures/CollimatorAperture.h"
@@ -33,7 +34,15 @@ int main(int argc, char* argv[])
     {
         seed = atoi(argv[1]);
     }	
+    string directory 	= "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";							//HR MAC
+	string output_dir 	= "/Build/Thesis/outputs/ScatterPlot/";
+    string batch_directory="17May_ScatterPlot/";
 
+	string full_output_dir = (directory+output_dir);
+	mkdir(full_output_dir.c_str(), S_IRWXU);
+	full_output_dir = (directory+output_dir+batch_directory);
+	mkdir(full_output_dir.c_str(), S_IRWXU);
+	
 	cout << "Seed: " << seed << endl;
 	RandomNG::init(seed);
 	/*********************************************************************
@@ -97,9 +106,9 @@ int main(int argc, char* argv[])
 	{
 		ostringstream bunch_output_file;
 		if(Loss_Map)
-			bunch_output_file << "Thesis/outputs/LM_ST_initial.txt";
+			bunch_output_file << full_output_dir << "Thesis/outputs/LM_ST_initial.txt";
 		else
-			bunch_output_file << "Thesis/outputs/HEL_ST_initial.txt";
+			bunch_output_file << full_output_dir << "Thesis/outputs/HEL_ST_initial.txt";
 		
 
 		ofstream* bunch_output = new ofstream(bunch_output_file.str().c_str());
@@ -172,7 +181,7 @@ int main(int argc, char* argv[])
 	//~ scatter_file << "Thesis/outputs/ScatterPlot.txt";
 	//~ ofstream* scatter_output = new ofstream(scatter_file.str().c_str());
 			
-	myScatter->OutputScatterPlot("Thesis/outputs/");
+	myScatter->OutputScatterPlot(full_output_dir);
 	
 	//~ delete scatter_output;
 	
@@ -183,7 +192,7 @@ int main(int argc, char* argv[])
 	//~ impact_file << "Thesis/outputs/JawImpact.txt";
 	//~ ofstream* impact_output = new ofstream(impact_file.str().c_str());
 			
-	myScatter->OutputJawImpact("Thesis/outputs/");
+	myScatter->OutputJawImpact(full_output_dir);
 	
 	//~ delete impact_output;
 	
@@ -193,9 +202,9 @@ int main(int argc, char* argv[])
 	if(output_final_bunch){
 		ostringstream bunch_output_file2;
 		if(Loss_Map)
-			bunch_output_file2 << "Thesis/outputs/LM_M_final.txt";
+			bunch_output_file2 << full_output_dir << "Thesis/outputs/LM_M_final.txt";
 		else
-			bunch_output_file2 << "Thesis/outputs/HEL_M_final.txt";
+			bunch_output_file2 << full_output_dir << "Thesis/outputs/HEL_M_final.txt";
 
 		ofstream* bunch_output2 = new ofstream(bunch_output_file2.str().c_str());
 		myBunch->Output(*bunch_output2);
