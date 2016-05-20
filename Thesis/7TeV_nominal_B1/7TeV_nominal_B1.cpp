@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 1E2;				// number of particles to track
-    int nturns = 1;					// number of turns to track
+    int npart = 15;				// number of particles to track
+    int nturns = 1E4;					// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
     if (argc >=2){npart = atoi(argv[1]);}
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 		output_dir 	= "/Build/Thesis/outputs/7TeV_nominal_B1/";
 	}
 		
-	string batch_directory="17May_Twiss/";
+	string batch_directory="19May_RF/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -102,15 +102,18 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);
 	fluka_dir = full_output_dir + "Fluka/";    
 	mkdir(fluka_dir.c_str(), S_IRWXU); 
+	
+	bool every_bunch			= 1;		// output whole bunch every turn in a single file
+	bool rf_test				= 1;		// Use RF distribution to plot RF bucket
 		
-	bool output_initial_bunch 	= 1;
+	bool output_initial_bunch 	= 0;
 	bool output_final_bunch 	= 0;
-		if (output_initial_bunch || output_final_bunch){
+		if (output_initial_bunch || output_final_bunch || every_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
 		}	
 	
 	bool output_fluka_database 	= 0;
-	bool output_twiss			= 1;		
+	bool output_twiss			= 0;		
 		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
 	bool collimation_on 		= 0;
@@ -118,15 +121,15 @@ int main(int argc, char* argv[])
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
 		}		
 	bool use_sixtrack_like_scattering = 0;
-	bool scatterplot			= 1;
+	bool scatterplot			= 0;
 	bool jawinelastic			= 0;
 	bool jawimpact				= 0;
 	
-	bool ap_survey				= 1;
-	bool coll_survey			= 1;
+	bool ap_survey				= 0;
+	bool coll_survey			= 0;
 	bool output_particletracks	= 0;
 	
-	bool symplectic				= 1;
+	bool symplectic				= 0;
 	bool sixD					= 1;	//0 = No RF, 1 = Rf	
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
 	
@@ -141,6 +144,7 @@ int main(int argc, char* argv[])
 
 	MADInterface* myMADinterface;
 		myMADinterface = new MADInterface( directory+input_dir+"Twiss_7TeV_nominal.tfs", beam_energy );
+		myMADinterface->SetSingleCellRF(1);
 	cout << "MADInterface Done" << endl;
 
     //myMADinterface->TreatTypeAsDrift("RFCAVITY");
@@ -343,9 +347,11 @@ int main(int argc, char* argv[])
     mybeam.yp0=myTwiss->Value(4,0,0,start_element_number);
     mybeam.ct0=myTwiss->Value(5,0,0,start_element_number);
 
-    mybeam.sig_dp = 0.0;
-    mybeam.sig_z = 0.0;
-    //~ mybeam.sig_z = ((2.51840894498383E-10 * 299792458)) * meter;
+    //~ mybeam.sig_dp = 0.0;
+    //~ mybeam.sig_z = 0.0;
+    //~ if(rf_test){
+		mybeam.sig_z = ((2.51840894498383E-10 * 299792458)) * meter;
+	//~ }
     //~ mybeam.sig_dp =  (1.129E-4);
 
     // X-Y coupling
@@ -362,10 +368,16 @@ int main(int argc, char* argv[])
 
     ProtonBunch* myBunch;
     int node_particles = npart;
+    ParticleBunchConstructor* myBunchCtor;
     
-    //~ ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, HorizontalHaloDistributionWithLimits);
-    ParticleBunchConstructor* myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, Halo7TeV);
-
+    if(rf_test){
+		//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn);
+		myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn2);
+	}
+	else{
+		myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, Halo7TeV);
+	}
+	
     myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
     delete myBunchCtor;
 
@@ -460,7 +472,12 @@ int main(int argc, char* argv[])
 /********************
  *  TRACKING RUN	*
  *******************/
-
+	ostringstream cbo_file;
+	cbo_file << bunch_dir << "Every_bunch.txt";
+	ofstream* cboclean = new ofstream(cbo_file.str().c_str(), ios::trunc);
+	ofstream* cbo = new ofstream(cbo_file.str().c_str(), ios::app);		
+	if(!cbo->good())	{ std::cerr << "Could not open every bunch output file" << std::endl; exit(EXIT_FAILURE); }
+	
     // Now all we have to do is create a loop for the number of turns and use the Track() function to perform tracking   
 	
 	for (int turn=1; turn<=nturns; turn++)
@@ -469,6 +486,8 @@ int main(int argc, char* argv[])
 
         myParticleTracker->Track(myBunch);
 
+        if(every_bunch){myBunch->Output(*cbo); }   
+        
         if( myBunch->size() <= 1 ) break;
     }
    
