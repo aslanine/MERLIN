@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "20May_NR_DIFF_4m/";
+		case_dir = "24May_O_DIFF_20keV/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 	
 	bool round_beams			= 0;		// true = -30m, false = -88.6m
-	bool super_non_round  = 0;		// true = -119m
+	bool super_non_round  = 1;		// true = -119m
 		if(super_non_round){round_beams = 0;}
 
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
@@ -646,13 +646,15 @@ int main(int argc, char* argv[])
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 5A - DEFAULT
 		
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 8, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 8A
-		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 10, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 10A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 10, 0.195, 2.334948339E4, 3.0);		// LHC: 3m, 10KeV, 10A
 		
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 4.0);			// LHC: 4m, 10KeV, 5A
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 5.0);			// LHC: 5m, 10KeV, 5A
 				
-		HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 4.0);			// LHC: 4m, 15KeV, 5A
-		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 5.0);			// LHC: 5m, 20KeV, 5A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.2373, 2.334948339E4, 3.0);		// LHC: 3m, 15KeV, 5A
+		HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.2717, 2.334948339E4, 3.0);		// LHC: 3m, 20KeV, 5A
+		
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 10, 0.2717, 2.334948339E4, 5.0);		// LHC: 5m, 20KeV, 10A
 				
 		// 1 = opposite to protons (focussing)
 		myHELProcess->SetElectronDirection(1);
