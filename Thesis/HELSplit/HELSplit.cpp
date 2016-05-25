@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "09May_R_NH/";
+		case_dir = "24May_O_DIFF_20keV/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -102,17 +102,16 @@ int main(int argc, char* argv[])
 			hbunch_dir = bunch_dir + halo_string;			mkdir(hbunch_dir.c_str(), S_IRWXU);
 		}		
 	
-	bool output_fluka_database 	= 1;
+	bool output_fluka_database 	= 0;
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
-	
-
-	bool hel_on 				= 0; 		// Hollow electron lens process?
+		
+	bool hel_on 				= 1; 		// Hollow electron lens process?
 	bool elliptical_HEL			= 0;		// Use elliptical operation
 
 		bool DCon				= 0;
 		bool ACon				= 0;		if(ACon){DCon=0;}
 		bool Turnskipon			= 0;		if(Turnskipon){ACon=0; DCon=0;}
-		bool Diffusiveon		= 0;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
+		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 1;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
 	bool collimation_on 		= 1;
@@ -121,11 +120,12 @@ int main(int argc, char* argv[])
 			cdustbin_dir = dustbin_dir + core_string; 	mkdir(cdustbin_dir.c_str(), S_IRWXU);
 			hdustbin_dir = dustbin_dir + halo_string; 	mkdir(hdustbin_dir.c_str(), S_IRWXU);			
 		}
+	bool jawimpact				= 1;
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 	
-	bool round_beams			= 1;		// true = -30m, false = -88.6m
-	bool super_non_round  = 0;		// true = -119m
+	bool round_beams			= 0;		// true = -30m, false = -88.6m
+	bool super_non_round  = 1;		// true = -119m
 		if(super_non_round){round_beams = 0;}
 
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
@@ -615,6 +615,10 @@ int main(int argc, char* argv[])
 		if(use_sixtrack_like_scattering){	myScatter->SetScatterType(0);	}
 		else{								myScatter->SetScatterType(4);	}
 
+		if(jawimpact){
+			myScatter->SetJawImpact("TCP.C6L7.B1");
+		}
+
 		myCollimateProcess->SetScatteringModel(myScatter);
 
 		myCollimateProcess->SetLossThreshold(200.0);
@@ -639,7 +643,18 @@ int main(int argc, char* argv[])
 		if(seed ==1){cout << "HEL on" << endl;}
 				
 		// HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double length_e);
-		HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 5A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 5A - DEFAULT
+		
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 8, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 8A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 10, 0.195, 2.334948339E4, 3.0);		// LHC: 3m, 10KeV, 10A
+		
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 4.0);			// LHC: 4m, 10KeV, 5A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 5.0);			// LHC: 5m, 10KeV, 5A
+				
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.2373, 2.334948339E4, 3.0);		// LHC: 3m, 15KeV, 5A
+		HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.2717, 2.334948339E4, 3.0);		// LHC: 3m, 20KeV, 5A
+		
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 10, 0.2717, 2.334948339E4, 5.0);		// LHC: 5m, 20KeV, 10A
 				
 		// 1 = opposite to protons (focussing)
 		myHELProcess->SetElectronDirection(1);
