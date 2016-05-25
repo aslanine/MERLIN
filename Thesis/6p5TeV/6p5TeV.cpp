@@ -50,8 +50,8 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 15;					// number of particles to track
-    int nturns = 1E4;					// number of turns to track
+    int npart = 1;					// number of particles to track
+    int nturns = 1;					// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
     //~ if (argc >=2){npart = atoi(argv[1]);}
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 	string pn_dir, case_dir, bunch_dir, lattice_dir, fluka_dir, dustbin_dir;			
 	
 	string output_dir = "/Build/Thesis/outputs/6p5TeV/";
-	string batch_directory="22_May_RF_Phase/";
+	string batch_directory="22_May_Aperture/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 	bool jawinelastic			= 0;
 	bool jawimpact				= 0;
 	
-	bool ap_survey				= 0;
+	bool ap_survey				= 1;
 	bool coll_survey			= 0;
 	bool output_particletracks	= 0;
 	
@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
     delete myApertureConfiguration;
 
 	if(ap_survey){
-		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 0);
+		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.01, 0);
 	}
 		
 	if(coll_survey){
