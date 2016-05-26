@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 	
 	bool batch = 1;
 	if(batch){
-		case_dir = "19May/";
+		case_dir = "25May_NoMCS/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 		
