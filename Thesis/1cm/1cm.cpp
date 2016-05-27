@@ -77,17 +77,17 @@ int main(int argc, char* argv[])
 	
 	bool batch = 1;
 	if(batch){
-		case_dir = "25May_NoMCS/";
+		case_dir = "27MayMCS/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 		
-		case_dir = "S_Comp/";
+		case_dir = "M_Comp/";
 		full_output_dir = (full_output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
 	bool output_initial_bunch 	= 0;
-	bool output_final_bunch 	= 0;		
+	bool output_final_bunch 	= 1;		
 		if (output_initial_bunch || output_final_bunch){
 			//~ bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 
 		}		
@@ -96,17 +96,17 @@ int main(int argc, char* argv[])
 		if(collimation_on){
 			//~ dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
 		}
-	bool use_sixtrack_like_scattering = 1;
+	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 
 	bool symplectic = 1;
 	bool composite	= 1;
 	bool hist 		= 1;
 	
-	bool selectscatter 	= 1;
+	bool selectscatter 	= 0;
 	bool jawimpact 		= 0;
 	bool scatterplot 	= 0;
-	bool jawinelastic 	= 1;
+	bool jawinelastic 	= 0;
 	
 /************************
 *	HISTOGRAM STUFF		*
@@ -114,15 +114,15 @@ int main(int argc, char* argv[])
 	const size_t nbins = 1000;
 	
 	// bin width = bin_max - bin_min / nbin
-	double bob = 5E-6;
+	double bob = 1E-4;
 	//~ const double bin_min_x = -100e-6, bin_max_x = 100e-6;
-	const double bin_min_x = -bob, bin_max_x = bob;
+	const double bin_min_x = -(5*bob), bin_max_x = (5*bob);
 	const double x_bw = (bin_max_x - bin_min_x) / nbins;
 	
 	const double bin_min_xp = -bob, bin_max_xp = bob;	
 	const double xp_bw = (bin_max_xp - bin_min_xp) / nbins;
 	
-	const double bin_min_y = -bob, bin_max_y = bob;	
+	const double bin_min_y = -(5*bob), bin_max_y = (5*bob);	
 	const double y_bw = (bin_max_y - bin_min_y) / nbins;
 	
 	const double bin_min_yp = -bob, bin_max_yp = bob;		
@@ -131,10 +131,10 @@ int main(int argc, char* argv[])
 	const double bin_min_dp = 0, bin_max_dp = 2E-5;
 	const double dp_bw = (bin_max_dp - bin_min_dp) / nbins;
 	
-	const double bin_min_t = -1E10, bin_max_t = 0;
+	const double bin_min_t = -1E12, bin_max_t = 0;
 	const double t_bw = (bin_max_t - bin_min_t) / nbins;
 	
-	const double bin_min_th = 0, bin_max_th = 3E-6;
+	const double bin_min_th = 0, bin_max_th = 1E-4;
 	const double th_bw = (bin_max_th - bin_min_th) / nbins;
 
 	int hist_x[nbins+2] = {0};
@@ -156,22 +156,22 @@ int main(int argc, char* argv[])
 	vector<string> material_names;
 	//~ material_names.push_back("Be");
 	//~ material_names.push_back("B");
-	material_names.push_back("C");
+	//~ material_names.push_back("C");
 	//~ material_names.push_back("O");
 	//~ material_names.push_back("Al");
 	//~ material_names.push_back("Fe");
 	//~ material_names.push_back("Ni");
-	material_names.push_back("Cu");
+	//~ material_names.push_back("Cu");
 	//~ material_names.push_back("CD");
 	//~ material_names.push_back("Mo");
-	material_names.push_back("W");
+	//~ material_names.push_back("W");
 	//~ material_names.push_back("Pb");
-	material_names.push_back("AC150K");
+	//~ material_names.push_back("AC150K");
 	//~ material_names.push_back("Mo2C");
-	material_names.push_back("GCOP");
-	material_names.push_back("IT180");
+	//~ material_names.push_back("GCOP");
+	//~ material_names.push_back("IT180");
 	material_names.push_back("CuCD");
-	material_names.push_back("MoGr");
+	//~ material_names.push_back("MoGr");
 
 /************************
 *	BEAM  SETTINGS	*

@@ -816,10 +816,10 @@ void ScatteringModel::OutputSelectScatterHistogram(string directory, int n, int 
 		if(n==4){bin_max_dp = 0.15;}
 		const double dp_bw = (bin_max_dp - bin_min_dp) / nbins;
 		
-		const double bin_min_t = -1E10, bin_max_t = 0;
+		const double bin_min_t = -1E12, bin_max_t = 0;
 		const double t_bw = (bin_max_t - bin_min_t) / nbins;
 		
-		const double bin_min_th = 0, bin_max_th = 3E-6;
+		const double bin_min_th = 0, bin_max_th = 1E-4;
 		const double th_bw = (bin_max_th - bin_min_th) / nbins;
 		
 		int hist_x[nbins+2] = {0};
