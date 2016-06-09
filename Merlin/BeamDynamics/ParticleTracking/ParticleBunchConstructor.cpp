@@ -321,7 +321,7 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		//~ double sigx = sqrt(beamdat.emit_x * beamdat.beta_x);
 		// M.Apply
 		//~ double sigx = sqrt(beamdat.emit_x) * beamdat.beta_x * 0.5;
-		double sigx = sqrt(beamdat.emit_x);
+
 		//~ double sigy = sqrt(beamdat.emit_y);
 		
 		//Nominal LHC		
@@ -340,9 +340,15 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 		//~ sigx = (sqrt(pow(sigx,2)));
 		
 		//~ double first = 1*sigx; 
-		//~ double last = 10*sigx; 			
+		//~ double last = 10*sigx; 
+		
+		double sigx = sqrt(beamdat.emit_x);
+		double sigz = beamdat.sig_z;
+		
 		double first = beamdat.min_sig_x * sigx;
 		double last = beamdat.max_sig_x * sigx;
+		//~ double first = beamdat.min_sig_x * sigz;
+		//~ double last = beamdat.max_sig_x * sigz;
 		
 		//~ double first = 4*sigx; 
 		//~ double last = 5.9*sigx; 	
@@ -360,11 +366,13 @@ void ParticleBunchConstructor::ConstructBunchDistribution (int bunchIndex) const
 
 			//~ double test = rx*u;	
 			p.x()	= (first + ((i-1) * steps));
-			p.xp() = 0.0;			
+			//~ p.x()	= 0.0;
+			p.xp() 	= 0.0;			
 			p.y()	= 0.0;
 			p.yp()	= 0.0;
 			p.dp()	= 0.0;
 			p.ct()	= 0.0;               
+			//~ p.ct()	= (first + ((i-1) * steps));            
 			//~ p.dp()	= RandomNG::uniform(-beamdat.sig_dp,beamdat.sig_dp);
 			//~ p.ct()	= RandomNG::uniform(-beamdat.sig_z,beamdat.sig_z);	               
 			M.Apply(p);
