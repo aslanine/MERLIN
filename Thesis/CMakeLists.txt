@@ -49,6 +49,7 @@ thesis_run(TevHELSplit TevHELSplit TevHELSplit.cpp)
 thesis_run(1cm 1cm 1cm.cpp)
 thesis_run(7TeV_nominal_B1 7TeV_nominal_B1 7TeV_nominal_B1.cpp)
 thesis_run(HL_TCLD HL_TCLD HL_TCLD.cpp)
+thesis_run(DetOTM DetOTM DetOTM.cpp)
 
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
 INCLUDE(Dart)

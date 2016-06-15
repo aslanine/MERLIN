@@ -5,6 +5,7 @@
 #include "RingDynamics/ClosedOrbit.h"
 #include "RingDynamics/TransferMatrix.h"
 #include "NumericalUtils/MatrixPrinter.h"
+#include "BeamDynamics/ParticleTracking/Integrators/SymplecticIntegrators.h"
 
 using namespace ParticleTracking;
 
@@ -94,7 +95,10 @@ void TransferMatrix::FindTM(RealMatrix& M, PSvector& orbit)
 	//MatrixForm(M,std::cout,OPFormat().precision(6).fixed());
 //	bunch.Output(std::cout);
     ParticleTracker tracker(theModel->GetRing(obspnt),&bunch,false);
-
+    
+    //~ tracker.SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
+	tracker.SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());
+	
     if(radiation) {
         SynchRadParticleProcess* srproc = new SynchRadParticleProcess(1);
 

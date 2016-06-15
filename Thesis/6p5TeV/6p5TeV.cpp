@@ -50,8 +50,8 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 6.4E6;					// number of particles to track
-    int nturns = 200;					// number of turns to track
+    int npart = 1;					// number of particles to track
+    int nturns = 1;					// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
     //~ if (argc >=2){npart = atoi(argv[1]);}
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 	string pn_dir, case_dir, bunch_dir, lattice_dir, fluka_dir, dustbin_dir;			
 	
 	string output_dir = "/Build/Thesis/outputs/6p5TeV/";
-	string batch_directory="20_May_Pure_Trans/";
+	string batch_directory="22_May_Aperture/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -92,8 +92,8 @@ int main(int argc, char* argv[])
 	fluka_dir = full_output_dir + "Fluka/";    
 	mkdir(fluka_dir.c_str(), S_IRWXU); 
 	
-	bool every_bunch			= 0;		// output whole bunch every turn in a single file
-	bool rf_test				= 0;		// Use RF distribution to plot RF bucket
+	bool every_bunch			= 1;		// output whole bunch every turn in a single file
+	bool rf_test				= 1;		// Use RF distribution to plot RF bucket
 	bool output_initial_bunch 	= 0;
 	bool output_final_bunch 	= 0;
 		if (output_initial_bunch || output_final_bunch || every_bunch){
@@ -101,23 +101,23 @@ int main(int argc, char* argv[])
 		}	
 	
 	bool output_fluka_database 	= 0;
-	bool output_twiss			= 1;		
+	bool output_twiss			= 0;		
 		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
-	bool collimation_on 		= 1;
+	bool collimation_on 		= 0;
 		if(collimation_on){
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
 		}		
 	bool use_sixtrack_like_scattering = 0;
 	bool scatterplot			= 0;
-	bool jawinelastic			= 1;
-	bool jawimpact				= 1;
+	bool jawinelastic			= 0;
+	bool jawimpact				= 0;
 	
-	bool ap_survey				= 0;
+	bool ap_survey				= 1;
 	bool coll_survey			= 0;
 	bool output_particletracks	= 0;
 	
-	bool cleaning				= 1;
+	bool cleaning				= 0;
 		if(cleaning){
 			collimation_on		= 1;
 			every_bunch			= 0;	
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 			output_final_bunch	= 0;
 		}
 	
-	bool symplectic				= 0;
+	bool symplectic				= 1;
 	bool sixD					= 1;
 	
 	bool CollMat				= 0;	// 0 = pure, 1 = composite
@@ -150,8 +150,8 @@ int main(int argc, char* argv[])
 	myAccModel->ExtractTypedElements(RFCavities,"ACS*");
 	Klystron* Kly1 = new Klystron("KLY1",RFCavities);
 	Kly1->SetVoltage(0.0);
-	Kly1->SetPhase(pi/2); 
-	//~ Kly1->SetPhase(0); 
+	//~ Kly1->SetPhase(pi/2); 
+	Kly1->SetPhase(pi/4); 
 	
 /************
 *	TWISS	*
@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
     delete myApertureConfiguration;
 
 	if(ap_survey){
-		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 0);
+		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.01, 0);
 	}
 		
 	if(coll_survey){

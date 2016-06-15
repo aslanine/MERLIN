@@ -15,6 +15,7 @@
 #include "BeamDynamics/ParticleTracking/ParticleBunch.h"
 #include "BeamDynamics/ParticleTracking/SynchRadParticleProcess.h"
 #include "BeamDynamics/ParticleTracking/RingDeltaTProcess.h"
+#include "BeamDynamics/ParticleTracking/Integrators/SymplecticIntegrators.h"
 #include "RingDynamics/ClosedOrbit.h"
 #include "TLAS/TLASimp.h"
 
@@ -25,7 +26,11 @@ using namespace ParticleTracking;
 ClosedOrbit::ClosedOrbit(AcceleratorModel* aModel, double refMomentum)
         : theModel(aModel), p0(refMomentum), transverseOnly(false), radiation(false), useFullAcc(false),
         delta(1.0e-7), tol(1.0e-26), max_iter(20), bendscale(0), theTracker(new ParticleTracker)
-{}
+{
+	//~ theTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
+	theTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());
+
+}
 
 ClosedOrbit::~ClosedOrbit()
 {
