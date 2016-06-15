@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 1E2;				// number of particles to track
-    int nturns = 1;					// number of turns to track
+    int npart = 6.4E6;				// number of particles to track
+    int nturns = 200;				// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
     if (argc >=2){npart = atoi(argv[1]);}
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/Thesis/outputs/HL_TCLD/";
 
 		
-	string batch_directory="17May_Twiss/";
+	string batch_directory="24May_CuCD_2TCLD/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -94,13 +94,13 @@ int main(int argc, char* argv[])
 	fluka_dir = full_output_dir + "Fluka/";    
 	mkdir(fluka_dir.c_str(), S_IRWXU); 
 		
-	bool output_initial_bunch 	= 1;
+	bool output_initial_bunch 	= 0;
 	bool output_final_bunch 	= 0;
 		if (output_initial_bunch || output_final_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
 		}	
 	
-	bool output_fluka_database 	= 0;
+	bool output_fluka_database 	= 1;
 	bool output_twiss			= 1;		
 		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
@@ -122,8 +122,11 @@ int main(int argc, char* argv[])
 	
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
 		
-	// 0=pure, 1=composite, 2=1st TCLD, 3=2 TCLDs.
+	//~ // 0=pure, 1=composite, 2=1st TCLD, 3=2 TCLDs.
+	//~ int CollMat					= 3;
+	// 0=pure, 1=composite, 2=2e MoGr, 3=2e CuCD
 	int CollMat					= 3;
+	int TCLD_count				= 2;
 	
 	
 /************************************
@@ -223,14 +226,90 @@ int main(int argc, char* argv[])
     CollimatorDatabase* collimator_db;
 	
 	switch(CollMat){
-		case 0:	collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_00_Pure.txt", myMaterialDatabase,  true);
-		break;
-		case 1:	collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_00_Composite.txt", myMaterialDatabase,  true);
-		break;
-		case 2:	collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_10_Composite.txt", myMaterialDatabase,  true);
-		break;
-		case 3:	collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_11_Composite.txt", myMaterialDatabase,  true);
-		break;
+		// Pure
+		case 0:	{
+			switch(TCLD_count){
+				// 0 TCLDs
+				case 0:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_00_Pure.txt", myMaterialDatabase,  true);
+					break;
+				}
+				// 1 TCLDs
+				case 1: {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_10_Pure.txt", myMaterialDatabase,  true);
+					break;
+				}
+				// 2 TCLDs
+				case 2: {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_11_Pure.txt", myMaterialDatabase,  true);
+					break;
+				}
+			}
+			break;
+		}
+		// Composite
+		case 1:	{
+			switch(TCLD_count){
+				// 0 TCLDs
+				case 0:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_00_Composite.txt", myMaterialDatabase,  true);
+					break;
+				}
+				// 1 TCLDs
+				case 1:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_10_Composite.txt", myMaterialDatabase,  true);
+					break;
+				}
+				// 2 TCLDs
+				case 2:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_11_Composite.txt", myMaterialDatabase,  true);
+					break;
+				}
+			}
+			break;
+		}
+		// MoGr 2e
+		case 2:	{
+			switch(TCLD_count){
+				// 0 TCLDs
+				case 0:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_00_2e_MoGr.txt", myMaterialDatabase,  true);
+					break;
+				}
+				// 1 TCLDs
+				case 1:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_10_2e_MoGr.txt", myMaterialDatabase,  true);
+					break;
+				}
+				// 2 TCLDs
+				case 2:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_11_2e_MoGr.txt", myMaterialDatabase,  true);
+					break;
+				}
+			}
+			break;
+		}
+		// CuCD 2e
+		case 3:	{
+			switch(TCLD_count){
+				// 0 TCLDs
+				case 0:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_00_2e_CuCD.txt", myMaterialDatabase,  true);
+					break;
+				}
+				// 1 TCLDs
+				case 1:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_10_2e_CuCD.txt", myMaterialDatabase,  true);
+					break;
+				}
+				// 2 TCLDs
+				case 2:  {
+					collimator_db = new CollimatorDatabase( directory+input_dir+"CollDB_11_2e_CuCD.txt", myMaterialDatabase,  true);
+					break;
+				}
+			break;
+			}
+		}
 	}
     collimator_db->MatchBeamEnvelope(true);
     collimator_db->EnableJawAlignmentErrors(false);
