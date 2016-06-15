@@ -84,9 +84,8 @@ int main(int argc, char* argv[])
 	input_dir 	= "/Thesis/data/HL_TCLD/";
 	output_dir 	= "/Build/Thesis/outputs/HL_TCLD/";
 
-		
-	string batch_directory="24May_CuCD_2TCLD/";
-	 
+	string batch_directory="13June_FDb/";
+
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
 	full_output_dir = (directory+output_dir+batch_directory);
@@ -332,14 +331,14 @@ int main(int argc, char* argv[])
     cout << "Impact factor number of sigmas: " << impact << endl;
     
     
-    if(output_fluka_database && seed == 1){
+    //~ if(output_fluka_database && seed == 1){
 		ostringstream fd_output_file;
 		fd_output_file << (full_output_dir+"fluka_database.txt");
 
 		ofstream* fd_output = new ofstream(fd_output_file.str().c_str());
 		collimator_db->OutputFlukaDatabase(fd_output);
 		delete fd_output;
-	}
+	//~ }
     delete collimator_db;
     
 /****************************
