@@ -912,21 +912,38 @@ void CollimatorDatabase::OutputFlukaDatabase(std::ostream* os)
 	(*os) << "# ID\tname\tangle[rad]\tbetax[m]\tbetay[m]\thalfgap[m]\tMaterial\tLength[m]\tsigx[m]\tsigy[m]\ttilt1[rad]\ttilt2[rad]\tnsig" << endl;
 	for(vector<FlukaData*>::iterator its = StoredFlukaData.begin(); its != StoredFlukaData.end(); ++its)
 	{
-		(*os) << setw(6) << left << (*its)->id_coll;
-		(*os) << setw(20) << left << (*its)->name;
+		//~ (*os) << setw(6) << left << (*its)->id_coll;
+		//~ (*os) << setw(20) << left << (*its)->name;
+		//~ //(*os) << setw(20) << left << (*its)->position;
+		//~ (*os) << setw(12) << left << (*its)->angle;
+		//~ (*os) << setw(12) << setprecision(20) << left << (*its)->beta_x;
+		//~ (*os) << setw(12) << setprecision(20) << left << (*its)->beta_y;
+		//~ (*os) << setw(12) << setprecision(20) << left << (*its)->half_gap;
+		//~ (*os) << setw(6) << left << (*its)->material;
+		//~ (*os) << setw(12) << left << (*its)->length;
+		//~ (*os) << setw(20) << left << (*its)->sig_x;
+		//~ (*os) << setw(20) << left << (*its)->sig_y;
+		//~ (*os) << setw(12) << left << (*its)->j1_tilt;
+		//~ (*os) << setw(12) << left << (*its)->j2_tilt;
+		//~ (*os) << setw(12) << left << (*its)->n_sig;
+		//~ (*os) << endl;
+		
+		(*os) << "\t" << left << (*its)->id_coll;
+		(*os) << "\t"  << left << (*its)->name;
 		//~ (*os) << setw(20) << left << (*its)->position;
-		(*os) << setw(12) << left << (*its)->angle;
-		(*os) << setw(12) << setprecision(20) << left << (*its)->beta_x;
-		(*os) << setw(12) << setprecision(20) << left << (*its)->beta_y;
-		(*os) << setw(12) << setprecision(20) << left << (*its)->half_gap;
-		(*os) << setw(6) << left << (*its)->material;
-		(*os) << setw(12) << left << (*its)->length;
-		(*os) << setw(20) << left << (*its)->sig_x;
-		(*os) << setw(20) << left << (*its)->sig_y;
-		(*os) << setw(12) << left << (*its)->j1_tilt;
-		(*os) << setw(12) << left << (*its)->j2_tilt;
-		(*os) << setw(12) << left << (*its)->n_sig;
+		(*os) << "\t"  << left << (*its)->angle;
+		(*os) << "\t"  << setprecision(20) << (*its)->beta_x;
+		(*os) << "\t"  << setprecision(20) << (*its)->beta_y;
+		(*os) << "\t"  << setprecision(20) << (*its)->half_gap;
+		(*os) << "\t"  << left << (*its)->material;
+		(*os) << "\t"  << left << (*its)->length;
+		(*os) << "\t"  << left << (*its)->sig_x;
+		(*os) << "\t"  << left << (*its)->sig_y;
+		(*os) << "\t"  << left << (*its)->j1_tilt;
+		(*os) << "\t"  << left << (*its)->j2_tilt;
+		(*os) << "\t"  << left << (*its)->n_sig;
 		(*os) << endl;
+		
 	}
 }
 

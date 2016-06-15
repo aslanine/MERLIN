@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/Thesis/outputs/HL_TCLD/";
 
 		
-	string batch_directory="17May_Twiss/";
+	string batch_directory="13June_FDb/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
 		}	
 	
-	bool output_fluka_database 	= 0;
+	bool output_fluka_database 	= 1;
 	bool output_twiss			= 1;		
 		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
@@ -253,14 +253,14 @@ int main(int argc, char* argv[])
     cout << "Impact factor number of sigmas: " << impact << endl;
     
     
-    if(output_fluka_database && seed == 1){
+    //~ if(output_fluka_database && seed == 1){
 		ostringstream fd_output_file;
 		fd_output_file << (full_output_dir+"fluka_database.txt");
 
 		ofstream* fd_output = new ofstream(fd_output_file.str().c_str());
 		collimator_db->OutputFlukaDatabase(fd_output);
 		delete fd_output;
-	}
+	//~ }
     delete collimator_db;
     
 /****************************
