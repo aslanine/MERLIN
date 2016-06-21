@@ -1,5 +1,5 @@
 %% Script to merge split data and plot no_particles for HL-LHC HEL Runs
-
+clear all;
 %% List of all directories
 
 %% Current Modulating
@@ -37,7 +37,10 @@
 
 % Current
 % '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/DIFF/NR'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/NR_6A'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/NR_7A'
 % '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/NR_8A'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/NR_9A'
 % '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/NR_10A'
 % '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/R_10A'
 % '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/O_10A'
@@ -48,8 +51,18 @@
 % '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Length/R_5m'
 % '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Length/O_5m'
 % Energy
-
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/DIFF/NR'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Energy/NR_15keV'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Energy/NR_20keV'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Energy/R_20keV'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Energy/O_20keV'
 % Max
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/DIFF/NR'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/DIFF/R'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/DIFF/O'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/MAX/NR_Max'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/MAX/R_Max'
+% '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/MAX/O_Max'
 
 %% Import data files
 clear all;
@@ -106,7 +119,7 @@ end
 clear A list;
 
 %% HD
-cd('/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Length/R_5m');
+cd('/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/R_10A');
 list = dir('*.txt'); 
 HD = zeros(turns, 2); A = zeros(turns, 2);
 for ii = 1:length(list)
@@ -122,7 +135,7 @@ end
 clear A list;
 
 %% HE
-cd('/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Length/NR_5m');
+cd('/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/NR_10A');
 list = dir('*.txt'); 
 HE = zeros(turns, 2); A = zeros(turns, 2);
 for ii = 1:length(list)
@@ -137,7 +150,7 @@ for ii = 1:length(list)
 end
 clear A list;
 %% HF
-cd('/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Length/O_5m');
+cd('/home/HR/Downloads/MERLIN_HRThesis/MERLIN/PLOTS/24May_HEL/CurrentModulating/Current/O_10A');
 list = dir('*.txt'); 
 HF = zeros(turns, 2); A = zeros(turns, 2);
 for ii = 1:length(list)
@@ -166,14 +179,24 @@ plot(HD(:,1), HD(:,2)/npart, ':', 'Color', 'k', 'LineWidth', 3), hold on;
 plot(HE(:,1), HE(:,2)/npart, ':', 'Color', c_orange, 'LineWidth', 3), hold on;
 plot(HF(:,1), HF(:,2)/npart, ':', 'Color', c_dodger, 'LineWidth', 3), hold on;
 
+% plot(HA(:,1), HA(:,2)/npart, '-', 'Color', 'k', 'LineWidth', 3), hold on;
+% plot(HB(:,1), HB(:,2)/npart, '-', 'Color', 'r', 'LineWidth', 3), hold on;
+% plot(HC(:,1), HC(:,2)/npart, '-', 'Color', 'g', 'LineWidth', 3), hold on;
+% plot(HD(:,1), HD(:,2)/npart, '-', 'Color', c_dodger, 'LineWidth', 3), hold on;
+% plot(HE(:,1), HE(:,2)/npart, '-', 'Color', c_orange, 'LineWidth', 3), hold on;
+% plot(HF(:,1), HF(:,2)/npart, '-', 'Color', c_dodger, 'LineWidth', 3), hold on;
+
 %% Legend
 
-legend('Location', 'southwest', 'R 3 [m]', 'NR 3 [m]', 'O 3 [m]', 'R 5 [m]', 'NR 5 [m]', 'O 5 [m]');
+% legend('Location', 'southwest', 'R 3 [m]', 'NR 3 [m]', 'O 3 [m]', 'R 5 [m]', 'NR 5 [m]', 'O 5 [m]');
+% legend('Location', 'southwest', 'R', 'NR', 'O', 'R Max', 'NR Max', 'O Max');
+legend('Location', 'southwest', 'R 5 [A]', 'NR 5 [A]', 'O 5 [A]', 'R 10 [A]', 'NR 10 [A]', 'O 10 [A]');
+% legend('Location', 'southwest', 'R 10 [keV]',  'NR 10 [keV]', 'O 10 [keV]','R 20 [keV]', 'NR 20 [keV]', 'O 20 [keV]');
 
 
 %% Plot Settings
 
-title ('Length','FontSize',16);
+title ('Current','FontSize',16);
 % Full axes
 set(gca,'FontSize',16,'XLim',[0 1E5],'Xtick',[0:1E4:1E5],'YLim',[0 1],'Ytick',[0:0.1:1],'PlotBoxAspectRatio',[4 2 2]);
 % Zoom axes
