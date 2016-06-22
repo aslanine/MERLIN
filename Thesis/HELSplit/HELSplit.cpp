@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     int seed = (int)time(NULL);                 // seed for random number generators
     int iseed = (int)time(NULL);                 // seed for random number generators
     int ncorepart 	= 1;						// number of core particles to track
-    int npart 		= 1E3;                     	// number of halo particles to track
+    int npart 		= 1E4;                     	// number of halo particles to track
     int nturns 		= 1E5;                      // number of turns to track
        
     //~ if (argc >=2){npart = atoi(argv[1]);}
@@ -67,9 +67,9 @@ int main(int argc, char* argv[])
     if(seed ==1){cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;}
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
-	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
 	string core_string =  "Core/";
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "24May_O_DIFF_20keV/";
+		case_dir = "15Jun_NR_DIFF_2m/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 	
 	bool round_beams			= 0;		// true = -30m, false = -88.6m
-	bool super_non_round  = 1;		// true = -119m
+	bool super_non_round  = 0;		// true = -119m
 		if(super_non_round){round_beams = 0;}
 
 	// REMEMBER TO CHANGE DISTRIBUTION SIGMA
@@ -645,17 +645,26 @@ int main(int argc, char* argv[])
 		// HollowELensProcess (int priority, int mode, double current, double beta_e, double rigidity, double length_e);
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 5A - DEFAULT
 		
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 6, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 6A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 7, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 7A
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 8, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 8A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 9, 0.195, 2.334948339E4, 3.0);			// LHC: 3m, 10KeV, 9A
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 10, 0.195, 2.334948339E4, 3.0);		// LHC: 3m, 10KeV, 10A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 11, 0.195, 2.334948339E4, 3.0);		// LHC: 3m, 10KeV, 11A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 12, 0.195, 2.334948339E4, 3.0);		// LHC: 3m, 10KeV, 12A
 		
+		HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 2.0);			// LHC: 2m, 10KeV, 5A
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 4.0);			// LHC: 4m, 10KeV, 5A
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 5.0);			// LHC: 5m, 10KeV, 5A
-				
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.195, 2.334948339E4, 6.0);			// LHC: 6m, 10KeV, 5A
+		
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.1414, 2.334948339E4, 3.0);		// LHC: 3m, 5KeV, 5A
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.2373, 2.334948339E4, 3.0);		// LHC: 3m, 15KeV, 5A
-		HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.2717, 2.334948339E4, 3.0);		// LHC: 3m, 20KeV, 5A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.2717, 2.334948339E4, 3.0);		// LHC: 3m, 20KeV, 5A
+		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 5, 0.30184, 2.334948339E4, 3.0);		// LHC: 3m, 25KeV, 5A
 		
 		//~ HollowELensProcess* myHELProcess = new HollowELensProcess(3, 1, 10, 0.2717, 2.334948339E4, 5.0);		// LHC: 5m, 20KeV, 10A
-				
+							
 		// 1 = opposite to protons (focussing)
 		myHELProcess->SetElectronDirection(1);
 				
