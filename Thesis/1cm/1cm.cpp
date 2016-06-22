@@ -77,11 +77,11 @@ int main(int argc, char* argv[])
 	
 	bool batch = 1;
 	if(batch){
-		case_dir = "27MayMCS/";
+		case_dir = "21JunAll/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 		
-		case_dir = "M_Comp/";
+		case_dir = "MScatter/";
 		full_output_dir = (full_output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 	bool composite	= 1;
 	bool hist 		= 1;
 	
-	bool selectscatter 	= 0;
+	bool selectscatter 	= 1;
 	bool jawimpact 		= 0;
 	bool scatterplot 	= 0;
 	bool jawinelastic 	= 0;
@@ -119,22 +119,22 @@ int main(int argc, char* argv[])
 	const double bin_min_x = -(5*bob), bin_max_x = (5*bob);
 	const double x_bw = (bin_max_x - bin_min_x) / nbins;
 	
-	const double bin_min_xp = -bob, bin_max_xp = bob;	
+	const double bin_min_xp = -1E-6, bin_max_xp = 1E-6;	
 	const double xp_bw = (bin_max_xp - bin_min_xp) / nbins;
 	
 	const double bin_min_y = -(5*bob), bin_max_y = (5*bob);	
 	const double y_bw = (bin_max_y - bin_min_y) / nbins;
 	
-	const double bin_min_yp = -bob, bin_max_yp = bob;		
+	const double bin_min_yp = -1E-6, bin_max_yp = 1E-6;		
 	const double yp_bw = (bin_max_yp - bin_min_yp) / nbins;
 	
-	const double bin_min_dp = 0, bin_max_dp = 2E-5;
+	const double bin_min_dp = 0, bin_max_dp = 5E-6;
 	const double dp_bw = (bin_max_dp - bin_min_dp) / nbins;
 	
-	const double bin_min_t = -1E12, bin_max_t = 0;
+	const double bin_min_t = -1E10, bin_max_t = 0;
 	const double t_bw = (bin_max_t - bin_min_t) / nbins;
 	
-	const double bin_min_th = 0, bin_max_th = 1E-4;
+	const double bin_min_th = 0, bin_max_th = 1E-5;
 	const double th_bw = (bin_max_th - bin_min_th) / nbins;
 
 	int hist_x[nbins+2] = {0};
@@ -166,11 +166,11 @@ int main(int argc, char* argv[])
 	//~ material_names.push_back("Mo");
 	//~ material_names.push_back("W");
 	//~ material_names.push_back("Pb");
-	//~ material_names.push_back("AC150K");
+	material_names.push_back("AC150K");
 	//~ material_names.push_back("Mo2C");
 	//~ material_names.push_back("GCOP");
 	//~ material_names.push_back("IT180");
-	material_names.push_back("CuCD");
+	//~ material_names.push_back("CuCD");
 	//~ material_names.push_back("MoGr");
 
 /************************
@@ -306,6 +306,7 @@ int main(int argc, char* argv[])
 				myScatter->OutputSelectScatterHistogram(mat_dir, 2, nbins, 1);
 				myScatter->OutputSelectScatterHistogram(mat_dir, 3, nbins, 1);
 				myScatter->OutputSelectScatterHistogram(mat_dir, 4, nbins, 1);
+				myScatter->OutputSelectScatterHistogram(mat_dir, 6, nbins, 1);
 						}
 			myScatter->OutputSelectScatter(mat_dir);
 		}
@@ -383,7 +384,7 @@ int main(int argc, char* argv[])
 			**	Output Final Hist
 			*********************************************************************/
 				ostringstream hist_output_file;
-				hist_output_file << mat_dir << "hist_MCS_" << *pit <<"_.txt";
+				hist_output_file << mat_dir << "HIST_" << *pit <<"_5.txt";
 				ofstream* out2 = new ofstream(hist_output_file.str().c_str());
 				if(!out2->good()){ std::cerr << "Could not open MCS hist output file for material " << *pit << std::endl; exit(EXIT_FAILURE); }  
 				

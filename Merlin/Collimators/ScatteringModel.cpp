@@ -800,27 +800,68 @@ void ScatteringModel::OutputSelectScatterHistogram(string directory, int n, int 
 	
 	for(vector<string>::iterator name = SelectScatterNames.begin(); name != SelectScatterNames.end(); ++name){
 		double bob = 1E-4;
-		const double bin_min_x = -(5*bob), bin_max_x = (5*bob);
+		//~ const double micro = 1E-6;		
+		
+		double bin_min_x;
+		double bin_min_xp;				
+		double bin_min_y;				
+		double bin_min_yp;						
+		double bin_min_dp;			
+		double bin_min_t;			
+		double bin_min_th;	
+		double bin_max_x;
+		double bin_max_xp;				
+		double bin_max_y;				
+		double bin_max_yp;						
+		double bin_max_dp;			
+		double bin_max_t;			
+		double bin_max_th;	
+		
 		const double x_bw = (bin_max_x - bin_min_x) / nbins;
 		
-		const double bin_min_xp = -bob, bin_max_xp = bob;	
+		if(n==2){
+			bin_min_x = -(5*bob), bin_max_x = (5*bob);
+			bin_min_xp = -5E-5, bin_max_xp = 5E-5;				
+			bin_min_y = -(5*bob), bin_max_y = (5*bob);				
+			bin_min_yp = -5E-5, bin_max_xp = 5E-5;							
+			bin_min_dp = 0, bin_max_dp = 2E-5;			
+			bin_min_t = -1E11, bin_max_t = 0;			
+			bin_min_th = 0, bin_max_th = 5E-5;	
+		}
+		else if(n==3){
+			bin_min_x = -(5*bob), bin_max_x = (5*bob);
+			bin_min_xp = -1E-4, bin_max_xp = 1E-4;				
+			bin_min_y = -(5*bob), bin_max_y = (5*bob);				
+			bin_min_yp = -1E-4, bin_max_yp = 1E-4;						
+			bin_min_dp = 0, bin_max_dp = 2E-5;			
+			bin_min_t = -4E11, bin_max_t = 0;			
+			bin_min_th = 0, bin_max_th = 1E-4;	
+		}
+		else if(n==4){
+			bin_min_x = -(5*bob), bin_max_x = (5*bob);
+			bin_min_xp = -1E-4, bin_max_xp = 1E-4;					
+			bin_min_y = -(5*bob), bin_max_y = (5*bob);				
+			bin_min_yp = -1E-4, bin_max_xp = 1E-4;							
+			bin_min_dp = 0, bin_max_dp = 0.15;			
+			bin_min_t = -1E12, bin_max_t = 0;			
+			bin_min_th = 0, bin_max_th = 1E-4;	
+		}
+		else{				
+			bin_min_x = -(5*bob), bin_max_x = (5*bob);
+			bin_min_xp = -bob, bin_max_xp = bob;				
+			bin_min_y = -(5*bob), bin_max_y = (5*bob);				
+			bin_min_yp = -bob, bin_max_yp = bob;						
+			bin_min_dp = 0, bin_max_dp = 2E-5;			
+			bin_min_t = -1E12, bin_max_t = 0;			
+			bin_min_th = 0, bin_max_th = 1E-4;		
+		}
+		
 		const double xp_bw = (bin_max_xp - bin_min_xp) / nbins;
-		
-		const double bin_min_y = -(5*bob), bin_max_y = (5*bob);	
 		const double y_bw = (bin_max_y - bin_min_y) / nbins;
-		
-		const double bin_min_yp = -bob, bin_max_yp = bob;		
-		const double yp_bw = (bin_max_yp - bin_min_yp) / nbins;		
-		
-		double bin_min_dp = 0, bin_max_dp = 2E-5;
-		if(n==4){bin_max_dp = 0.15;}
+		const double yp_bw = (bin_max_yp - bin_min_yp) / nbins;	
 		const double dp_bw = (bin_max_dp - bin_min_dp) / nbins;
-		
-		const double bin_min_t = -1E12, bin_max_t = 0;
 		const double t_bw = (bin_max_t - bin_min_t) / nbins;
-		
-		const double bin_min_th = 0, bin_max_th = 1E-4;
-		const double th_bw = (bin_max_th - bin_min_th) / nbins;
+		const double th_bw = (bin_max_th - bin_min_th) / nbins;			
 		
 		int hist_x[nbins+2] = {0};
 		int hist_xp[nbins+2] = {0};
