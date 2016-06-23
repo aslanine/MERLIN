@@ -47,7 +47,7 @@ using namespace PhysicalUnits;
 int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);                 // seed for random number generators
-    int npart 			= 1;                     	// number of halo particles to track
+    int npart 			= 1E6;                     	// number of halo particles to track
     int nleft = npart;
        
     if (argc >=2){npart = atoi(argv[1]);}
@@ -82,13 +82,13 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "25_Apr_MoGr/";
+		case_dir = "22_Jun_NonComp/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
 	
-	bool output_initial_bunch 	= 1;
-	bool output_final_bunch 	= 1;		
+	bool output_initial_bunch 	= 0;
+	bool output_final_bunch 	= 0;		
 		if (output_initial_bunch || output_final_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 
 		}		
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 	bool use_sixtrack_like_scattering = 0;
 	bool cut_distn				= 0;
 			
-	bool cleaning				= 1;
+	bool cleaning				= 0;
 		if(cleaning){
 			collimation_on		= 1;
 			cut_distn			= 0;	//not needed for helhalo	
@@ -141,19 +141,19 @@ int main(int argc, char* argv[])
 	vector<string> material_names;
 	//~ material_names.push_back("Be");
 	//~ material_names.push_back("B");
-	//~ material_names.push_back("C");
+	material_names.push_back("C");
 	//~ material_names.push_back("O");
 	//~ material_names.push_back("Al");
 	//~ material_names.push_back("Fe");
 	//~ material_names.push_back("Ni");
-	//~ material_names.push_back("Cu");
+	material_names.push_back("Cu");
 	//~ material_names.push_back("CD");
 	//~ material_names.push_back("Mo");
-	//~ material_names.push_back("W");
+	material_names.push_back("W");
 	//~ material_names.push_back("Pb");
-	//~ material_names.push_back("AC150K");
-	//~ material_names.push_back("GCOP");
-	//~ material_names.push_back("IT180");
+	material_names.push_back("AC150K");
+	material_names.push_back("GCOP");
+	material_names.push_back("IT180");
 	//~ material_names.push_back("Mo2C");
 	material_names.push_back("CuCD");
 	material_names.push_back("MoGr");
@@ -349,7 +349,7 @@ int main(int argc, char* argv[])
 		**	Output Final Hist
 		*********************************************************************/
 			ostringstream hist_output_file;
-			hist_output_file << bunch_dir << "hist_" << *pit <<"_.txt";
+			hist_output_file << full_output_dir << "hist_" << *pit <<"_.txt";
 			ofstream* out2 = new ofstream(hist_output_file.str().c_str());
 			if(!out2->good()){ std::cerr << "Could not open finalbunch output file for material " << *pit << std::endl; exit(EXIT_FAILURE); }  
 
