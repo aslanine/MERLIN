@@ -863,13 +863,21 @@ void ScatteringModel::OutputSelectScatterHistogram(string directory, int n, int 
 		const double t_bw = (bin_max_t - bin_min_t) / nbins;
 		const double th_bw = (bin_max_th - bin_min_th) / nbins;			
 		
-		int hist_x[nbins+2] = {0};
-		int hist_xp[nbins+2] = {0};
-		int hist_y[nbins+2] = {0};
-		int hist_yp[nbins+2] = {0};
-		int hist_dp[nbins+2] = {0};
-		int hist_t[nbins+2] = {0};
-		int hist_th[nbins+2] = {0};	
+		//~ int hist_x[nbins+2] = {0};
+		//~ int hist_xp[nbins+2] = {0};
+		//~ int hist_y[nbins+2] = {0};
+		//~ int hist_yp[nbins+2] = {0};
+		//~ int hist_dp[nbins+2] = {0};
+		//~ int hist_t[nbins+2] = {0};
+		//~ int hist_th[nbins+2] = {0};	
+		
+		int hist_x[nbins+2];
+		int hist_xp[nbins+2];
+		int hist_y[nbins+2];
+		int hist_yp[nbins+2];
+		int hist_dp[nbins+2];
+		int hist_t[nbins+2];
+		int hist_th[nbins+2];	
 		
 		int cut_type = 0;
 		
