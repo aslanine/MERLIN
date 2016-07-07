@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "22_Jun_NonComp/";
+		case_dir = "23_Jun_SNonComp/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 		if(collimation_on){
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);		
 		}
-	bool use_sixtrack_like_scattering = 0;
+	bool use_sixtrack_like_scattering = 1;
 	bool cut_distn				= 0;
 			
 	bool cleaning				= 0;
@@ -304,7 +304,7 @@ int main(int argc, char* argv[])
 		
 		if(output_final_bunch){
 			ostringstream fin_output_file;
-			fin_output_file << bunch_dir << "final_bunch_" << *pit <<"_.txt";
+			fin_output_file << bunch_dir << "final_bunch_" << *pit <<".txt";
 			ofstream* bunch_final = new ofstream(fin_output_file.str().c_str());
 			if(!bunch_final->good()){ std::cerr << "Could not open finalbunch output file for material " << *pit << std::endl; exit(EXIT_FAILURE); }  
 			//~ myBunch->Output(*hbunch_output2);
