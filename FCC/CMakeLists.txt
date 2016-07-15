@@ -26,7 +26,7 @@ add_custom_command(TARGET DataFiles2
                    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/outputs)
 
 # Add each file to be built as follows:
-#thesis_run(directory executable_name cpp_file_name.cpp)
-thesis_run(LatticeTest LatticeTest LatticeTest.cpp)
+#fcc_run(directory executable_name cpp_file_name.cpp)
+fcc_run(LatticeTest LatticeTest LatticeTest.cpp)
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
 INCLUDE(Dart)

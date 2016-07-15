@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/LatticeTest/";
 
 		
-	string batch_directory="11JulyTest/";
+	string batch_directory="12JulyTest/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -209,8 +209,8 @@ int main(int argc, char* argv[])
 		delete disp_output;
 	}
 	
-	if(sixD)
-	Kly1->SetVoltage(2.0);
+	//~ if(sixD)
+	//~ Kly1->SetVoltage(2.0);
 
 /************************
 *	Collimator set up	*
@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
 ****************************/
 
 	ApertureConfiguration* myApertureConfiguration;
-	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_Full_Ring_Aperture.tfs",1);     
+	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_Full_Ring_Aperture.tfs",0);     
     	
 	//~ ostringstream ap_output_file;
 	//~ ap_output_file << full_output_dir << "ApertureConfiguration.log";
@@ -351,7 +351,8 @@ int main(int argc, char* argv[])
 	}
 	else{
 		//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, Halo7TeV);
-		myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, normalDistribution);
+		//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, normalDistribution);
+		myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, pencilDistribution);
 	}
 	
     myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
@@ -361,7 +362,8 @@ int main(int argc, char* argv[])
     
     if(output_initial_bunch){   
 		ostringstream hbunch_output_file;
-		hbunch_output_file << bunch_dir << seed  << "_initial_bunch.txt";
+		//~ hbunch_output_file << bunch_dir << seed  << "_initial_bunch.txt";
+		hbunch_output_file << bunch_dir << "initial_bunch.txt";
 		ofstream* hbunch_output = new ofstream(hbunch_output_file.str().c_str());
 		if(!hbunch_output->good()) { std::cerr << "Could not open initial bunch output" << std::endl; exit(EXIT_FAILURE); }   
 		myBunch->Output(*hbunch_output);			
@@ -384,7 +386,8 @@ int main(int argc, char* argv[])
     
 	if(output_particletracks){
 		ostringstream trackingparticles_sstream;
-		trackingparticles_sstream << full_output_dir << "Tracking_output_file_"<< npart << "_" << seed << std::string(".txt");     
+		//~ trackingparticles_sstream << full_output_dir << "Tracking_output_file_"<< npart << "_" << seed << std::string(".txt");     
+		trackingparticles_sstream << full_output_dir << "Tracking_output_file_"<< npart << std::string(".txt");     
 		string trackingparticles_file = trackingparticles_sstream.str().c_str();     
 		 
 		TrackingOutputAV* myTrackingOutputAV = new TrackingOutputAV(trackingparticles_file);
@@ -473,7 +476,8 @@ int main(int argc, char* argv[])
 	*********************************************************************/
 	if(output_final_bunch){   
 		ostringstream bunch_output_file;
-		bunch_output_file << bunch_dir << seed  << "_final_bunch.txt";
+		//~ bunch_output_file << bunch_dir << seed  << "_final_bunch.txt";
+		bunch_output_file << bunch_dir << "final_bunch.txt";
 		ofstream* bunch_output = new ofstream(bunch_output_file.str().c_str());
 		if(!bunch_output->good()) { std::cerr << "Could not open final bunch output" << std::endl; exit(EXIT_FAILURE); }   
 		myBunch->Output(*bunch_output);			
@@ -484,11 +488,14 @@ int main(int argc, char* argv[])
 	**	Output Jaw Impact, Scatter Plot, Jaw Inelastic
 	*********************************************************************/
 	string JawIm_dir = (full_output_dir+"Jaw_Impact/"); 	mkdir(JawIm_dir.c_str(), S_IRWXU); 	
-	myScatter->OutputJawImpact(JawIm_dir,seed);
+	//~ myScatter->OutputJawImpact(JawIm_dir,seed);
+	myScatter->OutputJawImpact(JawIm_dir,0);
 	string JawInel_dir = (full_output_dir+"Jaw_Inelastic/"); 	mkdir(JawInel_dir.c_str(), S_IRWXU); 	
-	myScatter->OutputJawInelastic(JawInel_dir,seed);	
+	//~ myScatter->OutputJawInelastic(JawInel_dir,seed);	
+	myScatter->OutputJawInelastic(JawInel_dir,0);	
 	string SPlot_dir = (full_output_dir+"Scatter_Plot/"); 	mkdir(SPlot_dir.c_str(), S_IRWXU); 	
-    myScatter->OutputScatterPlot(SPlot_dir,seed);
+    //~ myScatter->OutputScatterPlot(SPlot_dir,seed);
+    myScatter->OutputScatterPlot(SPlot_dir,0);
    
 	/*********************************************************************
 	** OUTPUT FLUKA LOSSES 
@@ -520,7 +527,8 @@ int main(int argc, char* argv[])
 	** OUTPUT LOSSMAP  
 	*********************************************************************/
 	ostringstream dustbin_file;
-	dustbin_file << dustbin_dir <<"Dustbin_losses_"<< npart << "_" << seed << std::string(".txt");	
+	//~ dustbin_file << dustbin_dir <<"Dustbin_losses_"<< npart << "_" << seed << std::string(".txt");	
+	dustbin_file << dustbin_dir <<"Dustbin_losses_"<< npart << std::string(".txt");	
 	ofstream* dustbin_output = new ofstream(dustbin_file.str().c_str());	
 	if(!dustbin_output->good())    {
         std::cerr << "Could not open dustbin loss file" << std::endl;
@@ -536,7 +544,7 @@ int main(int argc, char* argv[])
     cout << "absorbed: " << npart - myBunch->size() << endl;
 
     // Cleanup our pointers on the stack for completeness
-    delete myMaterialDatabase;
+    //~ delete myMaterialDatabase;
     delete myBunch;
     delete myTwiss;
     delete myAccModel;
