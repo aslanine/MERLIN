@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 1;					// number of particles to track
+    int npart = 6.4E6;					// number of particles to track
     int nturns = 1;					// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 	string pn_dir, case_dir, bunch_dir, lattice_dir, fluka_dir, dustbin_dir;			
 	
 	string output_dir = "/Build/Thesis/outputs/6p5TeV/";
-	string batch_directory="22_May_Aperture/";
+	string batch_directory="18Jul16/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -92,9 +92,9 @@ int main(int argc, char* argv[])
 	fluka_dir = full_output_dir + "Fluka/";    
 	mkdir(fluka_dir.c_str(), S_IRWXU); 
 	
-	bool every_bunch			= 1;		// output whole bunch every turn in a single file
-	bool rf_test				= 1;		// Use RF distribution to plot RF bucket
-	bool output_initial_bunch 	= 0;
+	bool every_bunch			= 0;		// output whole bunch every turn in a single file
+	bool rf_test				= 0;		// Use RF distribution to plot RF bucket
+	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 0;
 		if (output_initial_bunch || output_final_bunch || every_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 	bool jawinelastic			= 0;
 	bool jawimpact				= 0;
 	
-	bool ap_survey				= 1;
+	bool ap_survey				= 0;
 	bool coll_survey			= 0;
 	bool output_particletracks	= 0;
 	
@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
 *	Aperture Configuration	*
 ****************************/
 
-	ApertureConfiguration* myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV_beam2.tfs",1);      
+	ApertureConfiguration* myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_6p5TeV_beam2.tfs",0);      
     
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;

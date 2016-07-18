@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	bool batch = 1;
 	if(batch){
 
-		case_dir = "23_Jun_SNonComp/";
+		case_dir = "15_Jul/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 			output_final_bunch	= 1;
 		}
 	bool symplectic = 1;
-	bool composite = 0;
+	bool composite = 1;
 	
 /************************
 *	HISTOGRAM STUFF		*
@@ -141,22 +141,22 @@ int main(int argc, char* argv[])
 	vector<string> material_names;
 	//~ material_names.push_back("Be");
 	//~ material_names.push_back("B");
-	material_names.push_back("C");
+	//~ material_names.push_back("C");
 	//~ material_names.push_back("O");
 	//~ material_names.push_back("Al");
 	//~ material_names.push_back("Fe");
 	//~ material_names.push_back("Ni");
-	material_names.push_back("Cu");
+	//~ material_names.push_back("Cu");
 	//~ material_names.push_back("CD");
 	//~ material_names.push_back("Mo");
-	material_names.push_back("W");
+	//~ material_names.push_back("W");
 	//~ material_names.push_back("Pb");
 	material_names.push_back("AC150K");
-	material_names.push_back("GCOP");
-	material_names.push_back("IT180");
+	//~ material_names.push_back("GCOP");
+	//~ material_names.push_back("IT180");
 	//~ material_names.push_back("Mo2C");
-	material_names.push_back("CuCD");
-	material_names.push_back("MoGr");
+	//~ material_names.push_back("CuCD");
+	//~ material_names.push_back("MoGr");
 
 /************************
 *	BEAM  SETTINGS	*

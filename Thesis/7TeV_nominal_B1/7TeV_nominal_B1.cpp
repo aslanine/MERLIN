@@ -52,9 +52,9 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 15;				// number of particles to track
-    int nturns = 1E4;					// number of turns to track
-	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
+    int npart = 6.4E6;				// number of particles to track
+    int nturns = 1;					// number of turns to track
+	bool DoTwiss = 0;				// run twiss and align to beam envelope etc?
 	 
     if (argc >=2){npart = atoi(argv[1]);}
     if (argc >=3){seed = atoi(argv[2]);}
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 		output_dir 	= "/Build/Thesis/outputs/7TeV_nominal_B1/";
 	}
 		
-	string batch_directory="19May_RF/";
+	string batch_directory="18July16/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -103,10 +103,10 @@ int main(int argc, char* argv[])
 	fluka_dir = full_output_dir + "Fluka/";    
 	mkdir(fluka_dir.c_str(), S_IRWXU); 
 	
-	bool every_bunch			= 1;		// output whole bunch every turn in a single file
-	bool rf_test				= 1;		// Use RF distribution to plot RF bucket
+	bool every_bunch			= 0;		// output whole bunch every turn in a single file
+	bool rf_test				= 0;		// Use RF distribution to plot RF bucket
 		
-	bool output_initial_bunch 	= 0;
+	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 0;
 		if (output_initial_bunch || output_final_bunch || every_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
 ****************************/
 
 	ApertureConfiguration* myApertureConfiguration;
-	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_7TeV.tfs",1);     
+	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture_7TeV.tfs",0);     
     	
 	//~ ostringstream ap_output_file;
 	//~ ap_output_file << full_output_dir << "ApertureConfiguration.log";
