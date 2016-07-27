@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/LatticeTest/";
 
 		
-	string batch_directory="12JulyTest/";
+	string batch_directory="26JulyTest/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -135,6 +135,8 @@ int main(int argc, char* argv[])
 	cout << "MADInterface Done" << endl;
 
     myMADinterface->TreatTypeAsDrift("RFCAVITY");
+    //~ myMADinterface->TreatTypeAsDrift("HKICKER");
+    myMADinterface->TreatTypeAsDrift("VKICKER");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
 

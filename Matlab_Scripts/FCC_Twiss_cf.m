@@ -1,6 +1,6 @@
 %% Plot Lattice Functions and Dispersion for MERLIN and MADX FCC
 
-clear all;
+clearvars all;
 
 %% Import TWISS
 filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/FCC_Full_Ring_Lattice.tfs';
@@ -34,7 +34,7 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 %% Import LatticeFunctionTable
 
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/11JulyTest/LatticeFunctions/LatticeFunctions.dat';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/LatticeFunctions.dat';
 formatSpec = '%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%f%[^\n\r]';
 fileID = fopen(filename,'r');
 dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN, 'ReturnOnError', false);
@@ -57,8 +57,8 @@ betay = dataArray{:, 10};
 % D_y_EF = dataArray{:, 14};      % D_y * Energy scaling factor
 % D_yp_EF = dataArray{:, 15};
 % EF = dataArray{:, 16};          % Energy scaling factor
-Dx_lf = dataArray{:, 12} / dataArray{:, 16};
-Dy_lf = dataArray{:, 14} / dataArray{:, 16};
+% Dx_lf = dataArray{:, 12} / dataArray{:, 16};
+% Dy_lf = dataArray{:, 14} / dataArray{:, 16};
 % Perform operations
 
 % Dx_lf = D_x_EF / EF;
@@ -73,7 +73,7 @@ clearvars filename formatSpec fileID dataArray ans;
 
 %% Import Dispersion
 
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/11JulyTest/LatticeFunctions/Dispersion.dat';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/Dispersion.dat';
 formatSpec = '%14f%14f%f%[^\n\r]';
 fileID = fopen(filename,'r');
 dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN, 'ReturnOnError', false);
@@ -88,6 +88,10 @@ clearvars filename formatSpec fileID dataArray ans;
 % xlimits full
 % xmin = 0;
 % xmax = 101000;
+
+% xlimits zoom start
+% xmin = 0;
+% xmax = 100;
 
 % IPA - IPB
 xmin = 0;
@@ -120,11 +124,13 @@ grid on;
 %% Plot Dx
 figure;
 
-plot(S_D, Dx, '-', M_s, M_Dx, ':', s, Dx_lf, '--','Linewidth',1.5);
+% plot(S_D, Dx, '-', M_s, M_Dx, ':', s, Dx_lf, '--','Linewidth',1.5);
+plot(S_D, Dx, '-', M_s, M_Dx, ':','Linewidth',1.5);
 
 set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 title('FCC Beam 1');
-legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
+% legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
+legend('MERLIN Dispersion','MADX');
 ylabel('D_x [m]');
 xlabel('s [m]');
 grid on;
@@ -132,11 +138,13 @@ grid on;
 %% Plot Dy
 figure;
 
-plot(S_D, Dy, '-', M_s, M_Dy, ':', s, Dy_lf, '--','Linewidth',1.5);
+% plot(S_D, Dy, '-', M_s, M_Dy, ':', s, Dy_lf, '--','Linewidth',1.5);
+plot(S_D, Dy, '-', M_s, M_Dy, ':','Linewidth',1.5);
 
 set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 title('FCC Beam 1');
-legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
+% legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
+legend('MERLIN Dispersion','MADX');
 ylabel('D_y [m]');
 xlabel('s [m]');
 grid on;
