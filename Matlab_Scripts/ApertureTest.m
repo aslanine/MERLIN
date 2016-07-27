@@ -19,7 +19,7 @@
 % m_ap4 = dataArray{:, 9};
 % clearvars filename delimiter formatSpec fileID dataArray ans;
 
-clear all;
+clearvars all;
 mydata= importdata('/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Thesis/data/HELFullBeam/HL_v1.2.1_Aperture.tfs') ;
 aperture=[mydata.data(:,3) mydata.data(:,4) mydata.data(:,5) mydata.data(:,6)];
 
