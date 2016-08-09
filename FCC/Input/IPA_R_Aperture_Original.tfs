@@ -1,0 +1,128 @@
+@ NAME             %05s "TWISS"
+@ TYPE             %05s "TWISS"
+@ SEQUENCE         %12s "LSS_PA_EXP.R"
+@ PARTICLE         %06s "PROTON"
+@ MASS             %le      0.938272
+@ CHARGE           %le      1.000000
+@ ENERGY           %le  50000.000009
+@ PC               %le  50000.000000
+@ GAMMA            %le  53289.448643
+@ KBUNCH           %le      1.000000
+@ BCURRENT         %le      0.000000
+@ SIGE             %le      0.001000
+@ SIGT             %le      1.000000
+@ NPART            %le      0.000000
+@ EX               %le      0.000000
+@ EY               %le      0.000000
+@ ET               %le      0.001000
+@ LENGTH           %le    537.808000
+@ ALFA             %le      0.000000
+@ ORBIT5           %le     -0.000000
+@ GAMMATR          %le      0.000000
+@ Q1               %le      0.736041
+@ Q2               %le      0.524536
+@ DQ1              %le      0.000000
+@ DQ2              %le      0.000000
+@ DXMAX            %le      0.253861
+@ DYMAX            %le      0.000000
+@ XCOMAX           %le      0.000000
+@ YCOMAX           %le      0.000000
+@ BETXMAX          %le  39844.862172
+@ BETYMAX          %le  39872.480190
+@ XCORMS           %le      0.000000
+@ YCORMS           %le      0.000000
+@ DXRMS            %le      0.127280
+@ DYRMS            %le      0.000000
+@ DELTAP           %le      0.000000
+@ SYNCH_1          %le      0.000000
+@ SYNCH_2          %le      0.000000
+@ SYNCH_3          %le      0.000000
+@ SYNCH_4          %le      0.000000
+@ SYNCH_5          %le      0.000000
+@ TITLE            %20s "IRS aperture, Beam 1"
+@ ORIGIN           %16s "5.02.10 Linux 64"
+@ DATE             %08s "29/07/16"
+@ TIME             %08s "13.59.59"
+* KEYWORD            NAME               PARENT                        S            L       APER_1       APER_2       APER_3       APER_4 APERTYPE           
+$ %s                 %s                 %s                          %le          %le          %le          %le          %le          %le %s                 
+ "MARKER"            "LSS_PA_EXP.R$START"  "MARKER"                0.000000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "IPA"               "MARKER"                0.000000     0.000000     0.020000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_17"          "DRIFT"                 8.000000     8.000000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_17"        "MARKER"                8.000000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "FCCPIP1.R"         "MARKER"                8.000000     0.000000     0.020000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_18"          "DRIFT"                31.000000    23.000000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_18"        "MARKER"               31.000000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "FCCPIP2.R"         "MARKER"               31.000000     0.000000     0.077500     0.000000     0.000000     0.000000 "CIRCLE"           
+ "ECOLLIMATOR"       "TAS.R"             "ECOLLIMATOR"          34.000000     3.000000     0.020000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_TAS.R"           "MARKER"               34.000000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_19"          "DRIFT"                36.000000     2.000000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_19"        "MARKER"               36.000000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "QUADRUPOLE"        "MQXC.1RA.H"        "QUADRUPOLE"           56.000000    20.000000    -0.023050     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MQXC.1RA.H"      "MARKER"               56.000000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_1"           "DRIFT"                59.010000     3.010000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_1"         "MARKER"               59.010000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "HKICKER"           "MCBXDH.A2RA.H"     "HKICKER"              59.010000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "VKICKER"           "MCBXDV.A2RA.H"     "VKICKER"              59.010000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_2"           "DRIFT"                63.120000     4.110000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_2"         "MARKER"               63.120000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "QUADRUPOLE"        "MQXD.A2RA.H"       "QUADRUPOLE"           80.620000    17.500000    -0.023050     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MQXD.A2RA.H"     "MARKER"               80.620000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_3"           "DRIFT"                84.450000     3.830000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_3"         "MARKER"               84.450000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "QUADRUPOLE"        "MQXD.B2RA.H"       "QUADRUPOLE"          101.950000    17.500000    -0.023050     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MQXD.B2RA.H"     "MARKER"              101.950000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_4"           "DRIFT"               109.070000     7.120000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_4"         "MARKER"              109.070000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "QUADRUPOLE"        "MQXC.3RA.H"        "QUADRUPOLE"          129.070000    20.000000    -0.023050     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MQXC.3RA.H"      "MARKER"              129.070000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_5"           "DRIFT"               144.198000    15.128000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_5"         "MARKER"              144.198000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "HKICKER"           "MCBXCH.3RA.H"      "HKICKER"             144.198000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "VKICKER"           "MCBXCV.3RA.H"      "VKICKER"             144.198000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_6"           "DRIFT"               152.156000     7.958000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_6"         "MARKER"              152.156000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "SBEND"             "MBXA.A4RA.H"       "SBEND"               164.656000    12.500000     0.036000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MBXA.A4RA.H"     "MARKER"              164.656000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_7"           "DRIFT"               166.156000     1.500000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_7"         "MARKER"              166.156000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "SBEND"             "MBXA.B4RA.H"       "SBEND"               178.656000    12.500000     0.053000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MBXA.B4RA.H"     "MARKER"              178.656000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_8"           "DRIFT"               233.206000    54.550000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_8"         "MARKER"              233.206000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "SBEND"             "MBRD.A4RA.H1"      "SBEND"               248.206000    15.000000     0.030000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MBRD.A4RA.H1"    "MARKER"              248.206000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_7"           "DRIFT"               249.706000     1.500000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_7"         "MARKER"              249.706000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "SBEND"             "MBRD.B4RA.H1"      "SBEND"               264.706000    15.000000     0.022000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MBRD.B4RA.H1"    "MARKER"              264.706000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_9"           "DRIFT"               296.600000    31.894000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_9"         "MARKER"              296.600000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "HKICKER"           "MCBRDH.4RA.H1"     "HKICKER"             299.600000     3.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MCBRDH.4RA.H1"   "MARKER"              299.600000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_10"          "DRIFT"               300.400000     0.800000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_10"        "MARKER"              300.400000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "VKICKER"           "MCBRDV.4RA.H1"     "VKICKER"             303.400000     3.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MCBRDV.4RA.H1"   "MARKER"              303.400000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_11"          "DRIFT"               335.706000    32.306000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_11"        "MARKER"              335.706000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "QUADRUPOLE"        "MQYY.4RA.H1"       "QUADRUPOLE"          342.506000     6.800000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MQYY.4RA.H1"     "MARKER"              342.506000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_12"          "DRIFT"               410.180000    67.674000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_12"        "MARKER"              410.180000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "QUADRUPOLE"        "MQYL.5RA.H1"       "QUADRUPOLE"          419.780000     9.600000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MQYL.5RA.H1"     "MARKER"              419.780000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_13"          "DRIFT"               451.980000    32.200000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_13"        "MARKER"              451.980000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "QUADRUPOLE"        "MQML.6RA.H1"       "QUADRUPOLE"          461.580000     9.600000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MQML.6RA.H1"     "MARKER"              461.580000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_14"          "DRIFT"               520.008000    58.428000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_14"        "MARKER"              520.008000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "QUADRUPOLE"        "MQM.A7RA.H1"       "MQM.7RA.H1"          526.808000     6.800000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MQM.A7RA.H1"     "MARKER"              526.808000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_15"          "DRIFT"               527.542000     0.734000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "M_DRIFT_15"        "MARKER"              527.542000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "QUADRUPOLE"        "MQM.B7RA.H1"       "MQM.7RA.H1"          534.342000     6.800000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "M_MQM.B7RA.H1"     "MARKER"              534.342000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "DRIFT"             "DRIFT_16"          "DRIFT"               537.808000     3.466000     0.000000     0.000000     0.000000     0.000000 "NONE"             
+ "MARKER"            "E.IR.RA.H1"        "MARKER"              537.808000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           
+ "MARKER"            "LSS_PA_EXP.R$END"  "MARKER"              537.808000     0.000000     0.000000     0.000000     0.000000     0.000000 "CIRCLE"           

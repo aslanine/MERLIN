@@ -28,5 +28,6 @@ add_custom_command(TARGET DataFiles2
 # Add each file to be built as follows:
 #fcc_run(directory executable_name cpp_file_name.cpp)
 fcc_run(LatticeTest LatticeTest LatticeTest.cpp)
+fcc_run(IPA_LSS IPA_LSS IPA_LSS.cpp)
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
 INCLUDE(Dart)

@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/LatticeTest/";
 
 		
-	string batch_directory="26JulyTest/";
+	string batch_directory="29July_Symplectic_TWISS/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 
     myMADinterface->TreatTypeAsDrift("RFCAVITY");
     //~ myMADinterface->TreatTypeAsDrift("HKICKER");
-    myMADinterface->TreatTypeAsDrift("VKICKER");
+    //~ myMADinterface->TreatTypeAsDrift("VKICKER");
     //~ myMADinterface->TreatTypeAsDrift("SEXTUPOLE");
     //~ myMADinterface->TreatTypeAsDrift("OCTUPOLE");
 

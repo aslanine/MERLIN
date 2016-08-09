@@ -34,7 +34,8 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 %% Import LatticeFunctionTable
 
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/LatticeFunctions.dat';
+% filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/LatticeFunctions.dat';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/29July_Symplectic_TWISS/LatticeFunctions/LatticeFunctions.dat';
 formatSpec = '%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%f%[^\n\r]';
 fileID = fopen(filename,'r');
 dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN, 'ReturnOnError', false);
@@ -73,7 +74,8 @@ clearvars filename formatSpec fileID dataArray ans;
 
 %% Import Dispersion
 
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/Dispersion.dat';
+% filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/Dispersion.dat';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/29July_Symplectic_TWISS/LatticeFunctions/Dispersion.dat';
 formatSpec = '%14f%14f%f%[^\n\r]';
 fileID = fopen(filename,'r');
 dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN, 'ReturnOnError', false);
@@ -86,16 +88,16 @@ clearvars filename formatSpec fileID dataArray ans;
 %% Multiple Plots
 
 % xlimits full
-% xmin = 0;
-% xmax = 101000;
+xmin = 0;
+xmax = 101000;
 
 % xlimits zoom start
 % xmin = 0;
 % xmax = 100;
 
 % IPA - IPB
-xmin = 0;
-xmax = 7000;
+% xmin = 0;
+% xmax = 7000;
 
 %% Plot beta x
 figure;
