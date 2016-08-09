@@ -326,6 +326,12 @@ public:
 	* @param[in] normalisation factor.
 	*/
 	void OutputSelectScatterHistogram(string directory, int n, int nbins, int norm=1);
+	
+	/**
+	* Used to output total number of point like scatters.
+	* @param[in] directory the output directory.
+	*/
+	void OutputSelectScatterTotals(string directory);
 
 	/**
 	* Used to configure individual ScatteringProcesses for a given material.

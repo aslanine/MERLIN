@@ -632,6 +632,46 @@ void ScatteringModel::OutputJawInelastic(string directory, int seed){
 	StoredJawInelasticData.clear();	
 }
 
+void ScatteringModel::OutputSelectScatterTotals(string directory){
+	
+	// Iterate over collimators
+	for(vector<string>::iterator name = SelectScatterNames.begin(); name != SelectScatterNames.end(); ++name){
+	
+		int one = 0; 	// Inelastic
+		int two = 0; 	// pN Elastic
+		int three = 0; 	// pn Elastic
+		int four = 0; 	// pn SD
+		int six = 0; 	// Rutherford
+	
+		std::ostringstream ss_file1;
+		ss_file1 << directory << "select_scatter_totals_" << (*name) << ".txt";
+		ofstream* os1 = new ofstream(ss_file1.str().c_str());	
+		if(!os1->good())    {
+			std::cerr << "ScatteringModel::OutputSelectScatterTotals: Could not open inelastic SelectScatter file for collimator " << (*name) << std::endl;
+			exit(EXIT_FAILURE);
+		} 		
+		
+		for(vector <SelectScatterData*>::iterator its = StoredSelectScatterData.begin(); its != StoredSelectScatterData.end(); ++its)
+		{
+			if( (*its)->name == (*name) && (*its)->type == 1){ ++one;}
+			if( (*its)->name == (*name) && (*its)->type == 2){ ++two;}
+			if( (*its)->name == (*name) && (*its)->type == 3){ ++three;}
+			if( (*its)->name == (*name) && (*its)->type == 4){ ++four;}
+			if( (*its)->name == (*name) && (*its)->type == 6){ ++six;}
+		}
+		
+		double total = one + two + three + four + six;
+		
+		(*os1) << " Number of point like scatters" << endl;
+		(*os1) << " Inelastic =\t\t" << one <<	" = " << ( (one/total) * 100 ) << " % " << endl;
+		(*os1) << " pN Elastic =\t\t" << two << " = " << ( (two/total) * 100 ) << " % " << endl;
+		(*os1) << " pn Elastic =\t\t" << three << " = " << ( (three/total) * 100 ) << " % " << endl;
+		(*os1) << " SD =\t\t" << four << " = " << ( (four/total) * 100 ) << " % " << endl;
+		(*os1) << " Rutherford =\t\t" << six << " = " << ( (six/total) * 100 ) << " % " << endl;
+		(*os1) << " Total =\t\t" << total << endl;				
+	}
+}
+
 void ScatteringModel::OutputSelectScatter(string directory, int seed){
 	
 	// Iterate over collimators
@@ -721,7 +761,7 @@ void ScatteringModel::OutputSelectScatter(string directory, int seed){
 			}
 		}	
 	}			
-	StoredSelectScatterData.clear();	
+	//~ StoredSelectScatterData.clear();	
 }
 
 void ScatteringModel::OutputScatteringProcesses(string directory, int seed){

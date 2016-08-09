@@ -244,7 +244,7 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 			}
 		}
 		
-		if(select_scatter && (p.type() == 2 || p.type() == 3 || p.type() == 4 )){scattermodel->SelectScatter(p, z, ColParProTurn, ColName);}
+		if(select_scatter && (p.type() == 2 || p.type() == 3 || p.type() == 4 || p.type() == 6 )){scattermodel->SelectScatter(p, z, ColParProTurn, ColName);}
 		
 		if(flukaset){ //for point like scattering
 			for(FlukaLossesIterator = FlukaLossesVector.begin(); FlukaLossesIterator != FlukaLossesVector.end(); ++FlukaLossesIterator){					
