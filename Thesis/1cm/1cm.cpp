@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 	
 	bool batch = 1;
 	if(batch){
-		case_dir = "13Jul/";
+		case_dir = "08Aug/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 		
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 	}
 	
 	bool output_initial_bunch 	= 0;
-	bool output_final_bunch 	= 1;		
+	bool output_final_bunch 	= 0;		
 		if (output_initial_bunch || output_final_bunch){
 			//~ bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 
 		}		
@@ -101,9 +101,9 @@ int main(int argc, char* argv[])
 
 	bool symplectic = 1;
 	bool composite	= 1;
-	bool hist 		= 0;
+	bool hist 		= 1;
 	
-	bool selectscatter 	= 0;
+	bool selectscatter 	= 1;
 	bool jawimpact 		= 0;
 	bool scatterplot 	= 0;
 	bool jawinelastic 	= 0;
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 	//~ material_names.push_back("Al");
 	//~ material_names.push_back("Fe");
 	//~ material_names.push_back("Ni");
-	//~ material_names.push_back("Cu");
+	material_names.push_back("Cu");
 	//~ material_names.push_back("CD");
 	//~ material_names.push_back("Mo");
 	material_names.push_back("W");
@@ -312,6 +312,7 @@ int main(int argc, char* argv[])
 		}
 		myScatter->OutputScatteringProcesses(mat_dir, ii);
 		myScatter->OutputCounter(mat_dir, ii);
+		myScatter->OutputSelectScatterTotals(mat_dir);
 		
 		cout << "\tOutput final bunches" << endl;
 		if(output_final_bunch){
