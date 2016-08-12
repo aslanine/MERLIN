@@ -45,11 +45,11 @@ using namespace PhysicalUnits;
 //e.g. for 1000 particles and a seed of 356: ./test 1000 356
 int main(int argc, char* argv[])
 {
-    int seed = (int)time(NULL);                 // seed for random number generators
+    int seed = 1;                 // seed for random number generators
     int iseed = (int)time(NULL);                 // seed for random number generators
     int ncorepart 	= 1;						// number of core particles to track
-    int npart 		= 1E4;                     	// number of halo particles to track
-    int nturns 		= 1E5;                      // number of turns to track
+    int npart 		= 10;                     	// number of halo particles to track
+    int nturns 		= 1;                      // number of turns to track
        
     //~ if (argc >=2){npart = atoi(argv[1]);}
 
@@ -67,9 +67,9 @@ int main(int argc, char* argv[])
     if(seed ==1){cout << " npart = " << npart << ", nturns = " << nturns << ", beam energy = " << beam_energy << endl;}
 	
 	//~ string directory = "/afs/cern.ch/user/h/harafiqu/public/MERLIN";	//lxplus harafiqu
-	//~ string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
+	string directory = "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";					//M11x	
 	//~ string directory = "/afs/cern.ch/user/a/avalloni/private/Merlin_all";	//lxplus avalloni
-	string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
+	//~ string directory = "/home/haroon/MERLIN_HRThesis/MERLIN";				//iiaa1
 	
 	string pn_dir, case_dir, bunch_dir, lattice_dir, hel_dir, cbunch_dir, hbunch_dir, hpn_dir, cpn_dir, dustbin_dir, hdustbin_dir, cdustbin_dir;			
 	string core_string =  "Core/";
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	mkdir(full_output_dir.c_str(), S_IRWXU);	
 	bool batch = 1;
 	if(batch){
-		case_dir = "29Jun_NR_DIFF_4A/";
+		case_dir = "08_Aug_TWISS/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 	}
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 	bool output_fluka_database 	= 0;
 	bool output_twiss			= 1;		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 		
-	bool hel_on 				= 1; 		// Hollow electron lens process?
+	bool hel_on 				= 0; 		// Hollow electron lens process?
 	bool elliptical_HEL			= 0;		// Use elliptical operation
 
 		bool DCon				= 0;
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 		bool Diffusiveon		= 1;		if(Diffusiveon){ACon=0; Turnskipon=0; DCon=0;}
 		bool output_hel_profile = 1;		if(output_hel_profile){hel_dir = (full_output_dir+"HEL/"); mkdir(hel_dir.c_str(), S_IRWXU);}
 		
-	bool collimation_on 		= 1;
+	bool collimation_on 		= 0;
 		if(collimation_on){
 			dustbin_dir = full_output_dir + "LossMap/"; 	mkdir(dustbin_dir.c_str(), S_IRWXU);
 			cdustbin_dir = dustbin_dir + core_string; 	mkdir(cdustbin_dir.c_str(), S_IRWXU);
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 										// False: 3 trackers:  HEL->TCP, TCP->IP1, IP1->HEL
 										// // False: 3 trackers: TCP->IP1, IP1->HEL, HEL->TCP NOT IN USE
 										
-	bool cleaning				= 1;
+	bool cleaning				= 0;
 		if(cleaning){
 			collimation_on		= 1;
 			every_bunch			= 0;
@@ -298,6 +298,8 @@ int main(int argc, char* argv[])
 	
 	Kly1->SetVoltage(2.0);
 	
+	cout << "\nTWISS DONE" << endl;
+	
 /************************
 *	Collimator set up	*
 ************************/
@@ -318,7 +320,7 @@ int main(int argc, char* argv[])
     // HLv1.2  -0.7 sigma = -1.8648E-4
     
     collimator_db->SelectImpactFactor(tcp_element, -2.66313E-5);     
-	//~ collimator_db->SelectImpactFactor(tcp_element, 1.0e-6);
+	// collimator_db->SelectImpactFactor(tcp_element, 1.0e-6);
 
     double impact = 6;
     

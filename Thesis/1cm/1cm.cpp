@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 	
 	bool batch = 1;
 	if(batch){
-		case_dir = "08Aug/";
+		case_dir = "09Aug/";
 		full_output_dir = (directory+output_dir+case_dir);
 		mkdir(full_output_dir.c_str(), S_IRWXU);
 		
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 	bool cut_distn				= 0;
 
 	bool symplectic = 1;
-	bool composite	= 1;
+	bool composite	= 0;
 	bool hist 		= 1;
 	
 	bool selectscatter 	= 1;
