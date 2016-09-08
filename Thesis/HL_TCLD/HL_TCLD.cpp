@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 6.4E6;				// number of particles to track
-    int nturns = 200;				// number of turns to track
+    int npart = 10;				// number of particles to track
+    int nturns = 1;				// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
     if (argc >=2){npart = atoi(argv[1]);}
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	input_dir 	= "/Thesis/data/HL_TCLD/";
 	output_dir 	= "/Build/Thesis/outputs/HL_TCLD/";
 
-	string batch_directory="13June_FDb/";
+	string batch_directory="16Aug/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
