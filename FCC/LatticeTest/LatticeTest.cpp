@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/LatticeTest/";
 
 		
-	string batch_directory="29July_Symplectic_TWISS/";
+	string batch_directory="14_Sep_Crossing/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -117,11 +117,12 @@ int main(int argc, char* argv[])
 	
 	bool ap_survey				= 1;
 	bool coll_survey			= 0;
-	bool output_particletracks	= 1;
+	bool output_particletracks	= 0;
 	
 	bool symplectic				= 1;
 	bool sixD					= 0;	//0 = No RF, 1 = Rf	
-	bool composite				= 0;	//0 = Sixtrack composite, 1=MERLIN composite	
+	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
+	bool crossing				= 1;
 
 	
 /************************************
@@ -130,7 +131,12 @@ int main(int argc, char* argv[])
 	cout << "MADInterface" << endl;
 
 	MADInterface* myMADinterface;
-		myMADinterface = new MADInterface( directory+input_dir+"FCC_Full_Ring_Lattice.tfs", beam_energy );
+	if(crossing){
+		myMADinterface = new MADInterface( directory+input_dir+"FCC_Full_Ring_Crossing_Lattice.tfs", beam_energy );		
+	}
+	else{
+		myMADinterface = new MADInterface( directory+input_dir+"FCC_Full_Ring_NoCrossing_Lattice.tfs", beam_energy );
+	}
 		//~ myMADinterface->SetSingleCellRF(1);
 	cout << "MADInterface Done" << endl;
 
@@ -261,7 +267,12 @@ int main(int argc, char* argv[])
 ****************************/
 
 	ApertureConfiguration* myApertureConfiguration;
-	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_Full_Ring_Aperture.tfs",0);     
+	if(crossing){
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_Full_Ring_Crossing_Aperture.tfs",0);    	
+	}
+	else{
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_Full_Ring_NoCrossing_Aperture.tfs",0);     
+	}
     	
 	//~ ostringstream ap_output_file;
 	//~ ap_output_file << full_output_dir << "ApertureConfiguration.log";
