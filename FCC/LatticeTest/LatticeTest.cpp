@@ -9,6 +9,7 @@
 #include <sys/stat.h> //to use mkdir
 
 //include relevant MERLIN headers
+#include "AcceleratorModel/Apertures/CollimatorAperture.h"
 #include "AcceleratorModel/ApertureSurvey.h"
 #include "AcceleratorModel/ControlElements/Klystron.h"
 
@@ -65,8 +66,11 @@ int main(int argc, char* argv[])
 
     cout << "npart=" << npart << " nturns=" << nturns << " beam energy = " << beam_energy << endl;
 
-	string start_element;
-	start_element = "IPA";// HORIZONTAL COLLIMATOR (x)
+	string start_element = "IPA";// IPA
+	string tas_element = "TAS.RA";// TAS IPA Right
+	string ipb_element = "IPB";// IPB
+	//~ string end_element = "END";// END
+	string end_element = ipb_element;// END
 
     // Define useful variables
     double beam_charge = 1.1e11;
@@ -84,7 +88,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/LatticeTest/";
 
 		
-	string batch_directory="14_Sep_Crossing/";
+	string batch_directory="27_Nov_inelastic_nearest_forcedloss/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -98,6 +102,7 @@ int main(int argc, char* argv[])
 		
 	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 1;
+	bool input_distn			= 1;
 		if (output_initial_bunch || output_final_bunch || every_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
 		}	
@@ -116,13 +121,13 @@ int main(int argc, char* argv[])
 	bool jawimpact				= 0;
 	
 	bool ap_survey				= 1;
-	bool coll_survey			= 0;
+	bool coll_survey			= 1;
 	bool output_particletracks	= 0;
 	
 	bool symplectic				= 1;
 	bool sixD					= 0;	//0 = No RF, 1 = Rf	
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
-	bool crossing				= 1;
+	bool crossing				= 0;
 
 	
 /************************************
@@ -161,8 +166,16 @@ int main(int argc, char* argv[])
 ************/
 
     int start_element_number = myAccModel->FindElementLatticePosition(start_element.c_str());
+    int tas_element_number = myAccModel->FindElementLatticePosition(tas_element.c_str());
+    int end_element_number = myAccModel->FindElementLatticePosition(ipb_element.c_str());
     
-    cout << "Found start element IPA at element number " << start_element_number << endl;
+    //~ std::vector<AcceleratorComponent*> elements;
+    //~ myAccModel->ExtractTypedElements(elements,"*");
+    //~ int end_element_number = elements.size();
+    
+    cout << "Found start element "<< start_element << " at element number " << start_element_number << endl;
+    cout << "Found "<< tas_element << " at element number " << tas_element_number << endl;
+    cout << "Found lattice end "<< end_element << " at element number " << end_element_number << endl;
 
 	LatticeFunctionTable* myTwiss = new LatticeFunctionTable(myAccModel, beam_energy);
 	myTwiss->UseDefaultFunctions();
@@ -229,11 +242,11 @@ int main(int argc, char* argv[])
 	MaterialDatabase* myMaterialDatabase = new MaterialDatabase();	
     CollimatorDatabase* collimator_db;
 	
-	collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_7TeV_pure.txt", myMaterialDatabase,  true);
+	collimator_db = new CollimatorDatabase( directory+input_dir+"Collimator_pure.txt", myMaterialDatabase,  true);
 	
     collimator_db->MatchBeamEnvelope(false);
     collimator_db->EnableJawAlignmentErrors(false);
-    //~ collimator_db->UseMiddleJawHalfGap();
+    collimator_db->UseMiddleJawHalfGap();
 
     collimator_db->SetJawPositionError(0.0 * nanometer);
     collimator_db->SetJawAngleError(0.0 * microradian);
@@ -358,20 +371,32 @@ int main(int argc, char* argv[])
     int node_particles = npart;
     ParticleBunchConstructor* myBunchCtor;
     
-    if(rf_test){
-		//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn);
-		myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn2);
+    if(input_distn){
+		//~ ifstream* bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.all.dat");	
+		ifstream* bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.inelastic.dat");	
+		istream* is = bunch_input;		
+		myBunch = new ProtonBunch(beam_energy, mybeam.charge, *is);					
+		myBunch->SetMacroParticleCharge(mybeam.charge);
+		npart = myBunch->size();
+		node_particles = npart;
+		cout << "\n\n\tInput distribution of " << npart << " particles used to create bunch" << endl;		
 	}
 	else{
-		//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, Halo7TeV);
-		//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, normalDistribution);
-		myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, pencilDistribution);
-	}
-	
-    myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
-    delete myBunchCtor;
+		if(rf_test){
+			//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn);
+			myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn2);
+		}
+		else{
+			//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, Halo7TeV);
+			//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, normalDistribution);
+			myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, pencilDistribution);
+		}
+		
+		myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
+		delete myBunchCtor;
 
-    myBunch->SetMacroParticleCharge(mybeam.charge);
+		myBunch->SetMacroParticleCharge(mybeam.charge);
+	}
     
     if(output_initial_bunch){   
 		ostringstream hbunch_output_file;
@@ -387,12 +412,33 @@ int main(int argc, char* argv[])
 *	ParticleTracker		*
 ************************/
 
-	AcceleratorModel::RingIterator beamline = myAccModel->GetRing(start_element_number);
-    ParticleTracker* myParticleTracker = new ParticleTracker(beamline, myBunch);
-    if(symplectic)
-		myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
-    else
-		myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());
+
+	ParticleTracker* myParticleTracker1;
+    ParticleTracker* myParticleTracker2;
+
+	AcceleratorModel::Beamline beamline1 = myAccModel->GetBeamline(start_element_number, tas_element_number-2);
+	//~ AcceleratorModel::Beamline beamline2 = myAccModel->GetBeamline(tas_element_number, end_element_number);
+	AcceleratorModel::Beamline beamline2 = myAccModel->GetBeamline(tas_element_number-1, end_element_number-1);
+	
+	myParticleTracker1 = new ParticleTracker(beamline1, myBunch);
+	myParticleTracker2 = new ParticleTracker(beamline2, myBunch);
+
+	if(symplectic){
+		myParticleTracker1->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());	
+		myParticleTracker2->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
+	}
+	else{	
+		myParticleTracker1->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());	
+		myParticleTracker2->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());	
+	}
+
+
+	//~ AcceleratorModel::RingIterator beamline = myAccModel->GetRing(start_element_number);
+    //~ ParticleTracker* myParticleTracker = new ParticleTracker(beamline, myBunch);
+    //~ if(symplectic)
+		//~ myParticleTracker->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
+    //~ else
+		//~ myParticleTracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());
     
 	string tof = "Tracking_output_file.txt";
     string t_o_f = full_output_dir+tof;
@@ -408,7 +454,7 @@ int main(int argc, char* argv[])
 		myTrackingOutputAV->SetTurn(1);
 		myTrackingOutputAV->output_all = 1;
 		 
-		myParticleTracker->SetOutput(myTrackingOutputAV);
+		myParticleTracker1->SetOutput(myTrackingOutputAV);
 	}
 	
 /****************************
@@ -416,7 +462,8 @@ int main(int argc, char* argv[])
 ****************************/
 
 	//~ FlukaLosses* myFlukaLosses = new FlukaLosses;  
-	LossMapDustbin* myLossMapDustbin = new LossMapDustbin;
+	LossMapDustbin* myLossMapDustbin = new LossMapDustbin(nearestelement);
+	//~ LossMapDustbin* myLossMapDustbin = new LossMapDustbin();
 	ScatteringModel* myScatter = new ScatteringModel;
 
   	if(collimation_on){ 
@@ -431,21 +478,47 @@ int main(int argc, char* argv[])
 		
 		//~ myCollimateProcess->ScatterAtCollimator(true);
 		myCollimateProcess->ScatterAtCollimator(false);
+		
+		// Extract TAS and set collimator aperture
+	    //~ std::vector<Collimator*> taselements;
+	    //~ std::vector<Collimator*>::iterator tasit;
+		//~ myAccModel->ExtractTypedElements(taselements,"TAS.RA");
+		//~ int tas_test = taselements.size();
+		//~ tasit = taselements.begin();
+		
+		//~ if(tas_test == 1){
+			//~ cout << "1 TAS.RA found" << endl;
+			
+			//~ // Set TAS to Copper
+			//~ MaterialDatabase* myMaterialDatabase = new MaterialDatabase();
+			//~ Material* collimator_material = myMaterialDatabase->FindMaterial("Cu");
+			
+			//~ //create aperture
+			//~ // CircularCollimatorAperture(radius, tilt, Material, double length, double x_offset_entry=0.0, double y_offset_entry=0.0);
+			//~ CircularCollimatorAperture* tas_ap = new CircularCollimatorAperture(0.025, 0.0, collimator_material, 3.0, 0,0);
+			
+			//~ //set aperture
+			
+			//~ (*tasit)->SetAperture(tas_ap);
+		//~ }
+		//~ else{
+		//~ cout << "Number of TAS.RA found: " << tas_test;			
+		//~ }
 
 		if(composite){	myScatter->SetComposites(1);}
 		else{			myScatter->SetComposites(0);}
 
 		if(jawimpact){
-			myScatter->SetJawImpact("TCP.C6L7.B1");
-			myScatter->SetJawImpact("TCSG.B5L7.B1");
+			myScatter->SetJawImpact("TAS.RA");
+			//~ myScatter->SetJawImpact("TCSG.B5L7.B1");
 		}
 		if(scatterplot)	{
-			myScatter->SetScatterPlot("TCP.C6L7.B1");			
-			myScatter->SetScatterPlot("TCSG.B5L7.B1");
+			myScatter->SetScatterPlot("TAS.RA");			
+			//~ myScatter->SetScatterPlot("TCSG.B5L7.B1");
 		}
 		if(jawinelastic){
-			myScatter->SetJawInelastic("TCP.C6L7.B1");
-			myScatter->SetJawInelastic("TCSG.B5L7.B1");
+			myScatter->SetJawInelastic("TAS.RA");
+			//~ myScatter->SetJawInelastic("TCSG.B5L7.B1");
 		}
 
 		// 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,   
@@ -458,7 +531,8 @@ int main(int argc, char* argv[])
 		myCollimateProcess->SetLossThreshold(200.0);
 		myCollimateProcess->SetOutputBinSize(0.1);
 
-		myParticleTracker->AddProcess(myCollimateProcess);
+		myParticleTracker1->AddProcess(myCollimateProcess);
+		myParticleTracker2->AddProcess(myCollimateProcess);
 	}
 	
 	
@@ -477,8 +551,21 @@ int main(int argc, char* argv[])
     {
         cout << "Turn " << turn <<"\tParticle number: " << myBunch->size() << endl;
 
-        myParticleTracker->Track(myBunch);
+        //~ myParticleTracker->Track(myBunch);
+        
+        myParticleTracker1->Track(myBunch);
+        
+		//~ if(output_final_bunch){   
+			ostringstream tas_output_file;
+			tas_output_file << bunch_dir << "TAS_bunch.txt";
+			ofstream* tas_output = new ofstream(tas_output_file.str().c_str());
+			if(!tas_output->good()) { std::cerr << "Could not open TAS bunch output" << std::endl; exit(EXIT_FAILURE); }   
+			myBunch->Output(*tas_output);			
+			delete tas_output;	
+		//~ }
 
+        myParticleTracker2->Track(myBunch);
+        
         if(every_bunch){myBunch->Output(*cbo); }   
         
         if( myBunch->size() <= 1 ) break;
@@ -490,7 +577,8 @@ int main(int argc, char* argv[])
 	if(output_final_bunch){   
 		ostringstream bunch_output_file;
 		//~ bunch_output_file << bunch_dir << seed  << "_final_bunch.txt";
-		bunch_output_file << bunch_dir << "final_bunch.txt";
+		//~ bunch_output_file << bunch_dir << "final_bunch.txt";
+		bunch_output_file << bunch_dir << "IPB_bunch.txt";
 		ofstream* bunch_output = new ofstream(bunch_output_file.str().c_str());
 		if(!bunch_output->good()) { std::cerr << "Could not open final bunch output" << std::endl; exit(EXIT_FAILURE); }   
 		myBunch->Output(*bunch_output);			
