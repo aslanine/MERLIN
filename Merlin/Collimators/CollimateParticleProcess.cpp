@@ -432,6 +432,11 @@ if(LostParticlePositions.size() != 0 && !is_collimator)
 				{
 					(*p).ct() = length;
 				}
+				if(dustset && !is_collimator){
+					for(DustbinIterator = DustbinVector.begin(); DustbinIterator != DustbinVector.end(); ++DustbinIterator){				
+						(*DustbinIterator)->Dispose(*currentComponent, 0., (*p), ColParProTurn);
+					}
+				}
 				lost.push_back(*p);
 			}
 		}

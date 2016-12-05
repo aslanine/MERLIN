@@ -279,3 +279,24 @@ void OneSidedUnalignedCollimatorAperture::SetJawSide(bool side)
 {
 	PositiveSide = side;
 }
+
+
+/**********************************************************************
+*
+*	A collimtor jaw, unaligned to the beam orbit or beta function changes
+* 	This does NOT have jaw flatness errors
+*	Still aligned to the beam size! Circular aperture,
+* 	parallel to the beam pipe - used for TAS, masks etc.
+*
+**********************************************************************/
+CircularCollimatorAperture::CircularCollimatorAperture(double r, double t, Material* m, double length, double x_off, double y_off)
+:CollimatorAperture(r,r,t,m,length,x_off,y_off)
+{
+	radius=r;
+	SetMaterial(m);
+}
+
+inline bool CircularCollimatorAperture::PointInside(double x,double y,double z) const
+{
+	return (x*x)+(y*y)<(radius*radius);
+}

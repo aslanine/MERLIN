@@ -138,4 +138,29 @@ bool PositiveSide;
 void SetJawSide(bool);
 };
 
+/**********************************************************************
+*
+*	A collimtor jaw, unaligned to the beam orbit or beta function changes
+* 	This does NOT have jaw flatness errors
+*
+**********************************************************************/
+
+class CircularCollimatorAperture: public CollimatorAperture
+{
+/*
+protected:
+double alpha;
+double CollimatorLength;
+double jaw_length;
+double x_offset,y_offset;
+*/
+protected:
+double radius;
+
+public:
+CircularCollimatorAperture(double r, double t, Material* m, double length, double x_offset_entry=0.0, double y_offset_entry=0.0);
+
+bool PointInside(double x,double y,double z) const;
+};
+
 #endif
