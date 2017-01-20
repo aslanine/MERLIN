@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	//~ string directory = "/home/haroon/git/Merlin/HR";									//iiaa1	
 	directory 	= "/home/HR/Downloads/MERLIN_HRThesis/MERLIN";							//HR MAC		
 	input_dir 	= "/FCC/Input/";
-	output_dir 	= "/Build/FCC/outputs/LatticeTest/";
+	output_dir 	= "/Build/FCC/outputs/FCC_v7/";
 
 		
 	string batch_directory="5Dec_test/";
@@ -128,6 +128,7 @@ int main(int argc, char* argv[])
 	bool sixD					= 0;	//0 = No RF, 1 = Rf	
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
 	bool crossing				= 0;
+	bool run_with_twiss			= 0;
 
 	
 /************************************
@@ -140,7 +141,7 @@ int main(int argc, char* argv[])
 		myMADinterface = new MADInterface( directory+input_dir+"FCC_Lattice_v7_DS_0300_NoCrossing.tfs", beam_energy );		
 	}
 	else{
-		myMADinterface = new MADInterface( directory+input_dir+"FCC_Lattice_v7_DS_0300_Crossing.tfs", beam_energy );
+		myMADinterface = new MADInterface( directory+input_dir+"FCC_Lattice_v7_DS_0300_NoCrossing.tfs", beam_energy );
 	}
 		//~ myMADinterface->SetSingleCellRF(1);
 	cout << "MADInterface Done" << endl;
@@ -178,58 +179,60 @@ int main(int argc, char* argv[])
     cout << "Found lattice end "<< end_element << " at element number " << end_element_number << endl;
 
 	LatticeFunctionTable* myTwiss = new LatticeFunctionTable(myAccModel, beam_energy);
-	myTwiss->UseDefaultFunctions();
-	myTwiss->AddFunction(1,6,3);
-    myTwiss->AddFunction(2,6,3);
-    myTwiss->AddFunction(3,6,3);
-    myTwiss->AddFunction(4,6,3);
-    myTwiss->AddFunction(6,6,3);
-
-    double bscale1 = 1e-22;
-    
-    if(DoTwiss){    
-		while(true)
-		{
-		cout << "start while(true) to scale bend path length" << endl;
-			// If we are running a lattice with no RF, the TWISS parameters
-			// will not be calculated correctly. This is because some are
-			// calculated from using the eigenvalues of the one turn map,
-			// which is not complete with RF (i.e. longitudinal motion) 
-			// switched off. In order to compensate for this we use the 
-			// ScaleBendPath function which calls a RingDeltaT process 
-			// and attaches it to the TWISS tracker. RingDeltaT process 
-			// adjusts the ct and dp values such that the TWISS may be 
-			// calculated and there are no convergence errors
-			myTwiss->ScaleBendPathLength(bscale1);
-			myTwiss->Calculate();
-
-			// If Beta_x is a number (as opposed to -nan) then we have 
-			// calculated the correct TWISS parameters, otherwise the loop
-			//  keeps running
-			if(!std::isnan(myTwiss->Value(1,1,1,0))) {break;}
-			bscale1 *= 2;
-			cout << "\n\ttrying bscale = " << bscale1<< endl;
-		}
-	}
-	
 	Dispersion* myDispersion = new Dispersion(myAccModel, beam_energy);
-    myDispersion->FindDispersion(start_element_number);
 	
-	if (output_twiss){
-		ostringstream twiss_output_file; 
-		twiss_output_file << (lattice_dir+"LatticeFunctions.dat");
-		ofstream twiss_output(twiss_output_file.str().c_str());
-		if(!twiss_output.good()){ std::cerr << "Could not open twiss output file" << std::endl; exit(EXIT_FAILURE); } 
-		myTwiss->PrintTable(twiss_output);
-				
-		ostringstream disp_output_file; 
-		disp_output_file << (lattice_dir+"Dispersion.dat");
-		ofstream* disp_output = new ofstream(disp_output_file.str().c_str());
-		if(!disp_output->good()){ std::cerr << "Could not open dispersion output file" << std::endl; exit(EXIT_FAILURE); } 
-		myDispersion->FindRMSDispersion(disp_output);
-		delete disp_output;
+	if (run_with_twiss){		
+		myTwiss->UseDefaultFunctions();
+		myTwiss->AddFunction(1,6,3);
+		myTwiss->AddFunction(2,6,3);
+		myTwiss->AddFunction(3,6,3);
+		myTwiss->AddFunction(4,6,3);
+		myTwiss->AddFunction(6,6,3);
+
+		double bscale1 = 1e-22;
+		
+		if(DoTwiss){    
+			while(true)
+			{
+			cout << "start while(true) to scale bend path length" << endl;
+				// If we are running a lattice with no RF, the TWISS parameters
+				// will not be calculated correctly. This is because some are
+				// calculated from using the eigenvalues of the one turn map,
+				// which is not complete with RF (i.e. longitudinal motion) 
+				// switched off. In order to compensate for this we use the 
+				// ScaleBendPath function which calls a RingDeltaT process 
+				// and attaches it to the TWISS tracker. RingDeltaT process 
+				// adjusts the ct and dp values such that the TWISS may be 
+				// calculated and there are no convergence errors
+				myTwiss->ScaleBendPathLength(bscale1);
+				myTwiss->Calculate();
+
+				// If Beta_x is a number (as opposed to -nan) then we have 
+				// calculated the correct TWISS parameters, otherwise the loop
+				//  keeps running
+				if(!std::isnan(myTwiss->Value(1,1,1,0))) {break;}
+				bscale1 *= 2;
+				cout << "\n\ttrying bscale = " << bscale1<< endl;
+			}
+		}
+		
+		myDispersion->FindDispersion(start_element_number);
+		
+		if (output_twiss){
+			ostringstream twiss_output_file; 
+			twiss_output_file << (lattice_dir+"LatticeFunctions.dat");
+			ofstream twiss_output(twiss_output_file.str().c_str());
+			if(!twiss_output.good()){ std::cerr << "Could not open twiss output file" << std::endl; exit(EXIT_FAILURE); } 
+			myTwiss->PrintTable(twiss_output);
+					
+			ostringstream disp_output_file; 
+			disp_output_file << (lattice_dir+"Dispersion.dat");
+			ofstream* disp_output = new ofstream(disp_output_file.str().c_str());
+			if(!disp_output->good()){ std::cerr << "Could not open dispersion output file" << std::endl; exit(EXIT_FAILURE); } 
+			myDispersion->FindRMSDispersion(disp_output);
+			delete disp_output;
+		}			
 	}
-	
 	//~ if(sixD)
 	//~ Kly1->SetVoltage(2.0);
 
@@ -281,10 +284,10 @@ int main(int argc, char* argv[])
 
 	ApertureConfiguration* myApertureConfiguration;
 	if(crossing){
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_v7_DS_0300_Aperture_Original.tfs",0);    	
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_v7_DS_0300_Aperture.tfs",0);    	
 	}
 	else{
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_v7_DS_0300_Aperture_Original.tfs",0);     
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_v7_DS_0300_Aperture.tfs",0);     
 	}
     	
 	//~ ostringstream ap_output_file;
@@ -314,55 +317,59 @@ int main(int argc, char* argv[])
 /********************
 *	Beam Settings	*
 ********************/
+	
+	BeamData mybeam;
 
-    BeamData mybeam;
+	// Default values for all members of BeamData are 0.0
+	// Particles are treated as macro particles - this has no bearing on collimation
+	mybeam.charge = beam_charge/npart;
+	mybeam.p0 = beam_energy;
+	if (run_with_twiss){
+		mybeam.beta_x = myTwiss->Value(1,1,1,start_element_number)*meter;
+		mybeam.beta_y = myTwiss->Value(3,3,2,start_element_number)*meter;
+		mybeam.alpha_x = -myTwiss->Value(1,2,1,start_element_number);
+		mybeam.alpha_y = -myTwiss->Value(3,4,2,start_element_number);
+		
+		// Minimum and maximum sigma for HEL Halo Distribution
+		//~ mybeam.min_sig_x = 6;
+		//~ mybeam.max_sig_x = 6.00156;
+		//~ mybeam.min_sig_y = 0.0;
+		//~ mybeam.max_sig_y = 0.0;    
+	   
+		// Dispersion
+		mybeam.Dx=myDispersion->Dx;
+		mybeam.Dy=myDispersion->Dy;
+		mybeam.Dxp=myDispersion->Dxp;
+		mybeam.Dyp=myDispersion->Dyp;
+		
+		//Beam centroid
+		mybeam.x0=myTwiss->Value(1,0,0,start_element_number);
+		mybeam.xp0=myTwiss->Value(2,0,0,start_element_number);
+		mybeam.y0=myTwiss->Value(3,0,0,start_element_number);
+		mybeam.yp0=myTwiss->Value(4,0,0,start_element_number);
+		mybeam.ct0=myTwiss->Value(5,0,0,start_element_number);
+		
+		delete myDispersion;
+	}
 
-    // Default values for all members of BeamData are 0.0
-    // Particles are treated as macro particles - this has no bearing on collimation
-    mybeam.charge = beam_charge/npart;
-    mybeam.p0 = beam_energy;
-    mybeam.beta_x = myTwiss->Value(1,1,1,start_element_number)*meter;
-    mybeam.beta_y = myTwiss->Value(3,3,2,start_element_number)*meter;
-    mybeam.alpha_x = -myTwiss->Value(1,2,1,start_element_number);
-    mybeam.alpha_y = -myTwiss->Value(3,4,2,start_element_number);
-    
-    // Minimum and maximum sigma for HEL Halo Distribution
-    //~ mybeam.min_sig_x = 6;
-    //~ mybeam.max_sig_x = 6.00156;
-    //~ mybeam.min_sig_y = 0.0;
-    //~ mybeam.max_sig_y = 0.0;    
-   
-    // Dispersion
-    mybeam.Dx=myDispersion->Dx;
-    mybeam.Dy=myDispersion->Dy;
-    mybeam.Dxp=myDispersion->Dxp;
-    mybeam.Dyp=myDispersion->Dyp;
+		mybeam.emit_x = emittance * meter;
+		mybeam.emit_y = emittance * meter;
 
-    mybeam.emit_x = emittance * meter;
-    mybeam.emit_y = emittance * meter;
 
-    //Beam centroid
-    mybeam.x0=myTwiss->Value(1,0,0,start_element_number);
-    mybeam.xp0=myTwiss->Value(2,0,0,start_element_number);
-    mybeam.y0=myTwiss->Value(3,0,0,start_element_number);
-    mybeam.yp0=myTwiss->Value(4,0,0,start_element_number);
-    mybeam.ct0=myTwiss->Value(5,0,0,start_element_number);
+		//~ mybeam.sig_dp = 0.0;
+		mybeam.sig_z = 0.0;
+		//~ if(rf_test){
+			//~ mybeam.sig_z = ((2.51840894498383E-10 * 299792458)) * meter;
+		//~ }
+		//~ mybeam.sig_dp =  (1.129E-4);
 
-    //~ mybeam.sig_dp = 0.0;
-    mybeam.sig_z = 0.0;
-    //~ if(rf_test){
-		//~ mybeam.sig_z = ((2.51840894498383E-10 * 299792458)) * meter;
-	//~ }
-    //~ mybeam.sig_dp =  (1.129E-4);
+		// X-Y coupling
+		mybeam.c_xy=0.0;
+		mybeam.c_xyp=0.0;
+		mybeam.c_xpy=0.0;
+		mybeam.c_xpyp=0.0;
 
-    // X-Y coupling
-    mybeam.c_xy=0.0;
-    mybeam.c_xyp=0.0;
-    mybeam.c_xpy=0.0;
-    mybeam.c_xpyp=0.0;
-
-    delete myDispersion;
-
+		
 /************
 *	BUNCH	*
 ************/
