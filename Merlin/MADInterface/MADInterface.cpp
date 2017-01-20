@@ -580,7 +580,16 @@ double MADInterface::ReadComponent ()
 	{
 		type="COLLIMATOR";
 	}
-
+	
+	else if(type=="VMONITOR")  
+	{
+		type="MONITOR";
+	}
+	else if(type=="HMONITOR")  
+	{
+		type="MONITOR";
+	}
+	
     if(type=="RBEND")
         {
 		  if((prmMap->GetParameter("K0L"))!=0.0){ type="SBEND";}
@@ -608,7 +617,7 @@ double MADInterface::ReadComponent ()
 		{
 			component = 0;
 		}
-        }
+    }
 	else if(type=="VKICKER")
 	{
 		double scale;
@@ -661,20 +670,20 @@ double MADInterface::ReadComponent ()
 	}//End of Collimators
 
 	//Magnets
-        else if(type=="QUADRUPOLE")
-        {
+    else if(type=="QUADRUPOLE")
+    {
 		k1=prmMap->GetParameter("K1L");
 		Quadrupole* quad = new Quadrupole(name,len,brho*k1/len);
 		ctor->AppendComponent(*quad);
 		component=quad;
-		}
-        else if(type=="SKEWQUAD")
-        {
+	}
+    else if(type=="SKEWQUAD")
+    {
 		k1=prmMap->GetParameter("K1L");
 		SkewQuadrupole* quad = new SkewQuadrupole(name,len,brho*k1/len);
 		ctor->AppendComponent(*quad);
 		component=quad;
-        }
+    }
 	else if(type=="SOLENOID")
 	{
 		ks=prmMap->GetParameter("KS");
@@ -685,8 +694,8 @@ double MADInterface::ReadComponent ()
 
 
 	//Dipole Bending Magnets
-        else if(type=="SBEND")
-        {
+	else if(type=="SBEND")
+    {
 		// K0L depreciated, replaced with ANGLE. HR 17.09.15
 		//~ angle=prmMap->GetParameter("K0L");
 		angle=prmMap->GetParameter("ANGLE");
@@ -739,7 +748,7 @@ double MADInterface::ReadComponent ()
 	
 	//HR not tested (HiLumi fudge) - SBEND with no pole faces
 	else if(type=="RBEND")
-        {
+    {
 		angle=prmMap->GetParameter("ANGLE");
 		k1   =prmMap->GetParameter("K1L");
 		h = angle/len;
