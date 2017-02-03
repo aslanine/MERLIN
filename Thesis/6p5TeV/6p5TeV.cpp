@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 6.4E6;					// number of particles to track
+    int npart = 1;					// number of particles to track
     int nturns = 1;					// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 	string pn_dir, case_dir, bunch_dir, lattice_dir, fluka_dir, dustbin_dir;			
 	
 	string output_dir = "/Build/Thesis/outputs/6p5TeV/";
-	string batch_directory="18Jul16/";
+	string batch_directory="25Jan17/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 		}	
 	
 	bool output_fluka_database 	= 0;
-	bool output_twiss			= 0;		
+	bool output_twiss			= 1;		
 		if(output_twiss){ lattice_dir = (full_output_dir+"LatticeFunctions/"); mkdir(lattice_dir.c_str(), S_IRWXU); }	
 	
 	bool collimation_on 		= 0;

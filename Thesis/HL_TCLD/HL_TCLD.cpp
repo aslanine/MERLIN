@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	input_dir 	= "/Thesis/data/HL_TCLD/";
 	output_dir 	= "/Build/Thesis/outputs/HL_TCLD/";
 
-	string batch_directory="16Aug/";
+	string batch_directory="25Jan17/";
 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -345,8 +345,8 @@ int main(int argc, char* argv[])
 *	Aperture Configuration	*
 ****************************/
 
-	ApertureConfiguration* myApertureConfiguration;
-	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture.tfs",1);     
+	//~ ApertureConfiguration* myApertureConfiguration;
+	//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"Aperture.tfs",1);     
     	
 	//~ ostringstream ap_output_file;
 	//~ ap_output_file << full_output_dir << "ApertureConfiguration.log";
@@ -354,8 +354,8 @@ int main(int argc, char* argv[])
     //~ myApertureConfiguration->SetLogFile(*ApertureConfigurationLog);
 	//~ myApertureConfiguration->EnableLogging(true);
 	
-    myApertureConfiguration->ConfigureElementApertures(myAccModel);
-    delete myApertureConfiguration;
+    //~ myApertureConfiguration->ConfigureElementApertures(myAccModel);
+    //~ delete myApertureConfiguration;
     
 	if(ap_survey){
 		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.01, 0);
