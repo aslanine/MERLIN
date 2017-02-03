@@ -75,7 +75,7 @@ clearvars filename formatSpec fileID dataArray ans;
 %% Import Dispersion
 
 % filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/HL_TCLD/25Jan17/LatticeFunctions/Dispersion.dat';
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7/23_Jan/LatticeFunctions/Dispersion.dat';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/Thesis/outputs/HL_TCLD/25Jan17/LatticeFunctions/Dispersion.dat';
 formatSpec = '%14f%14f%f%[^\n\r]';
 fileID = fopen(filename,'r');
 dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN, 'ReturnOnError', false);
@@ -101,18 +101,21 @@ xmax = 26659;
 
 %% Plot beta x
 figure;
+subplot(2,1,1);
 
 plot(s, betax, '-', M_s, M_betax, ':','Linewidth',1.5);
 
-set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
 title('HL-LHC Beam 1');
 legend('MERLIN','MADX');
 ylabel('\beta_x [m]');
 xlabel('s [m]');
 grid on;
 
-%% Plot beta x difference
-figure;
+% Plot beta x difference
+% figure;
+subplot(2,1,2);
 
 % interpolation steps
 interval = 1;
@@ -137,75 +140,265 @@ mad_int = interp1(test2(:,1), test2(:,2), s_int, 'linear','extrap');
 plot(s_int, (merlin_int - mad_int) );
 
 % set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
-set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
-title('HL-LHC Beam 1');
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+% title('6.5 TeV Beam 1');
 legend('MERLIN-MADX');
-ylabel('\beta_x [m]');
+ylabel('\Delta\beta_x [m]');
 xlabel('s [m]');
 grid on;
 
 %% Plot beta y
 figure;
+subplot(2,1,1);
 
 plot(s, betay, '-', M_s, M_betay, ':','Linewidth',1.5);
 
-set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC Beam 1');
+% set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+title('HL-LHC Beam 1');
 legend('MERLIN','MADX');
 ylabel('\beta_y [m]');
 xlabel('s [m]');
 grid on;
 
+% Plot beta y difference
+% figure;
+subplot(2,1,2);
+
+% interpolation steps
+interval = 1;
+s_int = 0:interval:26659;
+
+% create 2D array of data
+array_in = horzcat(s, betay);
+array_inm = horzcat(M_s, M_betay);
+
+% indices of unique s positions
+[~, ind] = unique(array_in(:,1), 'rows', 'first');
+[~, indm] = unique(array_inm(:,1), 'rows', 'first');
+
+% arrays of unique s points
+test1 = array_in(ind,:);
+test2 = array_inm(indm,:);
+
+% interpolate MERLIN and MADX
+merlin_int = interp1(test1(:,1), test1(:,2), s_int, 'linear','extrap');
+mad_int = interp1(test2(:,1), test2(:,2), s_int, 'linear','extrap');
+
+plot(s_int, (merlin_int - mad_int) );
+
+% set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+% title('6.5 TeV Beam 1');
+legend('MERLIN-MADX');
+ylabel('\Delta\beta_y [m]');
+xlabel('s [m]');
+grid on;
+
 %% Plot Dx
 figure;
+subplot(2,1,1);
 
 % plot(S_D, Dx, '-', M_s, M_Dx, ':', s, Dx_lf, '--','Linewidth',1.5);
 plot(S_D, Dx, '-', M_s, M_Dx, ':','Linewidth',1.5);
+% plot(s, Dx_lf, '--', S_D, Dx, '-', M_s, M_Dx, ':','Linewidth',1.5);
+% plot(s, Dx_lf, '-', S_D, Dx,'Linewidth',1.5);
 
-set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC Beam 1');
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+title('HL-LHC Beam 1');
 % legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
 legend('MERLIN Dispersion','MADX');
 ylabel('D_x [m]');
 xlabel('s [m]');
 grid on;
 
+% Plot Dx difference
+subplot(2,1,2);
+
+% interpolation steps
+interval = 10;
+s_int = 0:interval:26659;
+
+% create 2D array of data
+array_in = horzcat(S_D, Dx);
+% array_in = horzcat(s, Dx_lf);
+array_inm = horzcat(M_s, M_Dx);
+
+% indices of unique s positions
+[~, ind] = unique(array_in(:,1), 'rows', 'first');
+[~, indm] = unique(array_inm(:,1), 'rows', 'first');
+
+% arrays of unique s points
+test1 = array_in(ind,:);
+test2 = array_inm(indm,:);
+
+% interpolate MERLIN and MADX
+merlin_int = interp1(test1(:,1), test1(:,2), s_int, 'linear','extrap');
+mad_int = interp1(test2(:,1), test2(:,2), s_int, 'linear','extrap');
+
+plot(s_int, (merlin_int - mad_int) );
+
+% set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+% title('6.5 TeV Beam 1');
+legend('MERLIN-MADX');
+ylabel('\Delta D_x [m]');
+xlabel('s [m]');
+grid on;
+
 %% Plot Dy
 figure;
+subplot(2,1,1);
 
 % plot(S_D, Dy, '-', M_s, M_Dy, ':', s, Dy_lf, '--','Linewidth',1.5);
 plot(S_D, Dy, '-', M_s, M_Dy, ':','Linewidth',1.5);
 
-set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC Beam 1');
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+title('HL-LHC Beam 1');
 % legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
 legend('MERLIN Dispersion','MADX');
 ylabel('D_y [m]');
 xlabel('s [m]');
 grid on;
 
+% Plot Dx difference
+subplot(2,1,2);
+
+% interpolation steps
+interval = 1;
+s_int = 0:interval:26659;
+
+% create 2D array of data
+array_in = horzcat(S_D, Dy);
+% array_in = horzcat(s, Dy_lf);
+array_inm = horzcat(M_s, M_Dy);
+
+% indices of unique s positions
+[~, ind] = unique(array_in(:,1), 'rows', 'first');
+[~, indm] = unique(array_inm(:,1), 'rows', 'first');
+
+% arrays of unique s points
+test1 = array_in(ind,:);
+test2 = array_inm(indm,:);
+
+% interpolate MERLIN and MADX
+merlin_int = interp1(test1(:,1), test1(:,2), s_int, 'linear','extrap');
+mad_int = interp1(test2(:,1), test2(:,2), s_int, 'linear','extrap');
+
+plot(s_int, (merlin_int - mad_int) );
+
+% set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+% title('6.5 TeV Beam 1');
+legend('MERLIN-MADX');
+ylabel('\Delta D_y [m]');
+xlabel('s [m]');
+grid on;
+
 %% Plot x
 figure;
+subplot(2,1,1);
 
 plot(s, x, '-', M_s, M_x, ':','Linewidth',1.5);
 
-set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC Beam 1');
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+title('HL-LHC Beam 1');
 legend('MERLIN','MADX');
 ylabel('x [m]');
 xlabel('s [m]');
 grid on;
 
+% Plot x difference
+subplot(2,1,2);
+
+% interpolation steps
+interval = 0.01;
+s_int = 0:interval:26659;
+
+% create 2D array of data
+array_in = horzcat(s, x);
+array_inm = horzcat(M_s, M_x);
+
+% indices of unique s positions
+[~, ind] = unique(array_in(:,1), 'rows', 'first');
+[~, indm] = unique(array_inm(:,1), 'rows', 'first');
+
+% arrays of unique s points
+test1 = array_in(ind,:);
+test2 = array_inm(indm,:);
+
+% interpolate MERLIN and MADX
+merlin_int = interp1(test1(:,1), test1(:,2), s_int, 'linear','extrap');
+mad_int = interp1(test2(:,1), test2(:,2), s_int, 'linear','extrap');
+
+plot(s_int, (merlin_int - mad_int) );
+
+% set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+% title('6.5 TeV Beam 1');
+legend('MERLIN-MADX');
+ylabel('\Delta x [m]');
+xlabel('s [m]');
+grid on;
+
 %% Plot y
 figure;
+subplot(2,1,1);
 
 plot(s, y, '-', M_s, M_y, ':','Linewidth',1.5);
 
-set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC Beam 1');
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+title('HL-LHC Beam 1');
 legend('MERLIN','MADX');
 ylabel('y [m]');
 xlabel('s [m]');
 grid on;
 
 hold off;
+
+% Plot y difference
+subplot(2,1,2);
+
+% interpolation steps
+interval = 0.01;
+s_int = 0:interval:26659;
+
+% create 2D array of data
+array_in = horzcat(s, y);
+array_inm = horzcat(M_s, M_y);
+
+% indices of unique s positions
+[~, ind] = unique(array_in(:,1), 'rows', 'first');
+[~, indm] = unique(array_inm(:,1), 'rows', 'first');
+
+% arrays of unique s points
+test1 = array_in(ind,:);
+test2 = array_inm(indm,:);
+
+% interpolate MERLIN and MADX
+merlin_int = interp1(test1(:,1), test1(:,2), s_int, 'linear','extrap');
+mad_int = interp1(test2(:,1), test2(:,2), s_int, 'linear','extrap');
+
+plot(s_int, (merlin_int - mad_int) );
+
+% set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+% title('6.5 TeV Beam 1');
+legend('MERLIN-MADX');
+ylabel('\Delta y [m]');
+xlabel('s [m]');
+grid on;

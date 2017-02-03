@@ -3,7 +3,7 @@
 clearvars all;
 
 %% Import TWISS
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/FCC_Lattice_v7_DS_0300_NoCrossing.tfs';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/FCC_Full_Ring_NoCrossing_Lattice.tfs';
 delimiter = ' ';
 startRow = 48;
 formatSpec = '%q%q%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%q%f%f%f%f%f%f%f%f%*s%[^\n\r]';
@@ -35,7 +35,7 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 %% Import LatticeFunctionTable
 
 % filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/LatticeFunctions.dat';
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7/23_Jan/LatticeFunctions/LatticeFunctions.dat';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/27_Nov_inelastic_nearest_forcedloss/LatticeFunctions/LatticeFunctions.dat';
 formatSpec = '%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%f%[^\n\r]';
 fileID = fopen(filename,'r');
 dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN, 'ReturnOnError', false);
@@ -75,7 +75,7 @@ clearvars filename formatSpec fileID dataArray ans;
 %% Import Dispersion
 
 % filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/Dispersion.dat';
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7/23_Jan/LatticeFunctions/Dispersion.dat';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/27_Nov_inelastic_nearest_forcedloss/LatticeFunctions/Dispersion.dat';
 formatSpec = '%14f%14f%f%[^\n\r]';
 fileID = fopen(filename,'r');
 dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN, 'ReturnOnError', false);
@@ -107,7 +107,7 @@ plot(s, betax, '-', M_s, M_betax, ':','Linewidth',1.5);
 
 % set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC-hh v7 Beam 1');
+title('FCC-hh v6 Beam 1');
 legend('MERLIN','MADX');
 ylabel('\beta_x [m]');
 xlabel('s [m]');
@@ -156,7 +156,7 @@ plot(s, betay, '-', M_s, M_betay, ':','Linewidth',1.5);
 
 % set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC-hh v7 Beam 1');
+title('FCC-hh v6 Beam 1');
 legend('MERLIN','MADX');
 ylabel('\beta_y [m]');
 xlabel('s [m]');
@@ -208,7 +208,7 @@ plot(S_D, Dx, '-', M_s, M_Dx, ':','Linewidth',1.5);
 
 set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
 % set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC-hh v7 Beam 1');
+title('FCC-hh v6 Beam 1');
 % legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
 legend('MERLIN Dispersion','MADX');
 ylabel('D_x [m]');
@@ -259,7 +259,7 @@ plot(S_D, Dy, '-', M_s, M_Dy, ':','Linewidth',1.5);
 
 set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
 % set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC-hh v7 Beam 1');
+title('FCC-hh v6 Beam 1');
 % legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
 legend('MERLIN Dispersion','MADX');
 ylabel('D_y [m]');
@@ -310,7 +310,7 @@ plot(s, x, '-', M_s, M_x, ':','Linewidth',1.5);
 % set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 % set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
 set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC-hh v7 Beam 1');
+title('FCC-hh v6 Beam 1');
 legend('MERLIN','MADX');
 ylabel('x [m]');
 xlabel('s [m]');
@@ -360,7 +360,7 @@ plot(s, y, '-', M_s, M_y, ':','Linewidth',1.5);
 % set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 % set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
 set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('FCC-hh v7 Beam 1');
+title('FCC-hh v6 Beam 1');
 legend('MERLIN','MADX');
 ylabel('y [m]');
 xlabel('s [m]');
