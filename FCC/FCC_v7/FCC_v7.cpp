@@ -69,6 +69,8 @@ int main(int argc, char* argv[])
 	string start_element = "IPA";// IPA
 	string tas_element = "TAS.RA";// TAS IPA Right
 	string ipb_element = "IPB";// IPB
+	string tcld8_element = "TCLD.8RA.H1";
+	string tcld10_element = "TCLD.10RA.H1";
 	//~ string end_element = "END";// END
 	string end_element = ipb_element;// END
 
@@ -88,7 +90,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/FCC_v7/";
 
 		
-	string batch_directory="5Dec_test/";
+	string batch_directory="23_Jan/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -128,7 +130,7 @@ int main(int argc, char* argv[])
 	bool sixD					= 0;	//0 = No RF, 1 = Rf	
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
 	bool crossing				= 0;
-	bool run_with_twiss			= 0;
+	bool run_with_twiss			= 1;
 
 	
 /************************************
@@ -169,6 +171,8 @@ int main(int argc, char* argv[])
     int start_element_number = myAccModel->FindElementLatticePosition(start_element.c_str());
     int tas_element_number = myAccModel->FindElementLatticePosition(tas_element.c_str());
     int end_element_number = myAccModel->FindElementLatticePosition(ipb_element.c_str());
+    int tcld8_element_number = myAccModel->FindElementLatticePosition(tcld8_element.c_str());
+    int tcld10_element_number = myAccModel->FindElementLatticePosition(tcld10_element.c_str());
     
     //~ std::vector<AcceleratorComponent*> elements;
     //~ myAccModel->ExtractTypedElements(elements,"*");
@@ -235,6 +239,7 @@ int main(int argc, char* argv[])
 	}
 	//~ if(sixD)
 	//~ Kly1->SetVoltage(2.0);
+
 
 /************************
 *	Collimator set up	*
@@ -369,6 +374,28 @@ int main(int argc, char* argv[])
 		mybeam.c_xpy=0.0;
 		mybeam.c_xpyp=0.0;
 
+			
+/************************
+*	TCLD Settings		*
+************************/
+
+	// Extract TCLDs
+	vector<Collimator*> TCLD8;
+    myAccModel->ExtractTypedElements(TCLD8, tcld8_element.c_str()); 
+    
+	vector<Collimator*> TCLD10;
+    myAccModel->ExtractTypedElements(TCLD10, tcld10_element.c_str()); 
+    
+    
+	// Create Collimator Aperture
+	// CollimatorAperture* app=new CollimatorAperture(CollData[n].x_gap,CollData[n].y_gap,CollData[n].tilt,collimator_material, (CMapit->second)->GetLength(), 0,0);
+
+	 //~ CollimatorAperture* app8=new CollimatorAperture(
+
+	//~ TCLD8->SetAperture(app8);
+
+
+		
 		
 /************
 *	BUNCH	*
