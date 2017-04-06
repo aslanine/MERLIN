@@ -20,6 +20,7 @@
 #include "NumericalUtils/PhysicalUnits.h"
 #include "NumericalUtils/PhysicalConstants.h"
 #include "BeamDynamics/ParticleTracking/Integrators/TransRFIntegrator.h"
+#include "BeamDynamics/ParticleTracking/Integrators/SymplecticIntegrators.h"
 
 using namespace PhysicalConstants;
 using namespace PhysicalUnits;
@@ -46,6 +47,7 @@ END_INTG_SET
 
 
 template<> MAKE_DEF_INTG_SET(ParticleTracking::ParticleComponentTracker,ParticleTracking::TRANSPORT::StdISet)
+//~ template<> MAKE_DEF_INTG_SET(ParticleTracking::ParticleComponentTracker,ParticleTracking::SYMPLECTIC::StdISet)
 //template<> MAKE_DEF_INTG_SET(ParticleTracking::ParticleComponentTracker,ParticleTracking::THIN_LENS::StdISet)
 
 #define CHK_ZERO(s) if(s==0) return;
