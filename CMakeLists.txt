@@ -24,6 +24,18 @@ OPTION(ENABLE_OPENMP "Use OpenMP where possible. Default OFF" OFF)
 OPTION(BUILD_DYNAMIC "Build Merlin as a dynamic library. Default ON" ON)
 OPTION(BUILD_STATIC "Build Merlin as a static library. Default OFF" OFF)
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -pedantic")
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	# enables optimizations that do not interfere with debugging
+	# introduced in GCC 4.8
+	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og")
+else()
+	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+endif()
+
 #Set the default build type
 if(NOT CMAKE_BUILD_TYPE)
 	MESSAGE(STATUS "No build type set. You probably want to run ccmake and pick one.")
@@ -147,7 +159,7 @@ AUX_SOURCE_DIRECTORY(Merlin/TLAS sources)
 AUX_SOURCE_DIRECTORY(Merlin/utility sources)
 
 #Additional Compiler flags
-ADD_DEFINITIONS("-Wall -ansi -pedantic")
+#ADD_DEFINITIONS("-Wall -ansi -pedantic")
 
 #Enable to build the MerlinExamples folder
 if(ENABLE_EXAMPLES)

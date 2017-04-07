@@ -33,8 +33,7 @@ public:
 	* Constructor
 	* @param[in] m The material to attach to this aperture.
 	*/
-	//~ Aperture(Material* m = nullptr) : ApertureMaterial(m) {}
-	Aperture(Material* m = NULL) : ApertureMaterial(m) {}
+	Aperture(Material* m = nullptr) : ApertureMaterial(m) {}
 
 	/**
 	* Destructor
@@ -107,19 +106,19 @@ std::ostream& operator<< (std::ostream& out, const Aperture& ap);
 *
 * Interpolated in this case is where one type joins another - future internal usage, not a MAD-X type.
 */
-//~ typedef enum
-//~ {
-	//~ NONE,
-	//~ UNKNOWN,
-	//~ CIRCLE,			//Supported
-	//~ RECTANGLE,		//Supported
-	//~ ELLIPSE,		//Supported
-	//~ RECTCIRCLE,
-	//~ LHCSCREEN,		//Supported as RECTELLIPSE
-	//~ RECTELLIPSE,	//Supported
-	//~ RACETRACK,
-	//~ OCTAGON,
-	//~ INTERPOLATED
-//~ } ApertureClass;
+typedef enum
+{
+	NONE,
+	UNKNOWN,
+	CIRCLE,			//Supported
+	RECTANGLE,		//Supported
+	ELLIPSE,		//Supported
+	RECTCIRCLE,
+	LHCSCREEN,		//Supported as RECTELLIPSE
+	RECTELLIPSE,	//Supported
+	RACETRACK,
+	OCTAGON,
+	INTERPOLATED
+} ApertureClass;
 
 #endif

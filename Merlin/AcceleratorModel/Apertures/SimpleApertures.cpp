@@ -74,3 +74,18 @@ void EllipticalAperture::printout(std::ostream& out) const
 	out << GetApertureType() << "(" << GetHalfWidth() << ", " << GetHalfHeight() << ")";
 }
 
+/**
+* Octagonal Aperture Functions
+*/
+
+double OctagonalAperture::GetRadiusAt (double phi, double z) const
+{
+	std::cerr << "OctagonalAperture::GetRadiusAt() - not yet implemented" << std::endl;
+	exit(EXIT_FAILURE);
+}
+
+void OctagonalAperture::printout(std::ostream& out) const
+{
+	out << GetApertureType() << "(" << GetHalfWidth() << ", " << GetHalfHeight() << ", " << GetAngle1() << ", " << GetAngle2() << ")";
+}
+
