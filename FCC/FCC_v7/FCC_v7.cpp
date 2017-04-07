@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 {
     int seed = (int)time(NULL);		// seed for random number generators
     int iseed = (int)time(NULL);	// seed for random number generators
-    int npart = 1E3;				// number of particles to track
+    int npart = 1;				// number of particles to track
     int nturns = 1;				// number of turns to track
 	bool DoTwiss = 1;				// run twiss and align to beam envelope etc?
 	 
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/FCC_v7/";
 
 		
-	string batch_directory="23_Jan/";
+	string batch_directory="5_APR_Transport/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 		
 	bool output_initial_bunch 	= 1;
 	bool output_final_bunch 	= 1;
-	bool input_distn			= 1;
+	bool input_distn			= 0;
 		if (output_initial_bunch || output_final_bunch || every_bunch){
 			bunch_dir = (full_output_dir+"Bunch_Distn/"); 	mkdir(bunch_dir.c_str(), S_IRWXU); 		
 		}	

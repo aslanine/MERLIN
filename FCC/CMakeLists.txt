@@ -30,6 +30,8 @@ add_custom_command(TARGET DataFiles2
 fcc_run(LatticeTest LatticeTest LatticeTest.cpp)
 fcc_run(IPA_LSS IPA_LSS IPA_LSS.cpp)
 fcc_run(FCC_v7 FCC_v7 FCC_v7.cpp)
+fcc_run(FCC_v7_plus FCC_v7_plus FCC_v7_plus.cpp)
+fcc_run(FCC_v7_dev FCC_v7_dev FCC_v7_dev.cpp)
 fcc_run(off_momentum off_momentum off_momentum.cpp)
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
 INCLUDE(Dart)
