@@ -91,7 +91,9 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/FCC_v7_dev/";
 
 		
-	string batch_directory="6April_Alex_X/";
+	string batch_directory="2_May_All_35_TCLD_X/";
+	double n_sig_tcld = 35.14;
+	//~ double n_sig_tcld = 1000;
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -120,8 +122,8 @@ int main(int argc, char* argv[])
 		}		
 	bool use_sixtrack_like_scattering = 0;
 	bool scatterplot			= 0;
-	bool jawinelastic			= 0;
-	bool jawimpact				= 0;
+	bool jawinelastic			= 1;
+	bool jawimpact				= 1;
 	
 	bool ap_survey				= 1;
 	bool coll_survey			= 1;
@@ -132,7 +134,9 @@ int main(int argc, char* argv[])
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
 	bool crossing				= 1;
 	bool run_with_twiss			= 1;
-
+	bool TAS_Cu				= 0;
+	bool Inelastic				= 0;
+	bool scatter_at_coll			= 0;
 	
 /************************************
 *	ACCELERATORMODEL CONSTRUCTION	*
@@ -141,8 +145,11 @@ int main(int argc, char* argv[])
 
 	MADInterface* myMADinterface;
 	if(crossing){
-		//~ myMADinterface = new MADInterface( directory+input_dir+"fcc_lattice_dev_0300_crossing.tfs", beam_energy );		
-		myMADinterface = new MADInterface( directory+input_dir+"FCC_ring.b1.V8_1.tfs", beam_energy );		
+		myMADinterface = new MADInterface( directory+input_dir+"fcc_lattice_dev_0300_crossing.tfs", beam_energy );		
+		//~ myMADinterface = new MADInterface( directory+input_dir+"fcc_lattice_dev_0300_crossing_ipl.tfs", beam_energy );		
+		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_ring.b1.V8_1.tfs", beam_energy );		
+		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_Lattice_dev_Alex_0300_Crossing_IPL.tfs", beam_energy );		
+		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_Lattice_dev_Alex_0300_Crossing_IPA.tfs", beam_energy );		
 	}
 	else{
 		myMADinterface = new MADInterface( directory+input_dir+"fcc_lattice_dev_0300_nocrossing.tfs", beam_energy );
@@ -175,6 +182,7 @@ int main(int argc, char* argv[])
     int end_element_number = myAccModel->FindElementLatticePosition(ipb_element.c_str());
     int tcld8_element_number = myAccModel->FindElementLatticePosition(tcld8_element.c_str());
     int tcld10_element_number = myAccModel->FindElementLatticePosition(tcld10_element.c_str());
+    int dump_drift_element_number = tcld8_element_number-1;
     
     //~ std::vector<AcceleratorComponent*> elements;
     //~ myAccModel->ExtractTypedElements(elements,"*");
@@ -292,11 +300,11 @@ int main(int argc, char* argv[])
 
 	ApertureConfiguration* myApertureConfiguration;
 	if(crossing){
-		//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_aperture_dev_0300_crossing.tfs",0);    	
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_ring_aperture.b1.V8_1.tfs",0);    	
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_aperture_dev_0300_crossing.tfs");    	
+		//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_ring_aperture.b1.V8_1.tfs");    	
 	}
 	else{
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_aperture_dev_0300_nocrossing.tfs",0);     
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_aperture_dev_0300_nocrossing.tfs");     
 	}
     	
 	//~ ostringstream ap_output_file;
@@ -305,23 +313,14 @@ int main(int argc, char* argv[])
     //~ myApertureConfiguration->SetLogFile(*ApertureConfigurationLog);
 	//~ myApertureConfiguration->EnableLogging(true);
 	
+    OctagonalAperture* DefaultOctagon = new OctagonalAperture(0.0148, 0.0132, 0.378536, 0.910831);
+    myApertureConfiguration->SetDefaultAperture(DefaultOctagon);
+    myApertureConfiguration->EnableDefaultAperture(true);
+	
     myApertureConfiguration->ConfigureElementApertures(myAccModel);
     delete myApertureConfiguration;
     
-	if(ap_survey){
-		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 0);
-		//~ ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0, 20);
-	}
-		
-	if(coll_survey){
-		CollimatorSurvey* CollSurvey = new CollimatorSurvey(myAccModel, emittance, emittance, myTwiss); 
-		ostringstream cs_output_file;
-		cs_output_file << full_output_dir << "coll_survey.txt";
-		ofstream* cs_output = new ofstream(cs_output_file.str().c_str());
-		if(!cs_output->good()) { std::cerr << "Could not open collimator survey output" << std::endl; exit(EXIT_FAILURE); }   
-		CollSurvey->Output(cs_output, 100);			
-		delete cs_output;
-	}
+
 
 /********************
 *	Beam Settings	*
@@ -383,23 +382,68 @@ int main(int argc, char* argv[])
 *	TCLD Settings		*
 ************************/
 
-	// Extract TCLDs
-	vector<Collimator*> TCLD8;
+    MaterialDatabase* myMaterialDatabase = new MaterialDatabase();
+    Material* collimator_material = myMaterialDatabase->FindMaterial("W");
+
+    // Extract TCLDs
+    vector<Collimator*> TCLD8;
     myAccModel->ExtractTypedElements(TCLD8, tcld8_element.c_str()); 
+    cout << "Extracted " << TCLD8.size() << " TCLD8 elements (Should = 1)" << endl;
     
-	vector<Collimator*> TCLD10;
-    myAccModel->ExtractTypedElements(TCLD10, tcld10_element.c_str()); 
-    
-    
-	// Create Collimator Aperture
+    	// Create Collimator Aperture
 	// CollimatorAperture* app=new CollimatorAperture(CollData[n].x_gap,CollData[n].y_gap,CollData[n].tilt,collimator_material, (CMapit->second)->GetLength(), 0,0);
+	// Define aperture half gap in sigma
+	double hgap_tcld8 = n_sig_tcld * sqrt ( emittance * meter * myTwiss->Value(1,1,1,tcld8_element_number) * meter);
+	
+	cout << "\n Setting " << tcld8_element.c_str() << " half gap to " << hgap_tcld8 << " metres." << endl;
+	
+	CollimatorAperture* app8=new CollimatorAperture(2*hgap_tcld8, 10, 0, collimator_material, 5, 0,0);
+	    app8->SetExitWidth(2*hgap_tcld8);      //Horizontal
+	    app8->SetExitHeight(10);    //Vertical
+	    app8->SetExitXOffset(0);	//Horizontal
+	    app8->SetExitYOffset(0);	//Vertical
 
-	 //~ CollimatorAperture* app8=new CollimatorAperture(
+	vector<Collimator*>::iterator tcld8_it = TCLD8.begin();
+	cout << " At Collimator " << (*tcld8_it)->GetName() << " Aperture currently " << (*tcld8_it)->GetAperture()->GetApertureType() << endl;
+	(*tcld8_it)->SetAperture(app8);
+	(*tcld8_it)->SetMaterial(collimator_material);
+	cout << " At Collimator " << (*tcld8_it)->GetName() << " Aperture set to " << (*tcld8_it)->GetAperture()->GetApertureType() << endl;
+    
+    vector<Collimator*> TCLD10;
+    myAccModel->ExtractTypedElements(TCLD10, tcld10_element.c_str());   
+    cout << "Extracted " << TCLD10.size() << " TCLD10 elements (Should = 1)" << endl;  
+    
+	double hgap_tcld10 = n_sig_tcld * sqrt ( emittance * meter * myTwiss->Value(1,1,1,tcld10_element_number) * meter);
+	
+	cout << "\n Setting " << tcld10_element.c_str() << " half gap to " << hgap_tcld10 << " metres." << endl;
+	
+	CollimatorAperture* app10=new CollimatorAperture(2*hgap_tcld10, 10, 0, collimator_material, 5, 0,0);
+	    app10->SetExitWidth(2*hgap_tcld10);      //Horizontal
+	    app10->SetExitHeight(10);    //Vertical
+	    app10->SetExitXOffset(0);	//Horizontal
+	    app10->SetExitYOffset(0);	//Vertical
 
-	//~ TCLD8->SetAperture(app8);
-
-
+	vector<Collimator*>::iterator tcld10_it = TCLD10.begin();
+	cout << " At Collimator " << (*tcld10_it)->GetName() << " Aperture currently " << (*tcld10_it)->GetAperture()->GetApertureType() << endl;
+	(*tcld10_it)->SetAperture(app10);
+	(*tcld10_it)->SetMaterial(collimator_material);
+	cout << " At Collimator " << (*tcld10_it)->GetName() << " Aperture set to " << (*tcld10_it)->GetAperture()->GetApertureType() << endl;
+	
+	if(ap_survey){
+		ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0.1, 0);
+		//~ ApertureSurvey* myApertureSurvey = new ApertureSurvey(myAccModel, full_output_dir, 0, 20);
+	}
 		
+	if(coll_survey){
+		CollimatorSurvey* CollSurvey = new CollimatorSurvey(myAccModel, emittance, emittance, myTwiss); 
+		ostringstream cs_output_file;
+		cs_output_file << full_output_dir << "coll_survey.txt";
+		ofstream* cs_output = new ofstream(cs_output_file.str().c_str());
+		if(!cs_output->good()) { std::cerr << "Could not open collimator survey output" << std::endl; exit(EXIT_FAILURE); }   
+		CollSurvey->Output(cs_output, 100);			
+		delete cs_output;
+	}
+
 		
 /************
 *	BUNCH	*
@@ -410,31 +454,48 @@ int main(int argc, char* argv[])
     ParticleBunchConstructor* myBunchCtor;
     
     if(input_distn){
-		ifstream* bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.all.dat");	
-		//~ ifstream* bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.inelastic.dat");	
-		istream* is = bunch_input;		
-		myBunch = new ProtonBunch(beam_energy, mybeam.charge, *is);					
-		myBunch->SetMacroParticleCharge(mybeam.charge);
-		npart = myBunch->size();
-		node_particles = npart;
-		cout << "\n\n\tInput distribution of " << npart << " particles used to create bunch" << endl;		
+	ifstream* bunch_input;
+	if(crossing){
+	    if(Inelastic){    
+		bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.X.inelastic.dat");     
+	    }
+	    else{
+		bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.X.all.dat");
+	    }
 	}
 	else{
-		if(rf_test){
-			//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn);
-			myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn2);
-		}
-		else{
-			//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, Halo7TeV);
-			//~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, normalDistribution);
-			myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, pencilDistribution);
-		}
-		
-		myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
-		delete myBunchCtor;
-
-		myBunch->SetMacroParticleCharge(mybeam.charge);
+	    if(Inelastic){    
+		bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.inelastic.dat");     
+	    }
+	    else{
+		bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.all.dat"); 
+	    }
 	}
+	//~ ifstream* bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.all.dat");	
+	//~ ifstream* bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.X.all.dat");	
+	istream* is = bunch_input;		
+	myBunch = new ProtonBunch(beam_energy, mybeam.charge, *is);					
+	myBunch->SetMacroParticleCharge(mybeam.charge);
+	npart = myBunch->size();
+	node_particles = npart;
+	cout << "\n\n\tInput distribution of " << npart << " particles used to create bunch" << endl;		
+    }
+    else{
+	    if(rf_test){
+		    //~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn);
+		    myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, RFDistn2);
+	    }
+	    else{
+		    //~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, Halo7TeV);
+		    //~ myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, normalDistribution);
+		    myBunchCtor = new ParticleBunchConstructor(mybeam, node_particles, pencilDistribution);
+	    }
+	    
+	    myBunch = myBunchCtor->ConstructParticleBunch<ProtonBunch>();
+	    delete myBunchCtor;
+
+	    myBunch->SetMacroParticleCharge(mybeam.charge);
+    }
     
     if(output_initial_bunch){   
 		ostringstream hbunch_output_file;
@@ -452,22 +513,27 @@ int main(int argc, char* argv[])
 
 
 	ParticleTracker* myParticleTracker1;
-    ParticleTracker* myParticleTracker2;
+	ParticleTracker* myParticleTracker2;
+	ParticleTracker* myParticleTracker3;
 
 	AcceleratorModel::Beamline beamline1 = myAccModel->GetBeamline(start_element_number, tas_element_number-2);
 	//~ AcceleratorModel::Beamline beamline2 = myAccModel->GetBeamline(tas_element_number, end_element_number);
-	AcceleratorModel::Beamline beamline2 = myAccModel->GetBeamline(tas_element_number-1, end_element_number-1);
+	AcceleratorModel::Beamline beamline2 = myAccModel->GetBeamline(tas_element_number-1, dump_drift_element_number-1);
+	AcceleratorModel::Beamline beamline3 = myAccModel->GetBeamline(dump_drift_element_number, end_element_number-1);
 	
 	myParticleTracker1 = new ParticleTracker(beamline1, myBunch);
 	myParticleTracker2 = new ParticleTracker(beamline2, myBunch);
+	myParticleTracker3 = new ParticleTracker(beamline3, myBunch);
 
 	if(symplectic){
 		myParticleTracker1->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());	
 		myParticleTracker2->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
+		myParticleTracker3->SetIntegratorSet(new ParticleTracking::SYMPLECTIC::StdISet());
 	}
 	else{	
 		myParticleTracker1->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());	
 		myParticleTracker2->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());	
+		myParticleTracker3->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());	
 	}
 
 
@@ -514,48 +580,56 @@ int main(int argc, char* argv[])
 		myCollimateProcess->SetDustbin(myLossMapDustbin);   	        
 		//~ myCollimateProcess->SetFlukaLosses(myFlukaLosses); 
 		
-		//~ myCollimateProcess->ScatterAtCollimator(true);
-		myCollimateProcess->ScatterAtCollimator(false);
+		if(scatter_at_coll){
+		    myCollimateProcess->ScatterAtCollimator(true);
+		}
+		else{
+		    myCollimateProcess->ScatterAtCollimator(false);
+		}
 		
 		// Extract TAS and set collimator aperture
-	    //~ std::vector<Collimator*> taselements;
-	    //~ std::vector<Collimator*>::iterator tasit;
-		//~ myAccModel->ExtractTypedElements(taselements,"TAS.RA");
-		//~ int tas_test = taselements.size();
-		//~ tasit = taselements.begin();
-		
-		//~ if(tas_test == 1){
-			//~ cout << "1 TAS.RA found" << endl;
-			
-			//~ // Set TAS to Copper
-			//~ MaterialDatabase* myMaterialDatabase = new MaterialDatabase();
-			//~ Material* collimator_material = myMaterialDatabase->FindMaterial("Cu");
-			
-			//~ //create aperture
-			//~ // CircularCollimatorAperture(radius, tilt, Material, double length, double x_offset_entry=0.0, double y_offset_entry=0.0);
-			//~ CircularCollimatorAperture* tas_ap = new CircularCollimatorAperture(0.025, 0.0, collimator_material, 3.0, 0,0);
-			
-			//~ //set aperture
-			
-			//~ (*tasit)->SetAperture(tas_ap);
-		//~ }
-		//~ else{
-		//~ cout << "Number of TAS.RA found: " << tas_test;			
-		//~ }
+		if(TAS_Cu){
+		    std::vector<Collimator*> taselements;
+		    std::vector<Collimator*>::iterator tasit;
+		    myAccModel->ExtractTypedElements(taselements,"TAS.RA");
+		    int tas_test = taselements.size();
+		    tasit = taselements.begin();
+		    
+		    cout << " At Collimator " << (*tasit)->GetName() << " Aperture currently " << (*tasit)->GetAperture()->GetApertureType() << endl;
+		    if(tas_test == 1){
+			    cout << "1 TAS.RA found" << endl;
+			    
+			    // Set TAS to Copper
+			    Material* tas_material = myMaterialDatabase->FindMaterial("Cu");
+			    
+			    //create aperture
+			    // CircularCollimatorAperture(radius, tilt, Material, double length, double x_offset_entry=0.0, double y_offset_entry=0.0);
+			    CircularCollimatorAperture* tas_ap = new CircularCollimatorAperture(0.025, 0.0, tas_material, 3.0, 0,0);
+			    (*tasit)->SetAperture(tas_ap);
+			    (*tasit)->SetMaterial(tas_material);
+			    cout << " At Collimator " << (*tasit)->GetName() << " Aperture set to " << (*tasit)->GetAperture()->GetApertureType() << endl;
+		    }		
+		    else{
+		    cout << "Number of TAS.RA found: " << tas_test;			
+		    }
+		}
 
 		if(composite){	myScatter->SetComposites(1);}
 		else{			myScatter->SetComposites(0);}
 
 		if(jawimpact){
 			myScatter->SetJawImpact("TAS.RA");
+			myScatter->SetJawImpact("TCLD.8RA.H1");
 			//~ myScatter->SetJawImpact("TCSG.B5L7.B1");
 		}
 		if(scatterplot)	{
 			myScatter->SetScatterPlot("TAS.RA");			
+			myScatter->SetScatterPlot("TCLD.8RA.H1");			
 			//~ myScatter->SetScatterPlot("TCSG.B5L7.B1");
 		}
 		if(jawinelastic){
 			myScatter->SetJawInelastic("TAS.RA");
+			myScatter->SetJawInelastic("TCLD.8RA.H1");
 			//~ myScatter->SetJawInelastic("TCSG.B5L7.B1");
 		}
 
@@ -571,6 +645,7 @@ int main(int argc, char* argv[])
 
 		myParticleTracker1->AddProcess(myCollimateProcess);
 		myParticleTracker2->AddProcess(myCollimateProcess);
+		myParticleTracker3->AddProcess(myCollimateProcess);
 	}
 	
 	
@@ -591,18 +666,25 @@ int main(int argc, char* argv[])
 
         //~ myParticleTracker->Track(myBunch);
         
-        myParticleTracker1->Track(myBunch);
-        
-		//~ if(output_final_bunch){   
-			ostringstream tas_output_file;
-			tas_output_file << bunch_dir << "TAS_bunch.txt";
-			ofstream* tas_output = new ofstream(tas_output_file.str().c_str());
-			if(!tas_output->good()) { std::cerr << "Could not open TAS bunch output" << std::endl; exit(EXIT_FAILURE); }   
-			myBunch->Output(*tas_output);			
-			delete tas_output;	
-		//~ }
+        myParticleTracker1->Track(myBunch);        
+
+	    ostringstream tas_output_file;
+	    tas_output_file << bunch_dir << "TAS_bunch.txt";
+	    ofstream* tas_output = new ofstream(tas_output_file.str().c_str());
+	    if(!tas_output->good()) { std::cerr << "Could not open TAS bunch output" << std::endl; exit(EXIT_FAILURE); }   
+	    myBunch->Output(*tas_output);			
+	    delete tas_output;	
 
         myParticleTracker2->Track(myBunch);
+	
+	    ostringstream dump_output_file;
+	    dump_output_file << bunch_dir << "Pre_TCLD_8_bunch.txt";
+	    ofstream* dump_output = new ofstream(dump_output_file.str().c_str());
+	    if(!dump_output->good()) { std::cerr << "Could not open pre TCLD 8 bunch output" << std::endl; exit(EXIT_FAILURE); }   
+	    myBunch->Output(*dump_output);			
+	    delete dump_output;	
+
+        myParticleTracker3->Track(myBunch);
         
         if(every_bunch){myBunch->Output(*cbo); }   
         
@@ -619,7 +701,7 @@ int main(int argc, char* argv[])
 		bunch_output_file << bunch_dir << "IPB_bunch.txt";
 		ofstream* bunch_output = new ofstream(bunch_output_file.str().c_str());
 		if(!bunch_output->good()) { std::cerr << "Could not open final bunch output" << std::endl; exit(EXIT_FAILURE); }   
-		myBunch->Output(*bunch_output);			
+		myBunch->Output(*bunch_output);
 		delete bunch_output;	
 	}
 
@@ -633,34 +715,9 @@ int main(int argc, char* argv[])
 	//~ myScatter->OutputJawInelastic(JawInel_dir,seed);	
 	myScatter->OutputJawInelastic(JawInel_dir,0);	
 	string SPlot_dir = (full_output_dir+"Scatter_Plot/"); 	mkdir(SPlot_dir.c_str(), S_IRWXU); 	
-    //~ myScatter->OutputScatterPlot(SPlot_dir,seed);
-    myScatter->OutputScatterPlot(SPlot_dir,0);
+	//~ myScatter->OutputScatterPlot(SPlot_dir,seed);
+	myScatter->OutputScatterPlot(SPlot_dir,0);
    
-	/*********************************************************************
-	** OUTPUT FLUKA LOSSES 
-	*********************************************************************/
-	//~ ostringstream fluka_dustbin_file;
-	//~ fluka_dustbin_file << full_output_dir<<std::string("fluka_losses_")<< npart << "_" << seed << std::string(".txt");	   
-	  
-	//~ ofstream* fluka_dustbin_output = new ofstream(fluka_dustbin_file.str().c_str());	
-	//~ if(!fluka_dustbin_output->good())    {
-        //~ std::cerr << "Could not open dustbin loss file" << std::endl;
-        //~ exit(EXIT_FAILURE);
-    //~ }   
-	
-	//~ myFlukaDustbin->Finalise(); 
-	//~ myFlukaDustbin->Output(fluka_dustbin_output); 
-  
-  	/*********************************************************************
-	** OUTPUT FLUKA LOSSES  
-	*********************************************************************/
-	//~ ostringstream fluka_file;
-	//~ fluka_file << fluka_dir <<std::string("fluka_newlosses_")<< npart << "_" << seed << std::string(".txt");	 
-	//~ ofstream* fluka_output1 = new ofstream(fluka_file.str().c_str());   
-	//~ if(!fluka_output1->good()){ std::cerr << "Could not open fluka loss file" << std::endl; exit(EXIT_FAILURE); }  
-	//~ myFlukaLosses->Finalise();
-	//~ myFlukaLosses->Output(fluka_output1);
-	//~ delete fluka_output1;
 
    /*********************************************************************
 	** OUTPUT LOSSMAP  

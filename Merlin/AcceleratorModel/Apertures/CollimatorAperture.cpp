@@ -2,7 +2,68 @@
 #include "MADInterface/MADInterface.h"
 #include "Random/RandomNG.h"
 
+CircularCollimatorAperture::CircularCollimatorAperture(double r, double t, Material* m, double length, double x_off, double y_off)
+	:CircularAperture(r), alpha(t), CollimatorLength(length), x_offset_entry(x_off), y_offset_entry(y_off),cosalpha(cos(-t)),sinalpha(sin(-t))
+{
+	SetMaterial(m);
+	x_offset_exit = 0;
+	y_offset_exit = 0;
+	w_exit = 0;
+	h_exit = 0;
+}
 
+//~ inline bool CircularCollimatorAperture::PointInside(double x,double y,double z) const
+//~ {
+	//~ return x*x+y*y<r2;
+//~ }
+
+void CircularCollimatorAperture::SetExitWidth(double width)
+{
+	w_exit = width;
+}
+
+//Sets the jaw height at the exit of the collimator
+void CircularCollimatorAperture::SetExitHeight(double height)
+{
+	h_exit = height;
+}
+
+//Sets the x (horizontal) orbit offset at the exit of the collimator
+void CircularCollimatorAperture::SetExitXOffset(double x)
+{
+	x_offset_exit = x;
+}
+
+//Sets the y (vertical) orbit offset at the exit of the collimator
+void CircularCollimatorAperture::SetExitYOffset(double y)
+{
+	y_offset_exit = y;
+}
+
+double CircularCollimatorAperture::GetEntranceXOffset() const
+{
+	return x_offset_entry;
+}
+
+double CircularCollimatorAperture::GetEntranceYOffset() const
+{
+	return y_offset_entry;
+}
+
+double CircularCollimatorAperture::GetExitXOffset() const
+{
+	return x_offset_exit;
+}
+
+double CircularCollimatorAperture::GetExitYOffset() const
+{
+	return y_offset_exit;
+}
+
+double CircularCollimatorAperture::GetCollimatorTilt() const
+{
+	return alpha;
+}
 /**********************************************************************
 *
 *	A collimtor jaw, aligned to the beam orbit and beta function changes

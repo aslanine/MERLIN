@@ -281,10 +281,10 @@ int main(int argc, char* argv[])
 
 	ApertureConfiguration* myApertureConfiguration;
 	if(crossing){
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_Full_Ring_Crossing_Aperture.tfs",0);    	
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_Full_Ring_Crossing_Aperture.tfs");    	
 	}
 	else{
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_Full_Ring_NoCrossing_Aperture.tfs",0);     
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_Full_Ring_NoCrossing_Aperture.tfs");     
 	}
     	
 	//~ ostringstream ap_output_file;

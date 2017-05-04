@@ -109,7 +109,8 @@ void CollimateParticleProcess::SetCurrentComponent (AcceleratorComponent& compon
 		Collimator* aCollimator = dynamic_cast<Collimator*>(&component);
 		
 		const CollimatorAperture* tap= dynamic_cast<const CollimatorAperture*> (currentComponent->GetAperture());
-		is_collimator = scatter && tap;
+		const CircularCollimatorAperture* tapc= dynamic_cast<const CircularCollimatorAperture*> (currentComponent->GetAperture());
+		is_collimator = scatter && (tap || tapc);
 
 		if(!is_collimator)
 		{ // not a collimatorso set up for normal hard-edge collimation

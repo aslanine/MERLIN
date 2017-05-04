@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
 ****************************/
 
 	ApertureConfiguration* myApertureConfiguration;
-	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"IPA_R_Aperture.tfs",0);     
+	myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"IPA_R_Aperture.tfs");     
     	
 	//~ ostringstream ap_output_file;
 	//~ ap_output_file << full_output_dir << "ApertureConfiguration.log";

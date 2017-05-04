@@ -8,6 +8,45 @@
 
 /**********************************************************************
 *
+*	A circular collimator jaw
+*
+**********************************************************************/
+
+class CircularCollimatorAperture: public CircularAperture
+{
+protected:
+	double alpha;
+	double CollimatorLength;
+	double jaw_length;
+	double x_offset_entry,y_offset_entry;
+
+//Add jaw parameters at exit as well
+	double x_offset_exit,y_offset_exit;
+	double w_exit,h_exit;
+	double cosalpha;
+	double sinalpha;
+
+public:
+	CircularCollimatorAperture(double r, double t, Material* m, double length, double x_offset_entry=0.0, double y_offset_entry=0.0);
+
+	void SetExitWidth(double);	//Horizontal
+	void SetExitHeight(double);	//Vertical
+	void SetExitXOffset(double);	//Horizontal
+	void SetExitYOffset(double);	//Vertical
+
+	double GetEntranceXOffset() const;
+	double GetEntranceYOffset() const;
+
+	double GetExitXOffset() const;
+	double GetExitYOffset() const;
+
+	double GetCollimatorTilt() const;
+
+	//~ virtual bool PointInside(double x,double y,double z) const;
+};
+
+/**********************************************************************
+*
 *	A collimtor jaw, aligned to the beam orbit and beta function changes
 * 	This does NOT have jaw flatness errors
 *

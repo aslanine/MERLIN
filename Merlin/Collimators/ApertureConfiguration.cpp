@@ -12,7 +12,6 @@
 #include "Collimators/ApertureConfiguration.h"
 
 ApertureConfiguration::ApertureConfiguration(std::string InputFileName) : logFlag(false), DefaultAperture(nullptr), DefaultApertureFlag(false)
-
 {
 	LoadApertureConfiguration(InputFileName);
 }
@@ -59,7 +58,6 @@ void ApertureConfiguration::LoadApertureConfiguration(std::string InputFileName)
 			ApertureEntry.ap1 = ap1;
 			ApertureEntry.ap2 = ap2;
 			ApertureEntry.ap3 = ap3;
-			ApertureEntry.ap4 = ap4;
 			ApertureEntry.ap4 = ap4;
 
 			if(aptype == "\"RECTANGLE\"")

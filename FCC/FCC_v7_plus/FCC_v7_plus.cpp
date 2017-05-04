@@ -289,10 +289,10 @@ int main(int argc, char* argv[])
 
 	ApertureConfiguration* myApertureConfiguration;
 	if(crossing){
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v7_plus_0300_aperture.tfs",0);    	
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v7_plus_0300_aperture.tfs");    	
 	}
 	else{
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v7_plus_0300_aperture.tfs",0);     
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v7_plus_0300_aperture.tfs");     
 	}
     	
 	//~ ostringstream ap_output_file;
