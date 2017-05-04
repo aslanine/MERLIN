@@ -99,6 +99,9 @@ xmax = 26659;
 % xmin = 0;
 % xmax = 7000;
 
+
+interval = 0.01;
+
 %% Plot beta x
 figure;
 subplot(2,1,1);
@@ -107,7 +110,7 @@ plot(s, betax, '-', M_s, M_betax, ':','Linewidth',1.5);
 
 % set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('6.5 TeV Beam 1');
+title('6.5 TeV Beam 2 Flat Top');
 legend('MERLIN','MADX');
 ylabel('\beta_x [m]');
 xlabel('s [m]');
@@ -118,7 +121,6 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 1;
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -156,7 +158,7 @@ plot(s, betay, '-', M_s, M_betay, ':','Linewidth',1.5);
 
 % set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('6.5 TeV Beam 1');
+title('6.5 TeV Beam 2 Flat Top');
 legend('MERLIN','MADX');
 ylabel('\beta_y [m]');
 xlabel('s [m]');
@@ -167,7 +169,7 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 1;
+% interval = 1;
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -208,7 +210,7 @@ plot(S_D, Dx, '-', M_s, M_Dx, ':','Linewidth',1.5);
 
 set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
 % set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('6.5 TeV Beam 1');
+title('6.5 TeV Beam 2 Flat Top');
 % legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
 legend('MERLIN Dispersion','MADX');
 ylabel('D_x [m]');
@@ -219,7 +221,7 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 10;
+% interval = 10;
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -259,7 +261,7 @@ plot(S_D, Dy, '-', M_s, M_Dy, ':','Linewidth',1.5);
 
 set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
 % set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
-title('6.5 TeV Beam 1');
+title('6.5 TeV Beam 2 Flat Top');
 % legend('MERLIN Dispersion','MADX','MERLIN LatticeFunctions');
 legend('MERLIN Dispersion','MADX');
 ylabel('D_y [m]');
@@ -270,7 +272,7 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 1;
+% interval = 1;
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -310,7 +312,7 @@ plot(s, x, '-', M_s, M_x, ':','Linewidth',1.5);
 % set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 % set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
 set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('6.5 TeV Beam 1');
+title('6.5 TeV Beam 2 Flat Top');
 legend('MERLIN','MADX');
 ylabel('x [m]');
 xlabel('s [m]');
@@ -320,7 +322,7 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 0.01;
+% interval = 0.01;
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -360,7 +362,7 @@ plot(s, y, '-', M_s, M_y, ':','Linewidth',1.5);
 % set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 % set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
 set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
-title('6.5 TeV Beam 1');
+title('6.5 TeV Beam 2 Flat Top');
 legend('MERLIN','MADX');
 ylabel('y [m]');
 xlabel('s [m]');
@@ -372,7 +374,7 @@ hold off;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 0.01;
+% interval = 0.01;
 s_int = 0:interval:26659;
 
 % create 2D array of data

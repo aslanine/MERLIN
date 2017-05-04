@@ -1,34 +1,11 @@
-%% Plot Lattice Functions and Dispersion for MERLIN and MADX FCC v7 dev (ALEX KRAINER)
+%% Plot Lattice Functions and Dispersion for MERLIN and MADX FCC v7 dev (ALEX KRAINER) with coll changes
 
-clearvars all;
-
-%% Import TWISS From Alex
-
-% filename = '/home/HR/Downloads/Sam_TFS_Diff/FromAlex/FCC_ring_optics.b1.V8_1.tfs';
-% delimiter = ' ';
-% startRow = 48;
-% 
-% formatSpec = '%q%q%f%f%f%f%f%f%f%f%f%[^\n\r]';
-% 
-% fileID = fopen(filename,'r');
-% 
-% dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'MultipleDelimsAsOne', true, 'EmptyValue' ,NaN,'HeaderLines' ,startRow-1, 'ReturnOnError', false);
-% 
-% fclose(fileID);
-% 
-% M_s = dataArray{:, 3};
-% M_x = dataArray{:, 5};
-% M_y = dataArray{:, 6};
-% M_betax = dataArray{:, 7};
-% M_betay = dataArray{:, 8};
-% M_Dx = dataArray{:, 9};
-% M_Dy = dataArray{:, 10};
-% 
-% clearvars filename delimiter startRow formatSpec fileID dataArray ans;
+clear all;
 
 %% Import TWISS
 % filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/FCC_Lattice_dev_Alex_0300_Crossing_IPL.tfs';
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/fcc_lattice_dev_0300_crossing.tfs';
+% filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/fcc_lattice_dev_0300_crossing.tfs';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/fcc_lattice_dev_0300_crossing_ipl.tfs';
 delimiter = ' ';
 startRow = 48;
 formatSpec = '%q%q%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%q%f%f%f%f%f%f%f%f%*s%[^\n\r]';
@@ -47,8 +24,8 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 %% Import LatticeFunctionTable
 
 % filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/LatticeFunctions.dat';
-% filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7_dev/7April_B1_v8/LatticeFunctions/LatticeFunctions.dat';
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7_dev/10_APR_format/LatticeFunctions/LatticeFunctions.dat';
+% filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7_dev/7April_CollChanges/LatticeFunctions/LatticeFunctions.dat';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7_dev/7April_CollChanges_IPL/LatticeFunctions/LatticeFunctions.dat';
 formatSpec = '%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%30f%f%[^\n\r]';
 fileID = fopen(filename,'r');
 dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN, 'ReturnOnError', false);
@@ -88,8 +65,8 @@ clearvars filename formatSpec fileID dataArray ans;
 %% Import Dispersion
 
 % filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/LatticeTest/26JulyTest/LatticeFunctions/Dispersion.dat';
-% filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7_dev/7April_B1_v8/LatticeFunctions/Dispersion.dat';
-filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7_dev/10_APR_format/LatticeFunctions/Dispersion.dat';
+% filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7_dev/7April_CollChanges/LatticeFunctions/Dispersion.dat';
+filename = '/home/HR/Downloads/MERLIN_HRThesis/MERLIN/Build/FCC/outputs/FCC_v7_dev/7April_CollChanges_IPL/LatticeFunctions/Dispersion.dat';
 formatSpec = '%14f%14f%f%[^\n\r]';
 fileID = fopen(filename,'r');
 dataArray = textscan(fileID, formatSpec, 'Delimiter', '', 'WhiteSpace', '', 'EmptyValue' ,NaN, 'ReturnOnError', false);
@@ -102,9 +79,8 @@ clearvars filename formatSpec fileID dataArray ans;
 %% Multiple Plots
 
 % xlimits full
-xmin = 0; 
-% xmax = 97387.4336310000;
-xmax = 97749.3853528378;
+xmin = 0;
+xmax = 97387.4336310000;
 
 % xlimits zoom start
 % xmin = 0;
@@ -152,12 +128,7 @@ test2 = array_inm(indm,:);
 merlin_int = interp1(test1(:,1), test1(:,2), s_int, 'linear','extrap');
 mad_int = interp1(test2(:,1), test2(:,2), s_int, 'linear','extrap');
 
-test3 = double.empty;
-test3 = merlin_int - mad_int;
-test4 = (test3./mad_int)*100;
-
-% plot(s_int, (merlin_int - mad_int) );
-plot(s_int, test4);
+plot(s_int, (merlin_int - mad_int) );
 
 % set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
 % set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);

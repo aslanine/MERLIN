@@ -97,6 +97,8 @@ xmax = 26659;
 % xmin = 0;
 % xmax = 7000;
 
+interval = 1E-3;
+
 %% Plot beta x
 figure;
 subplot(2,1,1);
@@ -116,7 +118,64 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 1;
+s_int = 0:interval:26659;
+
+% create 2D array of data
+array_in = horzcat(s, betax);
+array_inm = horzcat(M_s, M_betax);
+
+% indices of unique s positions
+[~, ind] = unique(array_in(:,1), 'rows', 'first');
+[~, indm] = unique(array_inm(:,1), 'rows', 'first');
+
+% arrays of unique s points
+test1 = array_in(ind,:);
+test2 = array_inm(indm,:);
+
+% interpolate MERLIN and MADX
+merlin_int = interp1(test1(:,1), test1(:,2), s_int, 'linear','extrap');
+mad_int = interp1(test2(:,1), test2(:,2), s_int, 'linear','extrap');
+
+% test3 = difference
+test3 = double.empty;
+test3 = merlin_int - mad_int;
+
+% test4 = difference/MADX
+test4 = (test3./mad_int)*100;
+
+% plot
+plot(s_int, test4);
+
+% set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+% set(gca,'FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+% title('6.5 TeV Beam 1');
+legend('MERLIN-MADX');
+ylabel('^{\Delta\beta_x}/_{\beta_x} [%]');
+xlabel('s [m]');
+grid on;
+
+
+
+%% Plot beta_x
+figure;
+subplot(2,1,1);
+
+plot(s, betax, '-', M_s, M_betax, ':','Linewidth',1.5);
+
+% set(gca,'yscale','log','FontSize',16,'PlotBoxAspectratio',[4 2 2],'Linewidth',1,'XLim',[xmin xmax]);
+set(gca,'yscale','log','FontSize',16,'Linewidth',1,'XLim',[xmin xmax]);
+title('HL-LHC v1.2.1 Beam 1');
+legend('MERLIN','MADX');
+ylabel('\beta_x [m]');
+xlabel('s [m]');
+grid on;
+
+% Plot beta x difference
+% figure;
+subplot(2,1,2);
+
+% interpolation steps
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -165,7 +224,6 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 1;
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -217,7 +275,6 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 10;
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -268,7 +325,6 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 1;
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -318,7 +374,6 @@ grid on;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 0.01;
 s_int = 0:interval:26659;
 
 % create 2D array of data
@@ -370,7 +425,6 @@ hold off;
 subplot(2,1,2);
 
 % interpolation steps
-interval = 0.01;
 s_int = 0:interval:26659;
 
 % create 2D array of data
