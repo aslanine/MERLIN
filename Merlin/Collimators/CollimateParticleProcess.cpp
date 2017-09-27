@@ -404,6 +404,11 @@ if(LostParticlePositions.size() != 0 && !is_collimator)
 							(*DustbinIterator)->Dispose(*currentComponent, IntegratedLength, (*p), ColParProTurn);
 						}					
 					}
+					if(powerset && !is_collimator){				
+						for(PowerDepositionIterator = PowerDepositionVector.begin(); PowerDepositionIterator != PowerDepositionVector.end(); ++PowerDepositionIterator){					
+							(*PowerDepositionIterator)->Dispose(*currentComponent, IntegratedLength, (*p), ColParProTurn);
+						}					
+					}
 					p=LostBunch->erase(p);
 				}
 				//else, the particle is inside and can be kept for this step
@@ -437,6 +442,11 @@ if(LostParticlePositions.size() != 0 && !is_collimator)
 					for(DustbinIterator = DustbinVector.begin(); DustbinIterator != DustbinVector.end(); ++DustbinIterator){				
 						(*DustbinIterator)->Dispose(*currentComponent, 0., (*p), ColParProTurn);
 					}
+				}
+				if(powerset && !is_collimator){				
+					for(PowerDepositionIterator = PowerDepositionVector.begin(); PowerDepositionIterator != PowerDepositionVector.end(); ++PowerDepositionIterator){					
+						(*PowerDepositionIterator)->Dispose(*currentComponent, 0., (*p), ColParProTurn);
+					}					
 				}
 				lost.push_back(*p);
 			}

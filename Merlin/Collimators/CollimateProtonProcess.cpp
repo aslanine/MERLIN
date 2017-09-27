@@ -198,6 +198,11 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 						(*DustbinIterator)->Dispose(*currentComponent, (z+zstep), p, ColParProTurn);
 				}			
 			}
+			if(powerset){				
+				for(PowerDepositionIterator = PowerDepositionVector.begin(); PowerDepositionIterator != PowerDepositionVector.end(); ++PowerDepositionIterator){					
+					(*PowerDepositionIterator)->Dispose(*currentComponent, (z+zstep), p, ColParProTurn);
+				}					
+			}
 			return true;
 		}	
 //MCS
@@ -233,6 +238,11 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 						(*DustbinIterator)->Dispose(*currentComponent, z, p, ColParProTurn);
 					}					
 				}
+				if(powerset){				
+					for(PowerDepositionIterator = PowerDepositionVector.begin(); PowerDepositionIterator != PowerDepositionVector.end(); ++PowerDepositionIterator){					
+						(*PowerDepositionIterator)->Dispose(*currentComponent, z, p, ColParProTurn);
+					}					
+				}
 				if(flukaset){ // for inelastic
 					for(FlukaLossesIterator = FlukaLossesVector.begin(); FlukaLossesIterator != FlukaLossesVector.end(); ++FlukaLossesIterator){					
 							(*FlukaLossesIterator)->Record(*currentComponent, (z), p, ColParProTurn);
@@ -259,6 +269,11 @@ bool CollimateProtonProcess::DoScatter(Particle& p)
 			if(dustset){					
 				for(DustbinIterator = DustbinVector.begin(); DustbinIterator != DustbinVector.end(); ++DustbinIterator){					
 					(*DustbinIterator)->Dispose(*currentComponent, z, p, ColParProTurn);
+				}					
+			}
+			if(powerset){				
+				for(PowerDepositionIterator = PowerDepositionVector.begin(); PowerDepositionIterator != PowerDepositionVector.end(); ++PowerDepositionIterator){					
+					(*PowerDepositionIterator)->Dispose(*currentComponent, z, p, ColParProTurn);
 				}					
 			}
 			return true;

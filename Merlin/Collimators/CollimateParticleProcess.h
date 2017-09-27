@@ -27,6 +27,7 @@
 #include "BeamModel/PSTypes.h"
 
 #include "Collimators/Dustbin.h"
+#include "Collimators/PowerDeposition.h"
 #include "Collimators/FlukaLosses.h"
 
 #include "Exception/MerlinException.h"
@@ -123,9 +124,12 @@ public:
     virtual void SetOutputBinSize(double);
     
     virtual void SetDustbin (Dustbin* odb){DustbinVector.push_back(odb); dustset=1;}
+    virtual void SetPowerDeposition (PowerDeposition* opd){PowerDepositionVector.push_back(opd); powerset=1;}
     
     vector<Dustbin*> DustbinVector;
     vector<Dustbin*>::iterator DustbinIterator;
+    vector<PowerDeposition*> PowerDepositionVector;
+    vector<PowerDeposition*>::iterator PowerDepositionIterator;
     
     virtual void SetFlukaLosses (FlukaLosses* ofl){FlukaLossesVector.push_back(ofl); flukaset=1;}
     
@@ -165,6 +169,7 @@ protected:
 	
 	// 0 when no dustbin is set
     bool dustset;
+    bool powerset;
     bool flukaset;
     
     const double GetBinSize(){return bin_size;}

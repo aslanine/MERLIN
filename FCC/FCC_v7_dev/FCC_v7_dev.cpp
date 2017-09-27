@@ -28,6 +28,7 @@
 #include "Collimators/MaterialDatabase.h"
 #include "Collimators/ApertureConfiguration.h"
 #include "Collimators/Dustbin.h"
+#include "Collimators/PowerDeposition.h"
 #include "Collimators/FlukaLosses.h"
 
 #include "MADInterface/MADInterface.h"
@@ -91,7 +92,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/FCC_v7_dev/";
 
 		
-	string batch_directory="2_May_All_35_TCLD_X/";
+	string batch_directory="21_Aug_Coll/";
 	double n_sig_tcld = 35.14;
 	//~ double n_sig_tcld = 1000;
 	 
@@ -132,10 +133,10 @@ int main(int argc, char* argv[])
 	bool symplectic				= 1;
 	bool sixD					= 0;	//0 = No RF, 1 = Rf	
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
-	bool crossing				= 1;
+	bool crossing				= 0;
 	bool run_with_twiss			= 1;
 	bool TAS_Cu				= 0;
-	bool Inelastic				= 0;
+	bool Inelastic				= 1;
 	bool scatter_at_coll			= 0;
 	
 /************************************
@@ -456,12 +457,12 @@ int main(int argc, char* argv[])
     if(input_distn){
 	ifstream* bunch_input;
 	if(crossing){
-	    if(Inelastic){    
-		bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.X.inelastic.dat");     
-	    }
-	    else{
+	    //~ if(Inelastic){    
+		//~ bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.X.inelastic.dat");     
+	    //~ }
+	    //~ else{
 		bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.X.all.dat");
-	    }
+	    //~ }
 	}
 	else{
 	    if(Inelastic){    
@@ -565,108 +566,109 @@ int main(int argc, char* argv[])
 *	Collimation Process		*
 ****************************/
 
-	//~ FlukaLosses* myFlukaLosses = new FlukaLosses;  
-	LossMapDustbin* myLossMapDustbin = new LossMapDustbin(nearestelement);
-	//~ LossMapDustbin* myLossMapDustbin = new LossMapDustbin();
-	ScatteringModel* myScatter = new ScatteringModel;
+    //~ FlukaLosses* myFlukaLosses = new FlukaLosses;  
+    LossMapDustbin* myLossMapDustbin = new LossMapDustbin(nearestelement);
+    PowerDeposition* myPowerDeposition = new PowerDeposition(beam_energy, nearest_element);
+    //~ LossMapDustbin* myLossMapDustbin = new LossMapDustbin();
+    ScatteringModel* myScatter = new ScatteringModel;
 
-  	if(collimation_on){ 
+    if(collimation_on){ 
+	    
+	    bool beam2 = 0;
+	    
+	    CollimateProtonProcess* myCollimateProcess =new CollimateProtonProcess(2, 4, NULL);
+	    
+	    //~ myLossMapDustbin->Beam2(beam2);
+	    myCollimateProcess->SetDustbin(myLossMapDustbin);   	        
+	    myCollimateProcess->SetPowerDeposition(myPowerDeposition);   
+	    
+	    if(scatter_at_coll){
+		myCollimateProcess->ScatterAtCollimator(true);
+	    }
+	    else{
+		myCollimateProcess->ScatterAtCollimator(false);
+	    }
+	    
+	    // Extract TAS and set collimator aperture
+	    if(TAS_Cu){
+		std::vector<Collimator*> taselements;
+		std::vector<Collimator*>::iterator tasit;
+		myAccModel->ExtractTypedElements(taselements,"TAS.RA");
+		int tas_test = taselements.size();
+		tasit = taselements.begin();
 		
-		bool beam2 = 0;
-		
-		CollimateProtonProcess* myCollimateProcess =new CollimateProtonProcess(2, 4, NULL);
-		
-		//~ myLossMapDustbin->Beam2(beam2);
-		myCollimateProcess->SetDustbin(myLossMapDustbin);   	        
-		//~ myCollimateProcess->SetFlukaLosses(myFlukaLosses); 
-		
-		if(scatter_at_coll){
-		    myCollimateProcess->ScatterAtCollimator(true);
-		}
+		cout << " At Collimator " << (*tasit)->GetName() << " Aperture currently " << (*tasit)->GetAperture()->GetApertureType() << endl;
+		if(tas_test == 1){
+			cout << "1 TAS.RA found" << endl;
+			
+			// Set TAS to Copper
+			Material* tas_material = myMaterialDatabase->FindMaterial("Cu");
+			
+			//create aperture
+			// CircularCollimatorAperture(radius, tilt, Material, double length, double x_offset_entry=0.0, double y_offset_entry=0.0);
+			CircularCollimatorAperture* tas_ap = new CircularCollimatorAperture(0.025, 0.0, tas_material, 3.0, 0,0);
+			(*tasit)->SetAperture(tas_ap);
+			(*tasit)->SetMaterial(tas_material);
+			cout << " At Collimator " << (*tasit)->GetName() << " Aperture set to " << (*tasit)->GetAperture()->GetApertureType() << endl;
+		}		
 		else{
-		    myCollimateProcess->ScatterAtCollimator(false);
+		cout << "Number of TAS.RA found: " << tas_test;			
 		}
-		
-		// Extract TAS and set collimator aperture
-		if(TAS_Cu){
-		    std::vector<Collimator*> taselements;
-		    std::vector<Collimator*>::iterator tasit;
-		    myAccModel->ExtractTypedElements(taselements,"TAS.RA");
-		    int tas_test = taselements.size();
-		    tasit = taselements.begin();
-		    
-		    cout << " At Collimator " << (*tasit)->GetName() << " Aperture currently " << (*tasit)->GetAperture()->GetApertureType() << endl;
-		    if(tas_test == 1){
-			    cout << "1 TAS.RA found" << endl;
-			    
-			    // Set TAS to Copper
-			    Material* tas_material = myMaterialDatabase->FindMaterial("Cu");
-			    
-			    //create aperture
-			    // CircularCollimatorAperture(radius, tilt, Material, double length, double x_offset_entry=0.0, double y_offset_entry=0.0);
-			    CircularCollimatorAperture* tas_ap = new CircularCollimatorAperture(0.025, 0.0, tas_material, 3.0, 0,0);
-			    (*tasit)->SetAperture(tas_ap);
-			    (*tasit)->SetMaterial(tas_material);
-			    cout << " At Collimator " << (*tasit)->GetName() << " Aperture set to " << (*tasit)->GetAperture()->GetApertureType() << endl;
-		    }		
-		    else{
-		    cout << "Number of TAS.RA found: " << tas_test;			
-		    }
-		}
+	    }
 
-		if(composite){	myScatter->SetComposites(1);}
-		else{			myScatter->SetComposites(0);}
+	    if(composite){	myScatter->SetComposites(1);}
+	    else{			myScatter->SetComposites(0);}
 
-		if(jawimpact){
-			myScatter->SetJawImpact("TAS.RA");
-			myScatter->SetJawImpact("TCLD.8RA.H1");
-			//~ myScatter->SetJawImpact("TCSG.B5L7.B1");
-		}
-		if(scatterplot)	{
-			myScatter->SetScatterPlot("TAS.RA");			
-			myScatter->SetScatterPlot("TCLD.8RA.H1");			
-			//~ myScatter->SetScatterPlot("TCSG.B5L7.B1");
-		}
-		if(jawinelastic){
-			myScatter->SetJawInelastic("TAS.RA");
-			myScatter->SetJawInelastic("TCLD.8RA.H1");
-			//~ myScatter->SetJawInelastic("TCSG.B5L7.B1");
-		}
+	    if(jawimpact){
+		    myScatter->SetJawImpact("TAS.RA");
+		    myScatter->SetJawImpact("TCLD.8RA.H1");
+		    //~ myScatter->SetJawImpact("TCSG.B5L7.B1");
+	    }
+	    if(scatterplot)	{
+		    myScatter->SetScatterPlot("TAS.RA");			
+		    myScatter->SetScatterPlot("TCLD.8RA.H1");			
+		    //~ myScatter->SetScatterPlot("TCSG.B5L7.B1");
+	    }
+	    if(jawinelastic){
+		    myScatter->SetJawInelastic("TAS.RA");
+		    myScatter->SetJawInelastic("TCLD.8RA.H1");
+		    //~ myScatter->SetJawInelastic("TCSG.B5L7.B1");
+	    }
 
-		// 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,   
-		// 3: ST + Adv. SD,     4: MERLIN
-		// Where ST = SixTrack like, Adv. = Advanced, SD = Single Diffractive,
-		// and MERLIN includes all advanced scattering
-		if(use_sixtrack_like_scattering){myScatter->SetScatterType(0);}
-		else{myScatter->SetScatterType(4);}
-		myCollimateProcess->SetScatteringModel(myScatter);
-		myCollimateProcess->SetLossThreshold(200.0);
-		myCollimateProcess->SetOutputBinSize(0.1);
+	    // 0: ST,    1: ST + Adv. Ionisation,    2: ST + Adv. Elastic,   
+	    // 3: ST + Adv. SD,     4: MERLIN
+	    // Where ST = SixTrack like, Adv. = Advanced, SD = Single Diffractive,
+	    // and MERLIN includes all advanced scattering
+	    if(use_sixtrack_like_scattering){myScatter->SetScatterType(0);}
+	    else{myScatter->SetScatterType(4);}
+	    myCollimateProcess->SetScatteringModel(myScatter);
+	    myCollimateProcess->SetLossThreshold(200.0);
+	    myCollimateProcess->SetOutputBinSize(0.1);
 
-		myParticleTracker1->AddProcess(myCollimateProcess);
-		myParticleTracker2->AddProcess(myCollimateProcess);
-		myParticleTracker3->AddProcess(myCollimateProcess);
-	}
-	
-	
+	    myParticleTracker1->AddProcess(myCollimateProcess);
+	    myParticleTracker2->AddProcess(myCollimateProcess);
+	    myParticleTracker3->AddProcess(myCollimateProcess);
+    }
+    
+    
 /********************
  *  TRACKING RUN	*
  *******************/
-	ostringstream cbo_file;
-	cbo_file << bunch_dir << "Every_bunch.txt";
-	ofstream* cboclean = new ofstream(cbo_file.str().c_str(), ios::trunc);
-	ofstream* cbo = new ofstream(cbo_file.str().c_str(), ios::app);		
-	if(!cbo->good())	{ std::cerr << "Could not open every bunch output file" << std::endl; exit(EXIT_FAILURE); }
-	
-    // Now all we have to do is create a loop for the number of turns and use the Track() function to perform tracking   
-	
-	for (int turn=1; turn<=nturns; turn++)
+    ostringstream cbo_file;
+    cbo_file << bunch_dir << "Every_bunch.txt";
+    ofstream* cboclean = new ofstream(cbo_file.str().c_str(), ios::trunc);
+    ofstream* cbo = new ofstream(cbo_file.str().c_str(), ios::app);		
+    if(!cbo->good())	{ std::cerr << "Could not open every bunch output file" << std::endl; exit(EXIT_FAILURE); }
+    
+// Now all we have to do is create a loop for the number of turns and use the Track() function to perform tracking   
+    
+    for (int turn=1; turn<=nturns; turn++)
     {
-        cout << "Turn " << turn <<"\tParticle number: " << myBunch->size() << endl;
+	cout << "Turn " << turn <<"\tParticle number: " << myBunch->size() << endl;
 
-        //~ myParticleTracker->Track(myBunch);
-        
-        myParticleTracker1->Track(myBunch);        
+	//~ myParticleTracker->Track(myBunch);
+	
+	myParticleTracker1->Track(myBunch);        
 
 	    ostringstream tas_output_file;
 	    tas_output_file << bunch_dir << "TAS_bunch.txt";
@@ -675,7 +677,7 @@ int main(int argc, char* argv[])
 	    myBunch->Output(*tas_output);			
 	    delete tas_output;	
 
-        myParticleTracker2->Track(myBunch);
+	myParticleTracker2->Track(myBunch);
 	
 	    ostringstream dump_output_file;
 	    dump_output_file << bunch_dir << "Pre_TCLD_8_bunch.txt";
@@ -684,55 +686,89 @@ int main(int argc, char* argv[])
 	    myBunch->Output(*dump_output);			
 	    delete dump_output;	
 
-        myParticleTracker3->Track(myBunch);
-        
-        if(every_bunch){myBunch->Output(*cbo); }   
-        
-        if( myBunch->size() <= 1 ) break;
-    }
-   
-	/*********************************************************************
-	** OUTPUT FINAL BUNCH
-	*********************************************************************/
-	if(output_final_bunch){   
-		ostringstream bunch_output_file;
-		//~ bunch_output_file << bunch_dir << seed  << "_final_bunch.txt";
-		//~ bunch_output_file << bunch_dir << "final_bunch.txt";
-		bunch_output_file << bunch_dir << "IPB_bunch.txt";
-		ofstream* bunch_output = new ofstream(bunch_output_file.str().c_str());
-		if(!bunch_output->good()) { std::cerr << "Could not open final bunch output" << std::endl; exit(EXIT_FAILURE); }   
-		myBunch->Output(*bunch_output);
-		delete bunch_output;	
-	}
-
-	/*********************************************************************
-	**	Output Jaw Impact, Scatter Plot, Jaw Inelastic
-	*********************************************************************/
-	string JawIm_dir = (full_output_dir+"Jaw_Impact/"); 	mkdir(JawIm_dir.c_str(), S_IRWXU); 	
-	//~ myScatter->OutputJawImpact(JawIm_dir,seed);
-	myScatter->OutputJawImpact(JawIm_dir,0);
-	string JawInel_dir = (full_output_dir+"Jaw_Inelastic/"); 	mkdir(JawInel_dir.c_str(), S_IRWXU); 	
-	//~ myScatter->OutputJawInelastic(JawInel_dir,seed);	
-	myScatter->OutputJawInelastic(JawInel_dir,0);	
-	string SPlot_dir = (full_output_dir+"Scatter_Plot/"); 	mkdir(SPlot_dir.c_str(), S_IRWXU); 	
-	//~ myScatter->OutputScatterPlot(SPlot_dir,seed);
-	myScatter->OutputScatterPlot(SPlot_dir,0);
-   
-
-   /*********************************************************************
-	** OUTPUT LOSSMAP  
-	*********************************************************************/
-	ostringstream dustbin_file;
-	//~ dustbin_file << dustbin_dir <<"Dustbin_losses_"<< npart << "_" << seed << std::string(".txt");	
-	dustbin_file << dustbin_dir <<"Dustbin_losses_"<< npart << std::string(".txt");	
-	ofstream* dustbin_output = new ofstream(dustbin_file.str().c_str());	
-	if(!dustbin_output->good())    {
-        std::cerr << "Could not open dustbin loss file" << std::endl;
-        exit(EXIT_FAILURE);
-    }   
+	myParticleTracker3->Track(myBunch);
 	
-	myLossMapDustbin->Finalise(); 
-	myLossMapDustbin->Output(dustbin_output); 
+	if(every_bunch){myBunch->Output(*cbo); }   
+	
+	if( myBunch->size() <= 1 ) break;
+    }
+
+    /*********************************************************************
+    ** OUTPUT FINAL BUNCH
+    *********************************************************************/
+    if(output_final_bunch){   
+	    ostringstream bunch_output_file;
+	    //~ bunch_output_file << bunch_dir << seed  << "_final_bunch.txt";
+	    //~ bunch_output_file << bunch_dir << "final_bunch.txt";
+	    bunch_output_file << bunch_dir << "IPB_bunch.txt";
+	    ofstream* bunch_output = new ofstream(bunch_output_file.str().c_str());
+	    if(!bunch_output->good()) { std::cerr << "Could not open final bunch output" << std::endl; exit(EXIT_FAILURE); }   
+	    myBunch->Output(*bunch_output);
+	    delete bunch_output;	
+    }
+
+    /*********************************************************************
+    **	Output Jaw Impact, Scatter Plot, Jaw Inelastic
+    *********************************************************************/
+    string JawIm_dir = (full_output_dir+"Jaw_Impact/"); 	mkdir(JawIm_dir.c_str(), S_IRWXU); 	
+    //~ myScatter->OutputJawImpact(JawIm_dir,seed);
+    myScatter->OutputJawImpact(JawIm_dir,0);
+    string JawInel_dir = (full_output_dir+"Jaw_Inelastic/"); 	mkdir(JawInel_dir.c_str(), S_IRWXU); 	
+    //~ myScatter->OutputJawInelastic(JawInel_dir,seed);	
+    myScatter->OutputJawInelastic(JawInel_dir,0);	
+    string SPlot_dir = (full_output_dir+"Scatter_Plot/"); 	mkdir(SPlot_dir.c_str(), S_IRWXU); 	
+    //~ myScatter->OutputScatterPlot(SPlot_dir,seed);
+    myScatter->OutputScatterPlot(SPlot_dir,0);
+
+
+    /*********************************************************************
+    ** OUTPUT LOSSMAP  
+    *********************************************************************/
+    ostringstream dustbin_file;
+    //~ dustbin_file << dustbin_dir <<"Dustbin_losses_"<< npart << "_" << seed << std::string(".txt");	
+    dustbin_file << dustbin_dir <<"Dustbin_losses.txt";	
+    ofstream* dustbin_output = new ofstream(dustbin_file.str().c_str());	
+    if(!dustbin_output->good())    {
+	std::cerr << "Could not open dustbin loss file" << std::endl;
+	exit(EXIT_FAILURE);
+    }   
+    
+    myLossMapDustbin->Finalise(); 
+    myLossMapDustbin->Output(dustbin_output); 
+    
+    /*********************************************************************
+    ** OUTPUT PowerDeposition  
+    *********************************************************************/
+    ostringstream power_file;
+    power_file << dustbin_dir <<"Power_Losses.txt";	
+    ofstream* power_output = new ofstream(power_file.str().c_str());	
+    if(!power_output->good())    {
+	std::cerr << "Could not open power loss file" << std::endl;
+	exit(EXIT_FAILURE);
+    }       
+    myPowerDeposition->Finalise(); 
+    
+    double sigma_I = 108 * 1E-24 * 1E-3;
+    double nevents = 1E6;
+    double luminosity = 5E34;
+    double luminosity_ult = 30E34;
+    
+    // protons/second
+    //~ double normalisation = 1 / (sigma_I * nevents * luminosity);
+    
+    // Watts
+    double normalisation = 1 / (sigma_I * nevents * luminosity * 1E9 * PhysicalConstants::ElectronCharge);
+    
+    myPowerDeposition->Output(power_output, normalisation); 
+    
+    ostringstream ecorr_file;
+    ecorr_file << dustbin_dir <<"Energy_Correlation.txt";	
+    ofstream* ecorr_output = new ofstream(ecorr_file.str().c_str());	
+    if(!ecorr_output->good())    {
+	std::cerr << "Could not open energy corellation file" << std::endl;
+	exit(EXIT_FAILURE);
+    } 
+    myPowerDeposition->EnergyCorrelationOutput(ecorr_output); 
    
     // These lines tell us how many particles we tracked, how many survived, and how many were lost
     cout << "npart: " << npart << endl;
