@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/FCC_v8/";
 
 		
-	string batch_directory="21_Aug_Coll/";
+	string batch_directory="2_Oct_v8_test_nocross/";
 	double n_sig_tcld = 35.14;
 	//~ double n_sig_tcld = 1000;
 	 
@@ -135,9 +135,9 @@ int main(int argc, char* argv[])
 	bool composite				= 1;	//0 = Sixtrack composite, 1=MERLIN composite	
 	bool crossing				= 0;
 	bool run_with_twiss			= 1;
-	bool TAS_Cu				= 0;
+	bool TAS_Cu					= 0;
 	bool Inelastic				= 1;
-	bool scatter_at_coll			= 0;
+	bool scatter_at_coll		= 0;
 	
 /************************************
 *	ACCELERATORMODEL CONSTRUCTION	*
@@ -146,14 +146,16 @@ int main(int argc, char* argv[])
 
 	MADInterface* myMADinterface;
 	if(crossing){
-		myMADinterface = new MADInterface( directory+input_dir+"FCC_v8_Lattice_0300_Crossing.tfs", beam_energy );		
+		myMADinterface = new MADInterface( directory+input_dir+"fcc_v8_lattice_0300_crossing_merlin.tfs", beam_energy );		
+		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_v8_Lattice_0300_Crossing.tfs", beam_energy );		
 		//~ myMADinterface = new MADInterface( directory+input_dir+"fcc_lattice_dev_0300_crossing_ipl.tfs", beam_energy );		
 		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_ring.b1.V8_1.tfs", beam_energy );		
 		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_Lattice_dev_Alex_0300_Crossing_IPL.tfs", beam_energy );		
 		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_Lattice_dev_Alex_0300_Crossing_IPA.tfs", beam_energy );		
 	}
 	else{
-		myMADinterface = new MADInterface( directory+input_dir+"FCC_v8_Lattice_0300_NoCrossing.tfs", beam_energy );
+		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_v8_Lattice_0300_NoCrossing.tfs", beam_energy );
+		myMADinterface = new MADInterface( directory+input_dir+"fcc_v8_lattice_0300_nocrossing_merlin.tfs", beam_energy );
 	}
 		//~ myMADinterface->SetSingleCellRF(1);
 	cout << "MADInterface Done" << endl;
