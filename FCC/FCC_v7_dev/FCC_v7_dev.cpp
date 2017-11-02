@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/FCC_v7_dev/";
 
 		
-	string batch_directory="21_Aug_Coll/";
+	string batch_directory="2_Oct_NoCross/";
 	double n_sig_tcld = 35.14;
 	//~ double n_sig_tcld = 1000;
 	 

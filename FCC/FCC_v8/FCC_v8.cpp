@@ -92,9 +92,10 @@ int main(int argc, char* argv[])
 	output_dir 	= "/Build/FCC/outputs/FCC_v8/";
 
 		
-	string batch_directory="2_Oct_v8_test_nocross/";
-	double n_sig_tcld = 35.14;
-	//~ double n_sig_tcld = 1000;
+	//~ string batch_directory="4_Oct_v8_noTCLD_nocross/";
+	string batch_directory="17_Oct_v8_1100_noTCLD_Inelastic/";
+	//~ double n_sig_tcld = 35.14;
+	double n_sig_tcld = 1000;
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -154,8 +155,9 @@ int main(int argc, char* argv[])
 		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_Lattice_dev_Alex_0300_Crossing_IPA.tfs", beam_energy );		
 	}
 	else{
-		//~ myMADinterface = new MADInterface( directory+input_dir+"FCC_v8_Lattice_0300_NoCrossing.tfs", beam_energy );
-		myMADinterface = new MADInterface( directory+input_dir+"fcc_v8_lattice_0300_nocrossing_merlin.tfs", beam_energy );
+		//~ myMADinterface = new MADInterface( directory+input_dir+"fcc_lattice_dev_0300_nocrossing.tfs", beam_energy );
+		//~ myMADinterface = new MADInterface( directory+input_dir+"fcc_v8_lattice_0300_nocrossing_merlin.tfs", beam_energy );
+		myMADinterface = new MADInterface( directory+input_dir+"fcc_v8_lattice_1100_nocrossing.tfs", beam_energy );
 	}
 		//~ myMADinterface->SetSingleCellRF(1);
 	cout << "MADInterface Done" << endl;
@@ -307,7 +309,9 @@ int main(int argc, char* argv[])
 		//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_ring_aperture.b1.V8_1.tfs");    	
 	}
 	else{
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_v8_Aperture_0300.tfs");     
+		//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v8_aperture_0300_merlin.tfs");     
+		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v8_aperture_1100.tfs");     
+		//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_aperture_dev_0300_nocrossing.tfs");     
 	}
     	
 	//~ ostringstream ap_output_file;
@@ -407,7 +411,9 @@ int main(int argc, char* argv[])
 	    app8->SetExitYOffset(0);	//Vertical
 
 	vector<Collimator*>::iterator tcld8_it = TCLD8.begin();
-	cout << " At Collimator " << (*tcld8_it)->GetName() << " Aperture currently " << (*tcld8_it)->GetAperture()->GetApertureType() << endl;
+	cout << " At Collimator " << (*tcld8_it)->GetName() << endl;
+	//~ cout << " Aperture currently " << (*tcld8_it)->GetAperture()->GetApertureType() << endl;
+	//~ cout << " At Collimator " << (*tcld8_it)->GetName() << " Aperture currently " << (*tcld8_it)->GetAperture()->GetApertureType() << endl;
 	(*tcld8_it)->SetAperture(app8);
 	(*tcld8_it)->SetMaterial(collimator_material);
 	cout << " At Collimator " << (*tcld8_it)->GetName() << " Aperture set to " << (*tcld8_it)->GetAperture()->GetApertureType() << endl;
@@ -427,7 +433,9 @@ int main(int argc, char* argv[])
 	    app10->SetExitYOffset(0);	//Vertical
 
 	vector<Collimator*>::iterator tcld10_it = TCLD10.begin();
-	cout << " At Collimator " << (*tcld10_it)->GetName() << " Aperture currently " << (*tcld10_it)->GetAperture()->GetApertureType() << endl;
+	cout << " At Collimator " << (*tcld10_it)->GetName() << endl;
+	//~ cout << " Aperture currently " << (*tcld10_it)->GetAperture()->GetApertureType() << endl;
+	//~ cout << " At Collimator " << (*tcld10_it)->GetName() << " Aperture currently " << (*tcld10_it)->GetAperture()->GetApertureType() << endl;
 	(*tcld10_it)->SetAperture(app10);
 	(*tcld10_it)->SetMaterial(collimator_material);
 	cout << " At Collimator " << (*tcld10_it)->GetName() << " Aperture set to " << (*tcld10_it)->GetAperture()->GetApertureType() << endl;
@@ -471,7 +479,8 @@ int main(int argc, char* argv[])
 		bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.inelastic.dat");     
 	    }
 	    else{
-		bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.all.dat"); 
+		//~ bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.all.dat"); 
+		bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.elastic.dat"); 
 	    }
 	}
 	//~ ifstream* bunch_input = new ifstream("/home/HR/Downloads/MERLIN_HRThesis/MERLIN/FCC/Input/initial_merlin_distn.50tev.500k.3m.noX.all.dat");	
