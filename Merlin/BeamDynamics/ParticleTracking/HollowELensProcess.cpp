@@ -220,7 +220,7 @@ void HollowELensProcess::DoProcess (double ds)
 					if(theta!=0){
 						
 						if( (TuneVarPerStep !=0) && (DeltaTune !=0) ){						
-							OpTune = MinTune + fmod((floor(Turn/TurnsPerStep)),(Nstep));
+							OpTune = MinTune + fmod((floor(Turn/TurnsPerStep)),(Nstep)) * TuneVarPerStep ;
 						}
 						else{
 							OpTune = Tune;
