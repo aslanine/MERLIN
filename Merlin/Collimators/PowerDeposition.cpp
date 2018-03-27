@@ -57,6 +57,10 @@ void PowerDeposition::Dispose(AcceleratorComponent& currcomponent, double pos, P
 	if(otype == nearest_element){BinSize = currentComponent->GetLength();}
 	else if(otype == onem){BinSize = 1;}
 
+        // Assume either collimator or cold element
+        if(currentComponent->GetType() =="Collimator"){temp.temperature = 0;}				
+        else {temp.temperature = 1;}	
+
 	do
 	{
 		if ( (pos >= inter) && (pos < (inter + BinSize)) )
