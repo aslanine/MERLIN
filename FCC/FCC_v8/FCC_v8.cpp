@@ -93,9 +93,10 @@ int main(int argc, char* argv[])
 
 		
 	//~ string batch_directory="4_Oct_v8_noTCLD_nocross/";
-	string batch_directory="17_Oct_v8_1100_noTCLD_Inelastic/";
-	//~ double n_sig_tcld = 35.14;
-	double n_sig_tcld = 1000;
+	//~ string batch_directory="15_Feb_1100_noTCLD_Inelastic/";
+	string batch_directory="15_Feb_1100_TCLD_Inelastic/";
+	//~ string batch_directory="15_Feb_300_noTCLD_Inelastic/";
+	//~ string batch_directory="15_Feb_300_TCLD_Inelastic/";
 	 
 	string full_output_dir = (directory+output_dir);
 	mkdir(full_output_dir.c_str(), S_IRWXU);
@@ -139,7 +140,18 @@ int main(int argc, char* argv[])
 	bool TAS_Cu					= 0;
 	bool Inelastic				= 1;
 	bool scatter_at_coll		= 0;
-	
+
+	bool one_metre_beta_star 	= 1;
+	bool tcld_in				= 1;
+
+	double n_sig_tcld = 1000;
+	if(tcld_in){
+		n_sig_tcld = 35.14;
+	}
+	else{
+		n_sig_tcld = 1000;
+	}
+
 /************************************
 *	ACCELERATORMODEL CONSTRUCTION	*
 ************************************/
@@ -156,8 +168,12 @@ int main(int argc, char* argv[])
 	}
 	else{
 		//~ myMADinterface = new MADInterface( directory+input_dir+"fcc_lattice_dev_0300_nocrossing.tfs", beam_energy );
-		//~ myMADinterface = new MADInterface( directory+input_dir+"fcc_v8_lattice_0300_nocrossing_merlin.tfs", beam_energy );
-		myMADinterface = new MADInterface( directory+input_dir+"fcc_v8_lattice_1100_nocrossing.tfs", beam_energy );
+		if (one_metre_beta_star){
+			myMADinterface = new MADInterface( directory+input_dir+"fcc_v8_lattice_1100_nocrossing.tfs", beam_energy );
+		}
+		else{
+			myMADinterface = new MADInterface( directory+input_dir+"fcc_v8_lattice_0300_nocrossing_merlin.tfs", beam_energy );
+		}
 	}
 		//~ myMADinterface->SetSingleCellRF(1);
 	cout << "MADInterface Done" << endl;
@@ -309,9 +325,13 @@ int main(int argc, char* argv[])
 		//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"FCC_ring_aperture.b1.V8_1.tfs");    	
 	}
 	else{
-		//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v8_aperture_0300_merlin.tfs");     
-		myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v8_aperture_1100.tfs");     
-		//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_aperture_dev_0300_nocrossing.tfs");     
+		if(one_metre_beta_star){ 
+			myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v8_aperture_1100.tfs");
+		}
+		else{
+			myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_v8_aperture_0300_merlin.tfs");    
+			//~ myApertureConfiguration = new ApertureConfiguration(directory+input_dir+"fcc_aperture_dev_0300_nocrossing.tfs");
+		}
 	}
     	
 	//~ ostringstream ap_output_file;
@@ -401,8 +421,11 @@ int main(int argc, char* argv[])
 	// CollimatorAperture* app=new CollimatorAperture(CollData[n].x_gap,CollData[n].y_gap,CollData[n].tilt,collimator_material, (CMapit->second)->GetLength(), 0,0);
 	// Define aperture half gap in sigma
 	double hgap_tcld8 = n_sig_tcld * sqrt ( emittance * meter * myTwiss->Value(1,1,1,tcld8_element_number) * meter);
-	
-	cout << "\n Setting " << tcld8_element.c_str() << " half gap to " << hgap_tcld8 << " metres." << endl;
+
+    cout << "Emittance = " << emittance << endl;    
+    cout << "beta_x = " << myTwiss->Value(1,1,1,tcld8_element_number) << endl;
+    cout << "1 sigma = " << sqrt ( emittance * meter * myTwiss->Value(1,1,1,tcld8_element_number) * meter) << endl;	
+	cout << "\n Setting " << tcld8_element.c_str() << " half gap to " << hgap_tcld8 << " metres." << endl;	
 	
 	CollimatorAperture* app8=new CollimatorAperture(2*hgap_tcld8, 10, 0, collimator_material, 5, 0,0);
 	    app8->SetExitWidth(2*hgap_tcld8);      //Horizontal
@@ -578,9 +601,10 @@ int main(int argc, char* argv[])
 ****************************/
 
     //~ FlukaLosses* myFlukaLosses = new FlukaLosses;  
-    LossMapDustbin* myLossMapDustbin = new LossMapDustbin(nearestelement);
-    PowerDeposition* myPowerDeposition = new PowerDeposition(beam_energy, nearest_element);
-    //~ LossMapDustbin* myLossMapDustbin = new LossMapDustbin();
+    //~ LossMapDustbin* myLossMapDustbin = new LossMapDustbin(nearestelement);
+    LossMapDustbin* myLossMapDustbin = new LossMapDustbin();
+    //~ PowerDeposition* myPowerDeposition = new PowerDeposition(beam_energy, nearest_element);
+    PowerDeposition* myPowerDeposition = new PowerDeposition(beam_energy);
     ScatteringModel* myScatter = new ScatteringModel;
 
     if(collimation_on){ 
